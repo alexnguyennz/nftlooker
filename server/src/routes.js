@@ -204,3 +204,26 @@ module.exports.getNfts = getNfts;
 module.exports.getNft = getNft;
 module.exports.getCollectionMetadata = getCollectionMetadata;
 module.exports.getCollectionNfts = getCollectionNfts;
+
+/*
+Promise.allSettled(nfts).then((responses) => {
+    const data = responses.map((item) => {
+      return item.value;
+    });
+
+    // console.log(`${chain} nfts`, data);
+
+    // group NFTs by collection
+    const groupedData = data.reduce((acc, element) => {
+      // make array if key value doesn't already exist
+      acc[element.token_address] = acc[element.token_address] || [];
+
+      acc[element.token_address].push(element);
+
+      return acc;
+    }, Object.create(null));
+
+    //console.log('grouped', grouped);
+
+    res.json(groupedData);
+    */
