@@ -165,8 +165,10 @@ export function UserNFTs(props) {
   async function fetchNfts(chain) {
     await axios
       .get(
-        `https://nftlooker-server.netlify.app/.netlify/functions/server/api/nfts?chain=${chain}&address=${address}`
+        `/.netlify/functions/server/api/nfts?chain=${chain}&address=${address}`
       )
+
+      // https://nftlooker-server.netlify.app/
       .then((response) => {
         const data = response.data;
 

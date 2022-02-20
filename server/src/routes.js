@@ -79,22 +79,32 @@ const getNfts = async (req, res) => {
 
     changeIpfsUrl(metadata);
 
-    if (metadata.image && !metadata.image.endsWith('.mp4')) {
-      metadata.image = cloudinary.url(metadata.image, {
-        type: 'fetch',
-        transformation: [{ height: 300, width: 300 }, { fetch_format: 'auto' }],
-      });
-    } else if (metadata.image_url && !metadata.image_url.endsWith('.mp4')) {
-      metadata.image_url = cloudinary.url(metadata.image_url, {
-        type: 'fetch',
-        transformation: [{ height: 300, width: 300 }, { fetch_format: 'auto' }],
-      });
-    }
+    try {
+      if (metadata.image && !metadata.image.endsWith('.mp4')) {
+        metadata.image = cloudinary.url(metadata.image, {
+          type: 'fetch',
+          transformation: [
+            { height: 300, width: 300 },
+            { fetch_format: 'auto' },
+          ],
+        });
+      } else if (metadata.image_url && !metadata.image_url.endsWith('.mp4')) {
+        metadata.image_url = cloudinary.url(metadata.image_url, {
+          type: 'fetch',
+          transformation: [
+            { height: 300, width: 300 },
+            { fetch_format: 'auto' },
+          ],
+        });
+      }
 
-    return {
-      ...item,
-      metadata,
-    };
+      return {
+        ...item,
+        metadata,
+      };
+    } catch (err) {
+      console.log(err);
+    }
   });
 
   Promise.all(nfts).then((responses) => {
