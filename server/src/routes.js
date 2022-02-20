@@ -97,15 +97,11 @@ const getNfts = async (req, res) => {
     };
   });
 
-  Promise.allSettled(nfts).then((responses) => {
-    const data = responses.map((item) => {
-      return item.value;
-    });
-
+  Promise.all(nfts).then((responses) => {
     // console.log(`${chain} nfts`, data);
 
     // group NFTs by collection
-    const groupedData = data.reduce((acc, element) => {
+    const groupedData = responses.reduce((acc, element) => {
       // make array if key value doesn't already exist
       acc[element.token_address] = acc[element.token_address] || [];
 
