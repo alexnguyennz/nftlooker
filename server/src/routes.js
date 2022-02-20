@@ -79,40 +79,58 @@ const getNfts = async (req, res) => {
 
     changeIpfsUrl(metadata);
 
-    if (metadata.image && !metadata.image.endsWith('.mp4')) {
-      metadata.image = cloudinary.url(metadata.image, {
-        type: 'fetch',
-        transformation: [{ height: 300, width: 300 }, { fetch_format: 'auto' }],
-      });
-    } else if (metadata.image_url && !metadata.image_url.endsWith('.mp4')) {
-      metadata.image_url = cloudinary.url(metadata.image_url, {
-        type: 'fetch',
-        transformation: [{ height: 300, width: 300 }, { fetch_format: 'auto' }],
-      });
-    }
+    try {
+      if (metadata.image && !metadata.image.endsWith('.mp4')) {
+        metadata.image = cloudinary.url(metadata.image, {
+          type: 'fetch',
+          transformation: [
+            { height: 300, width: 300 },
+            { fetch_format: 'auto' },
+          ],
+        });
+      } else if (metadata.image_url && !metadata.image_url.endsWith('.mp4')) {
+        metadata.image_url = cloudinary.url(metadata.image_url, {
+          type: 'fetch',
+          transformation: [
+            { height: 300, width: 300 },
+            { fetch_format: 'auto' },
+          ],
+        });
+      }
 
-    return {
-      ...item,
-      metadata,
-    };
+      return {
+        ...item,
+        metadata,
+      };
+    } catch (err) {
+      console.log(err);
+    }
   });
 
-  Promise.all(nfts).then((responses) => {
+  Promise.allSettled(nfts).then((responses) => {
+    const data = responses.map((item) => {
+      return item.value;
+    });
+
     // console.log(`${chain} nfts`, data);
 
     // group NFTs by collection
-    const groupedData = responses.reduce((acc, element) => {
+    const grouped = data.reduce((acc, element) => {
       // make array if key value doesn't already exist
-      acc[element.token_address] = acc[element.token_address] || [];
+      try {
+        acc[element.token_address] = acc[element.token_address] || [];
 
-      acc[element.token_address].push(element);
+        acc[element.token_address].push(element);
+      } catch (err) {
+        //console.log('Broken NFT', err);
+      }
 
       return acc;
     }, Object.create(null));
 
     //console.log('grouped', grouped);
 
-    res.json(groupedData);
+    res.send(grouped);
   });
 };
 
