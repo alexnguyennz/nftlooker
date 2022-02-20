@@ -107,22 +107,30 @@ const getNfts = async (req, res) => {
     }
   });
 
-  Promise.all(nfts).then((responses) => {
+  Promise.allSettled(nfts).then((responses) => {
+    const data = responses.map((item) => {
+      return item.value;
+    });
+
     // console.log(`${chain} nfts`, data);
 
     // group NFTs by collection
-    const groupedData = responses.reduce((acc, element) => {
+    const grouped = data.reduce((acc, element) => {
       // make array if key value doesn't already exist
-      acc[element.token_address] = acc[element.token_address] || [];
+      try {
+        acc[element.token_address] = acc[element.token_address] || [];
 
-      acc[element.token_address].push(element);
+        acc[element.token_address].push(element);
+      } catch (err) {
+        //console.log('Broken NFT', err);
+      }
 
       return acc;
     }, Object.create(null));
 
     //console.log('grouped', grouped);
 
-    res.json(groupedData);
+    res.send(grouped);
   });
 };
 
