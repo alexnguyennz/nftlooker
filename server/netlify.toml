@@ -1,0 +1,6 @@
+[build]
+  command = "npm run build" 
+  functions = "functions-build" # netlify-lambda build to and read directory
+  # publish = "build" # which folder to serve static build files
+[functions] 
+  node_bundler = "esbuild"

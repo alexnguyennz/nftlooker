@@ -1,0 +1,17 @@
+diff --git a/node_modules/react-scripts/config/webpack.config.js b/node_modules/react-scripts/config/webpack.config.js
+index 2b1b3bb..b421fea 100644
+--- a/node_modules/react-scripts/config/webpack.config.js
++++ b/node_modules/react-scripts/config/webpack.config.js
+@@ -308,6 +308,12 @@ module.exports = function (webpackEnv) {
+       modules: ['node_modules', paths.appNodeModules].concat(
+         modules.additionalModulePaths || []
+       ),
++      // CUSTOM
++      fallback: { 
++        path: require.resolve("path-browserify"),
++        crypto: require.resolve("crypto-browserify"),
++        stream: require.resolve('stream-browserify'),
++     },
+       // These are the reasonable defaults supported by the Node ecosystem.
+       // We also include JSX as a common component filename extension to support
+       // some tools, although we do not recommend using it, see:
