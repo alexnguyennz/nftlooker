@@ -34,36 +34,26 @@ const resolution = new Resolution();
 
 require('dotenv').config();
 
-async function resolveAddress(address) {
-  let resolvedAddress = address;
-
-  // resolve domains
-  if (address.startsWith('0x')) {
-    return await resolvedAddress;
-  } else if (address.endsWith('.eth')) {
-    // ENS
-    resolvedAddress = await web3Provider.resolveName(address);
-    return await resolvedAddress;
-  } else {
-    // Unstoppable Domains
-    return await resolution
-      .addr(address, 'eth')
-      .then((address) => {
-        resolvedAddress = address;
-        return resolvedAddress;
-      })
-      .catch(console.error);
-  }
-}
-
 // http://localhost:7777/.netlify/functions/server/api/nfts?address=0x2aea6d8220b61950f30674606faaa01c23465299&chain=eth
 const getNfts = async (req, res) => {
   const { chain, address } = req.query;
 
-  let resolvedAddress = address;
+  let resolvedAddress;
 
-  if (!address.startsWith('0x')) {
-    resolvedAddress = await resolveAddress(address);
+  // resolve domains
+  if (address.startsWith('0x')) {
+    resolvedAddress = address;
+  } else if (address.endsWith('.eth')) {
+    // ENS
+    resolvedAddress = await web3Provider.resolveName(address);
+  } else {
+    // Unstoppable Domains
+    await resolution
+      .addr(address, 'eth')
+      .then((address) => {
+        resolvedAddress = address;
+      })
+      .catch(console.error);
   }
 
   const response = await axios.get(
