@@ -5,7 +5,8 @@
   "main": "src/server.js",
   "scripts": {
     "start": "nodemon local-server.js",
-    "build": "node local-server.js",
+    "lambda": "netlify-lambda serve functions",
+    "build": "netlify-lambda build functions",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
