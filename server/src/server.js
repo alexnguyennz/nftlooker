@@ -15,9 +15,6 @@ const {
   getCollectionNfts,
 } = require('../src/routes.js');
 
-// Netlify Lambda
-const serverless = require('serverless-http');
-
 const corsOptions = {
   origin: '*',
   methods: 'GET',
@@ -31,15 +28,6 @@ app.get('/api/nfts', getNfts);
 app.get('/api/nft', getNft);
 app.get('/api/collection/metadata', getCollectionMetadata);
 app.get('/api/collection/nfts', getCollectionNfts);
-
-//app.use('/.netlify/functions/server', );
-// app.use(
-//   '/.netlify/functions/server',
-//   createProxyMiddleware({
-//     target: 'https://nftlooker-server.netlify.app',
-//     changeOrigin: true,
-//   })
-// );
 
 // LAMBDA
 module.exports = app;
