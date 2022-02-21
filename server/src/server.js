@@ -29,14 +29,5 @@ app.get('/api/nft', getNft);
 app.get('/api/collection/metadata', getCollectionMetadata);
 app.get('/api/collection/nfts', getCollectionNfts);
 
-//app.use('/.netlify/functions/server', );
-// app.use(
-//   '/.netlify/functions/server',
-//   createProxyMiddleware({
-//     target: 'https://nftlooker-server.netlify.app',
-//     changeOrigin: true,
-//   })
-// );
-
 // LAMBDA
 module.exports = app;
