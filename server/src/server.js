@@ -16,7 +16,6 @@ const {
 } = require('../src/routes.js');
 
 // Netlify Lambda
-const router = express.Router();
 const serverless = require('serverless-http');
 
 const corsOptions = {
@@ -25,17 +24,13 @@ const corsOptions = {
   optionsSuccessStatus: 200,
 };
 
-router.use(cors(corsOptions));
+app.use(cors(corsOptions));
 
 // API CALLS
-router.get('/api/nfts', getNfts);
-router.get('/api/nft', getNft);
-router.get('/api/collection/metadata', getCollectionMetadata);
-router.get('/api/collection/nfts', getCollectionNfts);
-
-// MIDDLEWARE
-
-app.use(router);
+app.get('/api/nfts', getNfts);
+app.get('/api/nft', getNft);
+app.get('/api/collection/metadata', getCollectionMetadata);
+app.get('/api/collection/nfts', getCollectionNfts);
 
 //app.use('/.netlify/functions/server', );
 // app.use(

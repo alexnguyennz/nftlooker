@@ -67,7 +67,7 @@ const getNfts = async (req, res) => {
   }
 
   const response = await axios.get(
-    `https://deep-index.moralis.io/api/v2/${address}/nft?chain=${chain}&format=decimal`,
+    `https://deep-index.moralis.io/api/v2/${resolvedAddress}/nft?chain=${chain}&format=decimal`,
     {
       headers: {
         accept: 'application/json',
