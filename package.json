@@ -37,7 +37,6 @@
     "start": "npm-run-all --parallel start:*",
     "start:ui": "react-scripts start",
     "start:server": "npm run start --prefix server",
-    "start:lambda": "npm run lambda --prefix server",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",

@@ -2,7 +2,7 @@
   "name": "server",
   "version": "1.0.0",
   "description": "",
-  "main": "functions/server.js",
+  "main": "src/server.js",
   "scripts": {
     "start": "nodemon local-server.js",
     "lambda": "netlify-lambda serve functions",

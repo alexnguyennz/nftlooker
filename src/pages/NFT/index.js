@@ -60,7 +60,7 @@ export function NFT(props) {
 
     try {
       await axios(
-        `https://nftlooker-server.netlify.app/.netlify/functions/server/api/nft?chain=${chain}&address=${address}&tokenId=${tokenId}`
+        `/api/nft?chain=${chain}&address=${address}&tokenId=${tokenId}`
       ).then((response) => {
         setNft(response.data);
         props.onLoading(false);
