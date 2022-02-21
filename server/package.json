@@ -28,5 +28,9 @@
     "netlify-lambda": "^2.0.15",
     "nodemon": "^2.0.15",
     "serverless-http": "^2.7.0"
+  },
+  "engines": {
+    "npm": ">=8.0.0",
+    "node": ">=16.0.0"
   }
 }
