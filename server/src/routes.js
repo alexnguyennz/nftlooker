@@ -62,9 +62,7 @@ const getNfts = async (req, res) => {
 
   let resolvedAddress = address;
 
-  if (!address.startsWith('0x')) {
-    resolvedAddress = await resolveAddress(address);
-  }
+  resolvedAddress = await resolveAddress(address);
 
   const response = await axios.get(
     `https://deep-index.moralis.io/api/v2/${resolvedAddress}/nft?chain=${chain}&format=decimal`,
@@ -77,44 +75,56 @@ const getNfts = async (req, res) => {
   );
 
   const nfts = response.data.result.map(async (item) => {
-    const metadataResponse = await axios
+    return await axios
       .get(item.token_uri, {
         validateStatus: function (status) {
           return status < 500; // Resolve only if the status code is less than 400
         },
       })
-      .catch((err) => console.log(err.toJSON()));
+      .then((response) => {
+        let metadata = response.data;
+        //console.log('metadata', metadata);
 
-    let metadata = metadataResponse.data;
+        // check if returned metadata JSON was successfully parsed into an object
+        if (typeof metadata === 'object' && metadata !== null) {
+          changeIpfsUrl(metadata);
 
-    changeIpfsUrl(metadata);
+          if (metadata.image && !metadata.image.endsWith('.mp4')) {
+            metadata.image = cloudinary.url(metadata.image, {
+              default_image: `404_qmbbha.jpg`,
+              type: 'fetch',
+              transformation: [
+                { height: 300, width: 300 },
+                { fetch_format: 'auto' },
+              ],
+            });
 
-    try {
-      if (metadata.image && !metadata.image.endsWith('.mp4')) {
-        metadata.image = cloudinary.url(metadata.image, {
-          type: 'fetch',
-          transformation: [
-            { height: 300, width: 300 },
-            { fetch_format: 'auto' },
-          ],
-        });
-      } else if (metadata.image_url && !metadata.image_url.endsWith('.mp4')) {
-        metadata.image_url = cloudinary.url(metadata.image_url, {
-          type: 'fetch',
-          transformation: [
-            { height: 300, width: 300 },
-            { fetch_format: 'auto' },
-          ],
-        });
-      }
+            //metadata.image = 'img/404.jpg';
+          } else if (
+            metadata.image_url &&
+            !metadata.image_url.endsWith('.mp4')
+          ) {
+            metadata.image_url = cloudinary.url(metadata.image_url, {
+              default_image: `404_qmbbha.jpg`,
+              type: 'fetch',
+              transformation: [
+                { height: 300, width: 300 },
+                { fetch_format: 'auto' },
+              ],
+            });
+            // default_image: 'img/404.jpg'
+            //metadata.image_url = 'img/404.jpg';
+          }
 
-      return {
-        ...item,
-        metadata,
-      };
-    } catch (err) {
-      console.log(err);
-    }
+          return {
+            ...item,
+            metadata,
+          };
+        } else {
+          return null;
+        }
+      })
+      .catch((err) => console.log(err));
   });
 
   Promise.allSettled(nfts).then((responses) => {

@@ -4,8 +4,11 @@ Compatible with ENS and Unstoppable Domains.
 
 Images and videos are supported.
 
-Further updates could include:
+Tools:
 
-- more analytics e.g. date NFT was transferred to a wallet, how much it was purchased for, current NFT price based on marketplace data
+- React
+- Express.js
+- TailwindCSS
+- node-spdy - HTTP/2 support
 
 Initially built for the Road to Web 3 ETHGlobal hackathon.

@@ -35,17 +35,6 @@ import '../../index.css';
 // UTILS
 import profilerCallback from '../../utils/profilerCallback';
 
-// ENS resolve
-const ethers = require('ethers');
-const web3Provider = new ethers.providers.InfuraProvider('homestead', {
-  projectId: process.env.INFURA_API_ID,
-  projectSecret: process.env.INFURA_API_SECRET,
-});
-
-// Unstoppable resolve
-const { default: Resolution } = require('@unstoppabledomains/resolution');
-const resolution = new Resolution();
-
 const blue = {
   50: '#F0F7FF',
   100: '#C2E0FF',
@@ -107,9 +96,9 @@ export function UserNFTs(props) {
   const [address, setAddress] = useState('');
   const [currentLocation, setCurrentLocation] = useState('');
 
-  const [noNfts, setNoNfts] = useState();
+  const [noNfts, setNoNfts] = useState('');
 
-  const [chainTab, setChainTab] = useState(0);
+  const [chainTab, setChainTab] = useState(-1);
 
   const [allCollections, setAllCollections] = useState({
     eth: {
@@ -155,34 +144,10 @@ export function UserNFTs(props) {
   let location = useLocation();
   let params = useParams();
 
-  async function resolveAddress(address) {
-    // reset loading states
-    props.onLoading(true);
-    setLoaded(false);
-
-    // resolve domains
-    if (address.startsWith('0x')) {
-      setAddress(address);
-    } else if (address.endsWith('.eth')) {
-      // ENS
-      const resolvedAddress = await web3Provider.resolveName(address);
-
-      setAddress(resolvedAddress);
-    } else {
-      // Unstoppable Domains
-      await resolution
-        .addr(address, 'eth')
-        .then((address) => {
-          setAddress(address);
-        })
-        .catch(console.error);
-    }
-  }
-
   // set address using address param
   useEffect(() => {
     // resolve address here
-    resolveAddress(params.walletAddress);
+    setAddress(params.walletAddress);
   }, [location]);
 
   useEffect(() => {
@@ -195,6 +160,20 @@ export function UserNFTs(props) {
   useEffect(() => {
     console.log('all collections', allCollections);
   }, [allCollections]);
+
+  useEffect(() => {
+    // if loaded is true (all NFT data has been set in state), find out if there are any NFTs or not
+    if (loaded) {
+      setNoNfts(
+        Object.values(allCollections).every(
+          (collection) => collection.count == 0
+        )
+      );
+
+      // set chain tab to nothing
+      //setChainTab(-1);
+    }
+  }, [loaded]);
 
   useEffect(() => {}, [noNfts]);
 
@@ -212,7 +191,7 @@ export function UserNFTs(props) {
         });
 
         // set the chain tab to one that has NFTs
-        if (nftCount !== 0) {
+        if (nftCount > 0) {
           setChainTab(allCollections[chain].order);
         }
 
@@ -238,6 +217,10 @@ export function UserNFTs(props) {
   }
 
   async function getData() {
+    // reset loading states
+    props.onLoading(true);
+    setLoaded(false);
+
     const promises = [
       fetchNfts('eth'),
       fetchNfts('matic'),
@@ -310,6 +293,17 @@ export function UserNFTs(props) {
             </TabPanel>
           ))}
         </TabsUnstyled>
+      )}
+      {noNfts && (
+        <p className="mt-10 font-bold text-2xl text-center ">
+          No NFTs found :(
+          <img
+            src="/img/sad.png"
+            alt="sad Moogle art"
+            className="mx-auto mt-10"
+            width="450"
+          />
+        </p>
       )}
     </>
   );

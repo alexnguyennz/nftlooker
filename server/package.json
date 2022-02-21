@@ -4,7 +4,7 @@
   "description": "",
   "main": "src/server.js",
   "scripts": {
-    "start": "nodemon local-server.js",
+    "start": "nodemon src/server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -25,7 +25,8 @@
     "moralis": "^1.3.2",
     "netlify-lambda": "^2.0.15",
     "nodemon": "^2.0.15",
-    "serverless-http": "^2.7.0"
+    "serverless-http": "^2.7.0",
+    "spdy": "^4.0.2"
   },
   "engines": {
     "npm": "8.1.2",

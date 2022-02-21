@@ -1,11 +1,10 @@
+const spdy = require('spdy');
 const express = require('express');
+const fs = require('fs');
+
 const app = express();
 
-const { createProxyMiddleware } = require('http-proxy-middleware');
-
 const cors = require('cors');
-
-// global.fetch = require('node-fetch').default;
 
 // ROUTE DATA
 const {
@@ -29,5 +28,20 @@ app.get('/api/nft', getNft);
 app.get('/api/collection/metadata', getCollectionMetadata);
 app.get('/api/collection/nfts', getCollectionNfts);
 
-// LAMBDA
-module.exports = app;
+const PORT = process.env.PORT || 7777;
+
+spdy
+  .createServer(
+    {
+      key: fs.readFileSync('cert/server.key'),
+      cert: fs.readFileSync('cert/server.crt'),
+    },
+    app
+  )
+  .listen(PORT, (err) => {
+    if (err) {
+      throw new Error(err);
+    }
+
+    console.log(`Server running on ${PORT}`);
+  });
