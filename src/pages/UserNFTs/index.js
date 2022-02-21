@@ -35,6 +35,17 @@ import '../../index.css';
 // UTILS
 import profilerCallback from '../../utils/profilerCallback';
 
+// ENS resolve
+const ethers = require('ethers');
+const web3Provider = new ethers.providers.InfuraProvider('homestead', {
+  projectId: process.env.INFURA_API_ID,
+  projectSecret: process.env.INFURA_API_SECRET,
+});
+
+// Unstoppable resolve
+const { default: Resolution } = require('@unstoppabledomains/resolution');
+const resolution = new Resolution();
+
 const blue = {
   50: '#F0F7FF',
   100: '#C2E0FF',
@@ -144,9 +155,34 @@ export function UserNFTs(props) {
   let location = useLocation();
   let params = useParams();
 
+  async function resolveAddress(address) {
+    // reset loading states
+    props.onLoading(true);
+    setLoaded(false);
+
+    // resolve domains
+    if (address.startsWith('0x')) {
+      setAddress(address);
+    } else if (address.endsWith('.eth')) {
+      // ENS
+      const resolvedAddress = await web3Provider.resolveName(address);
+
+      setAddress(resolvedAddress);
+    } else {
+      // Unstoppable Domains
+      await resolution
+        .addr(address, 'eth')
+        .then((address) => {
+          setAddress(address);
+        })
+        .catch(console.error);
+    }
+  }
+
   // set address using address param
   useEffect(() => {
-    setAddress(params.walletAddress);
+    // resolve address here
+    resolveAddress(params.walletAddress);
   }, [location]);
 
   useEffect(() => {
@@ -204,9 +240,6 @@ export function UserNFTs(props) {
   }
 
   async function getData() {
-    props.onLoading(true);
-    setLoaded(false);
-
     const promises = [
       fetchNfts('eth'),
       fetchNfts('matic'),
