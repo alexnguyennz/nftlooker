@@ -1,1 +1,1 @@
-web: node local-server.js
+web: node server/local-server.js
