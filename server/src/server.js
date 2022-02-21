@@ -15,9 +15,6 @@ const {
   getCollectionNfts,
 } = require('../src/routes.js');
 
-// Netlify Lambda
-const serverless = require('serverless-http');
-
 const corsOptions = {
   origin: '*',
   methods: 'GET',
