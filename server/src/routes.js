@@ -10,6 +10,15 @@ const axios = require('axios');
 
 require('dotenv').config();
 
+var cloudinary = require('cloudinary').v2;
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+  secure: true,
+});
+
 const changeIpfsUrl = require('./utils/changeIpfsUrl.js');
 
 // ENS resolve
@@ -81,6 +90,24 @@ const getNfts = async (req, res) => {
     changeIpfsUrl(metadata);
 
     try {
+      if (metadata.image && !metadata.image.endsWith('.mp4')) {
+        metadata.image = cloudinary.url(metadata.image, {
+          type: 'fetch',
+          transformation: [
+            { height: 300, width: 300 },
+            { fetch_format: 'auto' },
+          ],
+        });
+      } else if (metadata.image_url && !metadata.image_url.endsWith('.mp4')) {
+        metadata.image_url = cloudinary.url(metadata.image_url, {
+          type: 'fetch',
+          transformation: [
+            { height: 300, width: 300 },
+            { fetch_format: 'auto' },
+          ],
+        });
+      }
+
       return {
         ...item,
         metadata,
