@@ -35,7 +35,7 @@ router.get('/api/collection/nfts', getCollectionNfts);
 
 // MIDDLEWARE
 
-app.use('/.netlify/functions/server', router);
+app.use(router);
 
 //app.use('/.netlify/functions/server', );
 // app.use(
@@ -48,4 +48,3 @@ app.use('/.netlify/functions/server', router);
 
 // LAMBDA
 module.exports = app;
-module.exports.handler = serverless(app);

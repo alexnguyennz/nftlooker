@@ -42,14 +42,14 @@ export function Collection(props) {
     props.onLoading(true);
 
     const response = await axios(
-      `https://nftlooker-server.netlify.app/.netlify/functions/server/api/collection/metadata?chain=${chain}&address=${address}`
+      `/api/collection/metadata?chain=${chain}&address=${address}`
     );
 
     setCollection(response.data);
 
     // Get 5 latest NFTs
     await axios(
-      `https://nftlooker-server.netlify.app/.netlify/functions/server/api/collection/nfts?chain=${chain}&address=${address}&limit=5`
+      `/api/collection/nfts?chain=${chain}&address=${address}&limit=5`
     ).then((response) => {
       setcollectionMetadata(response.data);
       props.onLoading(false);

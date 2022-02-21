@@ -60,11 +60,11 @@ async function resolveAddress(address) {
 const getNfts = async (req, res) => {
   const { chain, address } = req.query;
 
-  /*let resolvedAddress = address;
+  let resolvedAddress = address;
 
   if (!address.startsWith('0x')) {
     resolvedAddress = await resolveAddress(address);
-  } */
+  }
 
   const response = await axios.get(
     `https://deep-index.moralis.io/api/v2/${address}/nft?chain=${chain}&format=decimal`,

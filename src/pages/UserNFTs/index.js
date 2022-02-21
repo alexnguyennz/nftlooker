@@ -200,9 +200,7 @@ export function UserNFTs(props) {
 
   async function fetchNfts(chain) {
     await axios
-      .get(
-        `/.netlify/functions/server/api/nfts?chain=${chain}&address=${address}`
-      )
+      .get(`/api/nfts?chain=${chain}&address=${address}`)
       .then((response) => {
         const data = response.data;
 
