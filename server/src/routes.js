@@ -60,27 +60,11 @@ async function resolveAddress(address) {
 const getNfts = async (req, res) => {
   const { chain, address } = req.query;
 
-  // let resolvedAddress;
+  let resolvedAddress = address;
 
-  // // resolve domains
-  // if (address.startsWith('0x')) {
-  //   resolvedAddress = address;
-  // } else if (address.endsWith('.eth')) {
-  //   // ENS
-  //   resolvedAddress = await web3Provider.resolveName(address);
-  // } else {
-  //   // Unstoppable Domains
-  //   await resolution
-  //     .addr(address, 'eth')
-  //     .then((address) => {
-  //       resolvedAddress = address;
-  //     })
-  //     .catch(console.error);
-  // }
-
-  //const resolvedAddress = await resolveAddress(address);
-
-  const resolvedAddress = await resolveAddress(address);
+  if (!address.startsWith('0x')) {
+    resolvedAddress = await resolveAddress(address);
+  }
 
   const response = await axios.get(
     `https://deep-index.moralis.io/api/v2/${resolvedAddress}/nft?chain=${chain}&format=decimal`,
