@@ -160,14 +160,12 @@ export function UserNFTs(props) {
     props.onLoading(true);
     setLoaded(false);
 
-    let resolvedAddress = address;
-
     // resolve domains
     if (address.startsWith('0x')) {
       setAddress(address);
     } else if (address.endsWith('.eth')) {
       // ENS
-      resolvedAddress = await web3Provider.resolveName(address);
+      const resolvedAddress = await web3Provider.resolveName(address);
 
       setAddress(resolvedAddress);
     } else {
@@ -175,8 +173,7 @@ export function UserNFTs(props) {
       await resolution
         .addr(address, 'eth')
         .then((address) => {
-          resolvedAddress = address;
-          setAddress(resolvedAddress);
+          setAddress(address);
         })
         .catch(console.error);
     }
