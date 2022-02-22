@@ -1,18 +1,12 @@
 function changeIpfsUrl(metadata) {
   if (metadata.image_url) {
-    if (metadata.image_url.startsWith('ipfs://')) {
-      // replace any starting protocols e.g. http://, https://
-      const image = metadata.image_url.replace(
-        /^.*:\/\//i,
-        //'https://cloudflare-ipfs.com/ipfs/',
-        'https://ipfs.io/ipfs/'
-      );
+    metadata.image = metadata.image_url;
+  }
 
-      metadata.image_url = image;
+  // set original image link in metadata to use as a fallback
+  metadata.original_image = metadata.image;
 
-      return metadata;
-    }
-  } else if (metadata.image) {
+  try {
     if (metadata.image.startsWith('ipfs://ipfs/')) {
       // replace any starting protocols e.g. http://, https://
       const image = metadata.image.replace(
@@ -24,6 +18,7 @@ function changeIpfsUrl(metadata) {
       //console.log('URL', new URL(metadata.image).host);
 
       metadata.image = image;
+      metadata.original_image = image;
 
       return metadata;
     } else if (metadata.image.startsWith('ipfs://')) {
@@ -37,6 +32,7 @@ function changeIpfsUrl(metadata) {
       //console.log('URL', new URL(metadata.image).host);
 
       metadata.image = image;
+      metadata.original_image = image;
 
       return metadata;
     } else if (metadata.image.startsWith('https://gateway.pinata.cloud/')) {
@@ -47,9 +43,12 @@ function changeIpfsUrl(metadata) {
       );
 
       metadata.image = image;
+      metadata.original_image = image;
 
       return metadata;
     }
+  } catch (err) {
+    console.log(err);
   }
 }
 

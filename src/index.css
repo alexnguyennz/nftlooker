@@ -2,7 +2,19 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  font-family: 'Inter', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial,
-    Sans-Serif;
+@font-face {
+  font-family: first;
+  src: url('../public/font/texgyreadventor-regular.otf');
 }
+
+body {
+  /* font-family: 'Inter', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial,
+    Sans-Serif; */
+  font-family: 'Kanit', 'Inter', BlinkMacSystemFont, 'Segoe UI', Roboto,
+    Helvetica, Arial, Sans-Serif;
+  overflow-y: scroll; /* force vertical scrollbar to avoid app shift */
+}
+
+/* h1 {
+  font-family: first;
+} */

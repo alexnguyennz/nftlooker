@@ -11,6 +11,7 @@ const mime = require('mime-types');
 
 // filter based on MIME type
 function NFTImage(props) {
+  const nft = props.nft;
   const image = props.image;
   const mimeType = mime.lookup(image);
 
@@ -23,7 +24,11 @@ function NFTImage(props) {
       );
     default:
       return (
-        <a href={image} target="_blank" rel="noopener noreferrer nofollow">
+        <a
+          href={nft.metadata.original_image}
+          target="_blank"
+          rel="noopener noreferrer nofollow"
+        >
           <img src={image} className="mx-auto w-full" />
         </a>
       );
@@ -86,14 +91,9 @@ export function NFT(props) {
               &#60; To Collection
             </button>
           </div>
-          <div className="grid grid-cols 1 md:grid-cols-2 gap-10">
+          <div className="grid md:grid-cols-2 gap-10">
             <div className="mx-auto w-3/4">
-              <NFTImage
-                nft={nft}
-                image={
-                  nft.metadata && (nft.metadata.image || nft.metadata.image_url)
-                }
-              />
+              <NFTImage nft={nft} image={nft.metadata && nft.metadata.image} />
             </div>
             <ul className="space-y-2">
               <li className="text-2xl font-semibold">{nft.metadata.name}</li>
@@ -124,7 +124,7 @@ export function NFT(props) {
                   {nft.token_address}
                 </a>
               </li>
-              <li>Token ID: {nft.token_id}</li>
+              <li className="break-all">Token ID: {nft.token_id}</li>
             </ul>
           </div>
         </>

@@ -1,13 +1,6 @@
 import { Link } from 'react-router-dom';
 
-import Box from '@mui/material/Box';
-import Card from '@mui/material/Card';
-import CardMedia from '@mui/material/CardMedia';
-import CardActions from '@mui/material/CardActions';
-import CardContent from '@mui/material/CardContent';
-import Button from '@mui/material/Button';
-import Typography from '@mui/material/Typography';
-import ShareIcon from '@mui/icons-material/Share';
+import { Button } from '@chakra-ui/react';
 
 const mime = require('mime-types');
 
@@ -16,7 +9,7 @@ function NFTImage(props) {
   const chain = props.chain;
 
   const nft = props.nft;
-  const image = nft.metadata.image || nft.metadata.image_url;
+  const image = nft.metadata.image;
   const mimeType = mime.lookup(image);
 
   switch (mimeType) {
@@ -32,7 +25,14 @@ function NFTImage(props) {
         <Link
           to={`/${chain}/collection/${nft.token_address}/nft/${nft.token_id}`}
         >
-          <img src={image} className="mx-auto w-full" />
+          <img
+            src={image}
+            onError={({ currentTarget }) => {
+              currentTarget.onerror = null; // prevents looping
+              currentTarget.src = '/img/404.webp';
+            }}
+            className="mx-auto w-full"
+          />
         </Link>
       );
   }
@@ -49,49 +49,30 @@ export function NFTCard(props) {
 
   return (
     <>
-      <Card variant="outlined" className=" flex flex-col">
-        <CardMedia className="">
-          {nft.metadata && (
-            <NFTImage collection={collection} nft={nft} chain={chain} />
-          )}
-        </CardMedia>
-        <div className="text-center p-3 pb-0">
-          <Typography>
+      <div className="flex flex-col max-w-sm rounded-lg overflow-hidden shadow-md transition-all hover:-translate-y-2">
+        {nft.metadata && (
+          <NFTImage collection={collection} nft={nft} chain={chain} />
+        )}
+
+        <div className="p-3 mt-auto space-y-2">
+          <h3 className="text-center font-semibold">
             <Link
-              className="text-sm"
               to={`/${chain}/collection/${nft.token_address}/nft/${nft.token_id}`}
             >
               {nft.metadata && nft.metadata.name}
             </Link>
-          </Typography>
+          </h3>
+          <div className="float-right">
+            <Button size="xs">
+              <Link
+                to={`/${chain}/collection/${nft.token_address}/nft/${nft.token_id}`}
+              >
+                View
+              </Link>
+            </Button>
+          </div>
         </div>
-        <CardActions className="mt-auto justify-end" disableSpacing>
-          <Button size="small">
-            <Link
-              to={`/${chain}/collection/${nft.token_address}/nft/${nft.token_id}`}
-            >
-              View
-            </Link>
-          </Button>
-        </CardActions>
-      </Card>
-
-      {/* <div className="border-black border p-4 hover:-translate-y-2 transition">
-        <div className="">
-          {nft.metadata && (
-            <NFTImage collection={collection} nft={nft} chain={chain} />
-          )}
-        </div>
-
-        <div className="text-center py-1">
-          <Link
-            className="text-sm p-3"
-            to={`/${chain}/collection/${nft.token_address}/nft/${nft.token_id}`}
-          >
-            {nft.metadata && nft.metadata.name}
-          </Link>
-        </div>
-      </div> */}
+      </div>
     </>
   );
 }

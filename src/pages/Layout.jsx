@@ -1,23 +1,38 @@
 import { useEffect, useState } from 'react';
 
 // React Router
-import { Outlet, Link, useNavigate, useParams } from 'react-router-dom';
+import {
+  Outlet,
+  Link,
+  useNavigate,
+  useParams,
+  useLocation,
+} from 'react-router-dom';
 
 // Ethers
 import { ethers } from 'ethers';
 
-// MUI
-import { TextField } from '@mui/material';
-import { LoadingButton } from '@mui/lab';
-import SearchIcon from '@mui/icons-material/Search';
-import Box from '@mui/material/Box';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
-import FormGroup from '@mui/material/FormGroup';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Checkbox from '@mui/material/Checkbox';
 
-import Tabs from '@mui/material/Tabs';
-import Tab from '@mui/material/Tab';
+// Chakra
+import { Stack, Input } from '@chakra-ui/react';
+import { Button, ButtonGroup } from '@chakra-ui/react';
+import { Search2Icon } from '@chakra-ui/icons';
+import { Tabs, TabList, TabPanels, Tab, TabPanel } from '@chakra-ui/react';
+import {
+  Menu,
+  MenuButton,
+  MenuList,
+  MenuItem,
+  MenuItemOption,
+  MenuGroup,
+  MenuOptionGroup,
+  MenuDivider,
+  Box,
+} from '@chakra-ui/react';
+import { IconButton } from '@chakra-ui/react';
+import { HamburgerIcon } from '@chakra-ui/icons';
+import { FormControl, FormLabel, Switch } from '@chakra-ui/react';
 
 import {
   Ethereum,
@@ -43,6 +58,14 @@ export function Layout(props) {
 
   let navigate = useNavigate();
   let params = useParams();
+  let location = useLocation();
+
+  useEffect(() => {
+    // reset app state if you go to / route
+    if (location.pathname == '/') {
+      setAddress('');
+    }
+  }, [location]);
 
   // set the input field to the walletAddress param
   useEffect(() => {
@@ -98,6 +121,34 @@ export function Layout(props) {
   return (
     <div className="p-5 space-y-3">
       <div className="flex justify-end items-center space-x-3">
+        {/* TESTING */}
+        {process.env.NODE_ENV === 'development' && (
+          <div className="text-center">
+            <Button
+              onClick={() =>
+                navigate(`/0x2aea6d8220b61950f30674606faaa01c23465299`)
+              }
+            >
+              ETH/MATIC
+            </Button>
+            <Button onClick={() => navigate(`/alice.eth`)}>.eth</Button>
+            <Button onClick={() => navigate(`/brad.crypto`)}>.crypto</Button>
+            <Button
+              onClick={() =>
+                navigate(`/0x40a7dc2ac7d5fc35da3a9d99552b18cd91188735`)
+              }
+            >
+              BSC
+            </Button>
+            <Button
+              onClick={() =>
+                navigate(`/0x3a52c7df1bb5e70a0a13e9c9c00f258fe9da68fd`)
+              }
+            >
+              FTM/AVAX
+            </Button>
+          </div>
+        )}
         {walletAddress && (
           <a
             href={`https://etherscan.io/address/${walletAddress}`}
@@ -109,89 +160,88 @@ export function Layout(props) {
           </a>
         )}
         {!walletConnected ? (
-          <LoadingButton
+          <Button
+            colorScheme="red"
+            rightIcon={<AccountBalanceWalletIcon />}
             onClick={connectWallet}
-            variant="outlined"
-            size="medium"
-            sx={{
-              textTransform: 'capitalize',
-            }}
           >
-            Connect <AccountBalanceWalletIcon />
-          </LoadingButton>
+            Connect
+          </Button>
         ) : (
           <>
-            <LoadingButton
-              onClick={() => navigate(`/${walletAddress}`)}
-              variant="outlined"
-              size="medium"
-              sx={{
-                textTransform: 'capitalize',
-              }}
-            >
+            <Button onClick={() => navigate(`/${walletAddress}`)}>
               Portfolio
-            </LoadingButton>
-            <LoadingButton
-              onClick={disconnectWallet}
-              variant="outlined"
-              color="error"
-              size="medium"
-              sx={{
-                textTransform: 'capitalize',
-              }}
-            >
+            </Button>
+            <Button colorScheme="red" onClick={disconnectWallet}>
               Disconnect
-            </LoadingButton>
+            </Button>
           </>
         )}
+        <Box>
+          <Menu closeOnSelect={false}>
+            <MenuButton
+              as={IconButton}
+              aria-label="Options"
+              icon={<HamburgerIcon />}
+            />
+            <MenuList minWidth="100px">
+              <MenuItem>
+                <FormControl display="flex" alignItems="center">
+                  <FormLabel htmlFor="testnet" mb="0">
+                    Enable testnets
+                  </FormLabel>
+                  <Switch
+                    id="testnet"
+                    isChecked={props.testnets}
+                    onChange={() => props.onSetTestnets(!props.testnets)}
+                  />
+                </FormControl>
+              </MenuItem>
+            </MenuList>
+          </Menu>
+        </Box>
       </div>
+
       <div className="space-y-3">
-        <header>
-          <h1 className="text-6xl text-center font-bold">
+        <header className="text-center">
+          <h1 className="text-6xl font-bold">
             <Link to="/">nft looker.</Link>
           </h1>
 
-          <div className="text-center space-x-5">
+          <h2 className="text-xl">View NFTs across multiple blockchains.</h2>
+
+          {/*<div className="text-center space-x-5">
             <Ethereum />
             <Polygon />
             <Binance />
             <Avalanche />
             <Fantom />
-          </div>
+        </div>*/}
         </header>
 
-        <form onSubmit={handleSubmit} className="space-y-3">
-          <div className="mx-auto lg:w-1/2">
-            <Box sx={{ display: 'flex', alignItems: 'flex-end' }}>
-              {/* <AccountBalanceWalletIcon
-                sx={{ color: 'action.active', mr: 1, my: 2 }}
-              /> */}
-              <TextField
-                fullWidth
-                id="wallet-address"
-                label="Enter wallet address or domain"
-                value={address}
-                onChange={(e) => setAddress(e.currentTarget.value)}
-                autoFocus
-              />
-            </Box>
-          </div>
-          <div className="text-center">
-            <LoadingButton
-              type="submit"
-              endIcon={<SearchIcon />}
-              loading={props.loading}
-              loadingPosition="end"
-              variant="contained"
-              size="large"
-              color="info"
-              sx={{
-                textTransform: 'capitalize',
-              }}
-            >
-              Look
-            </LoadingButton>
-          </div>
+        <form
+          onSubmit={handleSubmit}
+          className="space-y-3 mx-auto text-center lg:w-1/2"
+        >
+          <Input
+            placeholder="Enter wallet address or domain"
+            value={address}
+            onChange={(e) => setAddress(e.currentTarget.value)}
+            size="lg"
+            autoFocus
+          />
+
+          <Button
+            type="submit"
+            isLoading={props.loading}
+            size="lg"
+            loadingText="Loading"
+            spinnerPlacement="end"
+            colorScheme="blue"
+            rightIcon={<Search2Icon />}
+          >
+            Look
+          </Button>
         </form>
 
         <main>

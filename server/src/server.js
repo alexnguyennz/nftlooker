@@ -40,7 +40,8 @@ spdy
   )
   .listen(PORT, (err) => {
     if (err) {
-      throw new Error(err);
+      console.error(err);
+      return process.exit(1);
     }
 
     console.log(`Server running on ${PORT}`);

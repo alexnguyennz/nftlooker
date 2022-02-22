@@ -9,6 +9,11 @@ import { NFT } from './pages/NFT';
 
 function App() {
   const [loading, setLoading] = useState(false);
+  const [testnets, setTestnets] = useState(false);
+
+  useEffect(() => {
+    console.log('setTestnets', testnets);
+  }, [testnets]);
 
   return (
     <div className="App">
@@ -20,6 +25,8 @@ function App() {
               <Layout
                 loading={loading}
                 onLoading={(isLoading) => setLoading(isLoading)}
+                testnets={testnets}
+                onSetTestnets={(testnets) => setTestnets(testnets)}
               />
             }
           >

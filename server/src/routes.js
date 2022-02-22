@@ -19,6 +19,8 @@ cloudinary.config({
   secure: true,
 });
 
+const DEFAULT_IMG = '404_cnciyv.webp';
+
 const changeIpfsUrl = require('./utils/changeIpfsUrl.js');
 
 // ENS resolve
@@ -87,33 +89,19 @@ const getNfts = async (req, res) => {
 
         // check if returned metadata JSON was successfully parsed into an object
         if (typeof metadata === 'object' && metadata !== null) {
+          // format IPFS links
+
           changeIpfsUrl(metadata);
 
           if (metadata.image && !metadata.image.endsWith('.mp4')) {
             metadata.image = cloudinary.url(metadata.image, {
-              default_image: `404_qmbbha.jpg`,
               type: 'fetch',
               transformation: [
                 { height: 300, width: 300 },
                 { fetch_format: 'auto' },
               ],
+              default_image: DEFAULT_IMG,
             });
-
-            //metadata.image = 'img/404.jpg';
-          } else if (
-            metadata.image_url &&
-            !metadata.image_url.endsWith('.mp4')
-          ) {
-            metadata.image_url = cloudinary.url(metadata.image_url, {
-              default_image: `404_qmbbha.jpg`,
-              type: 'fetch',
-              transformation: [
-                { height: 300, width: 300 },
-                { fetch_format: 'auto' },
-              ],
-            });
-            // default_image: 'img/404.jpg'
-            //metadata.image_url = 'img/404.jpg';
           }
 
           return {
@@ -171,16 +159,34 @@ const getNft = async (req, res) => {
 
   const metadata = metadataResponse.data;
 
-  changeIpfsUrl(metadata);
+  if (typeof metadata === 'object' && metadata !== null) {
+    // format IPFS links
 
-  const nft = {
-    ...response.data,
-    metadata,
-  };
+    changeIpfsUrl(metadata);
 
-  console.log('metadata', nft);
+    if (metadata.image && !metadata.image.endsWith('.mp4')) {
+      metadata.image = cloudinary.url(metadata.image, {
+        type: 'fetch',
+        // serve larger image for bigger view
+        transformation: [
+          { height: 1000, width: 1000 },
+          { fetch_format: 'auto' },
+        ],
+        default_image: DEFAULT_IMG,
+      });
+    }
 
-  res.send(nft);
+    const nft = {
+      ...response.data,
+      metadata,
+    };
+
+    console.log('metadata', nft);
+
+    res.send(nft);
+  } else {
+    return null;
+  }
 };
 
 const getCollectionMetadata = async (req, res) => {
@@ -217,14 +223,32 @@ const getCollectionNfts = async (req, res) => {
 
     const metadata = response.data;
 
-    changeIpfsUrl(metadata);
+    if (typeof metadata === 'object' && metadata !== null) {
+      // format IPFS links
 
-    console.log('metadata', metadata);
+      changeIpfsUrl(metadata);
 
-    return {
-      ...item,
-      metadata,
-    };
+      if (metadata.image && !metadata.image.endsWith('.mp4')) {
+        metadata.image = cloudinary.url(metadata.image, {
+          type: 'fetch',
+          // serve larger image for bigger view
+          transformation: [
+            { height: 300, width: 300 },
+            { fetch_format: 'auto' },
+          ],
+          default_image: DEFAULT_IMG,
+        });
+      }
+
+      console.log('metadata', metadata);
+
+      return {
+        ...item,
+        metadata,
+      };
+    } else {
+      return null;
+    }
   });
 
   Promise.allSettled(nfts).then((responses) => {

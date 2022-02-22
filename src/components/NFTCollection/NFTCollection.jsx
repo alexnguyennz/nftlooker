@@ -12,7 +12,7 @@ export function NFTCollection(props) {
 
   return (
     <section className={`space-y-1`}>
-      <h3 className="tracking-wide font-semibold">
+      <h3 className="tracking-wide text-left text-lg font-semibold">
         <Link to={`/${chain}/collection/${collection[0].token_address}`}>
           {collection[0].name}
         </Link>
