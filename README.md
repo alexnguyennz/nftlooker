@@ -6,9 +6,13 @@ Images and videos are supported.
 
 Tools:
 
-- React
-- Express.js
-- TailwindCSS
+- React - frontend
+- Express.js - web server/framework
+- TailwindCSS - CSS framework
+- Moralis API - NFT data
+- Covalent API - NFT data
+- Chakra UI - React components
+- Cloudinary API - image transformation/optimisation
 - node-spdy - HTTP/2 support
 
 Initially built for the Road to Web 3 ETHGlobal hackathon.

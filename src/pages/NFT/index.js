@@ -4,6 +4,8 @@ import { Link, useNavigate, useLocation, useParams } from 'react-router-dom';
 
 import axios from 'axios';
 
+import { ArrowBackIcon } from '@chakra-ui/icons';
+
 // IPFS EXAMPLE
 // http://localhost:3000/collection/0x2953399124f0cbb46d2cbacd8a89cf0599974963/nft/51457428668762326190474255981562178405831810566835418606623410388040178204673
 
@@ -18,7 +20,7 @@ function NFTImage(props) {
   switch (mimeType) {
     case 'video/mp4':
       return (
-        <video width="100%" controls>
+        <video width="100%" controls autoPlay muted loop>
           <source src={`${image}`} type="video/mp4" />
         </video>
       );
@@ -76,59 +78,75 @@ export function NFT(props) {
   }
 
   return (
-    <>
+    <div className="space-y-10">
       {nft && (
-        <>
-          <div className="text-center mb-5">
-            <button
-              className="text-xl font-semibold"
-              onClick={() =>
-                navigate(
-                  `/${params.chain}/collection/${params.contractAddress}`
-                )
-              }
-            >
-              &#60; To Collection
-            </button>
+        <section className="grid grid-cols 1 md:grid-cols-2 gap-5">
+          <div className="mx-auto w-full md:w-3/4">
+            <NFTImage
+              nft={nft}
+              chain={params.chain}
+              image={nft.metadata && nft.metadata.image}
+            />
           </div>
-          <div className="grid md:grid-cols-2 gap-10">
-            <div className="mx-auto w-3/4">
-              <NFTImage nft={nft} image={nft.metadata && nft.metadata.image} />
+          <div className="space-y-2">
+            <h3 className="pb-2 border-b border-gray-500 text-4xl font-bold ">
+              {nft.metadata.name}
+            </h3>
+
+            <div className="space-y-5">
+              <p>
+                DESCRIPTION
+                <br />
+                <span className="text-2xl">{nft.metadata.description}</span>
+              </p>
+
+              <p>
+                OWNER
+                <br />
+                <span className="text-2xl">
+                  <a
+                    href={`https://polygonscan.com/address/${nft.owner_of}`}
+                    target="_blank"
+                    rel="noopener noreferrer nofollow"
+                  >
+                    {nft.owner_of}
+                  </a>
+                </span>
+              </p>
+
+              <p>
+                COLLECTION
+                <br />
+                <span className="text-2xl">
+                  <Link to={`/${chain}/collection/${nft.token_address}`}>
+                    <ArrowBackIcon /> {nft.name}
+                  </Link>
+                </span>
+              </p>
+
+              <p>
+                CONTRACT
+                <br />
+                <span className="text-2xl">
+                  <a
+                    href={`https://polygonscan.com/address/${nft.token_address}`}
+                    target="_blank"
+                    rel="noopener noreferrer nofollow"
+                  >
+                    {nft.token_address}
+                  </a>
+                </span>
+              </p>
+
+              <p>
+                TOKEN ID
+                <br />
+                <span className="text-2xl break-all">{nft.token_id}</span>
+              </p>
             </div>
-            <ul className="space-y-2">
-              <li className="text-2xl font-semibold">{nft.metadata.name}</li>
-              <li>
-                Collection:{' '}
-                <Link to={`/${chain}/collection/${nft.token_address}`}>
-                  {nft.name}
-                </Link>
-              </li>
-              <li>{nft.metadata.description}</li>
-              <li>
-                Owner:{' '}
-                <a
-                  href={`https://polygonscan.com/address/${nft.owner_of}`}
-                  target="_blank"
-                  rel="noopener noreferrer nofollow"
-                >
-                  {nft.owner_of}
-                </a>
-              </li>
-              <li>
-                Contract Address:{' '}
-                <a
-                  href={`https://polygonscan.com/address/${nft.token_address}`}
-                  target="_blank"
-                  rel="noopener noreferrer nofollow"
-                >
-                  {nft.token_address}
-                </a>
-              </li>
-              <li className="break-all">Token ID: {nft.token_id}</li>
-            </ul>
           </div>
-        </>
+        </section>
       )}
-    </>
+    </div>
   );
 }

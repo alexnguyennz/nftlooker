@@ -265,6 +265,9 @@ export function UserNFTs(props) {
       }
     }
 
+    // bool state if count is 0 or not (no NFTs)
+    const disabled = !allCollections[chain].count;
+
     return (
       <Tab
         onChange={() => setChainTab(idx)}
@@ -273,8 +276,9 @@ export function UserNFTs(props) {
             ? 'No NFTs found.'
             : `${allCollections[chain].count} NFTs found.`
         }
-        isDisabled={!allCollections[chain].count}
+        isDisabled={disabled}
         value={idx}
+        className={disabled && `css-1ltezim`}
       >
         <span className="pr-1">
           <ChainIcon />
@@ -293,12 +297,18 @@ export function UserNFTs(props) {
       "teal" | "blue" | "cyan" | "purple" | "pink" | 
       "linkedin" | "facebook" | "messenger" 
       | "whatsapp" | "twitter" | "telegram"*/}
+      {/* variant 
+      
+"line" | "enclosed" | "enclosed-colored" | "soft-rounded" | "solid-rounded" | "unstyled"
+      
+      */}
       {loaded && !noNfts && (
         <Tabs
           index={chainTab}
           onChange={(index) => setChainTab(index)}
           align="center"
-          variant="enclosed"
+          variant="solid-rounded" // variant="enclosed"
+          colorScheme="blue"
           isLazy
           lazyBehavior
         >

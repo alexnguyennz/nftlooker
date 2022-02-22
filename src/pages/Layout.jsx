@@ -31,8 +31,19 @@ import {
   Box,
 } from '@chakra-ui/react';
 import { IconButton } from '@chakra-ui/react';
-import { HamburgerIcon } from '@chakra-ui/icons';
+import { HamburgerIcon, QuestionIcon } from '@chakra-ui/icons';
 import { FormControl, FormLabel, Switch } from '@chakra-ui/react';
+import {
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalFooter,
+  ModalBody,
+  ModalCloseButton,
+} from '@chakra-ui/react';
+
+import { useDisclosure } from '@chakra-ui/react';
 
 import {
   Ethereum,
@@ -51,6 +62,9 @@ export function Layout(props) {
   const [address, setAddress] = useState(WALLET_ADDRESS);
   const [walletConnected, setWalletConnected] = useState(false);
   const [walletAddress, setWalletAddress] = useState(null);
+
+  // Modal
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
   // initialise Ethers
   const { ethereum } = window;
@@ -119,24 +133,30 @@ export function Layout(props) {
   }
 
   return (
-    <div className="p-5 space-y-3">
-      <div className="flex justify-end items-center space-x-3">
+    <div className="p-5 space-y-3 flex flex-col min-h-screen">
+      <div className="flex justify-end items-center space-x-3 ">
         {/* TESTING */}
         {process.env.NODE_ENV === 'development' && (
-          <div className="text-center">
+          <div className="text-center space-x-3">
             <Button
               onClick={() =>
                 navigate(`/0x2aea6d8220b61950f30674606faaa01c23465299`)
               }
+              size="xs"
             >
               ETH/MATIC
             </Button>
-            <Button onClick={() => navigate(`/alice.eth`)}>.eth</Button>
-            <Button onClick={() => navigate(`/brad.crypto`)}>.crypto</Button>
+            <Button onClick={() => navigate(`/alice.eth`)} size="xs">
+              .eth
+            </Button>
+            <Button onClick={() => navigate(`/brad.crypto`)} size="xs">
+              .crypto
+            </Button>
             <Button
               onClick={() =>
                 navigate(`/0x40a7dc2ac7d5fc35da3a9d99552b18cd91188735`)
               }
+              size="xs"
             >
               BSC
             </Button>
@@ -144,6 +164,7 @@ export function Layout(props) {
               onClick={() =>
                 navigate(`/0x3a52c7df1bb5e70a0a13e9c9c00f258fe9da68fd`)
               }
+              size="xs"
             >
               FTM/AVAX
             </Button>
@@ -200,24 +221,46 @@ export function Layout(props) {
             </MenuList>
           </Menu>
         </Box>
+
+        {/* INFO */}
+        <button onClick={onOpen}>
+          <QuestionIcon />
+        </button>
+
+        <Modal onClose={onClose} isOpen={isOpen} isCentered>
+          <ModalOverlay />
+          <ModalContent>
+            <ModalHeader>Info</ModalHeader>
+            <ModalCloseButton />
+            <ModalBody>
+              <p>Current supported chains:</p>
+              <ul className="list-disc pl-5">
+                <li>Ethereum</li>
+                <li>Polygon</li>
+                <li>Binance Smart Chain</li>
+                <li>Avalanche</li>
+                <li>Fantom</li>
+              </ul>
+              <p>
+                Please send me an email for any requests, suggestions, bugs,
+                issues, etc.
+              </p>
+            </ModalBody>
+            <ModalFooter>
+              <Button onClick={onClose}>Close</Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
       </div>
 
-      <div className="space-y-3">
-        <header className="text-center">
-          <h1 className="text-6xl font-bold">
-            <Link to="/">nft looker.</Link>
-          </h1>
+      <header className="text-center space-y-3">
+        <h1 className="text-6xl font-bold tracking-tighter">
+          <Link to="/">nft looker.</Link>
+        </h1>
 
-          <h2 className="text-xl">View NFTs across multiple blockchains.</h2>
-
-          {/*<div className="text-center space-x-5">
-            <Ethereum />
-            <Polygon />
-            <Binance />
-            <Avalanche />
-            <Fantom />
-        </div>*/}
-        </header>
+        <h2 className="text-xl font-semibold">
+          View NFTs across multiple blockchains.
+        </h2>
 
         <form
           onSubmit={handleSubmit}
@@ -231,23 +274,43 @@ export function Layout(props) {
             autoFocus
           />
 
-          <Button
-            type="submit"
-            isLoading={props.loading}
-            size="lg"
-            loadingText="Loading"
-            spinnerPlacement="end"
-            colorScheme="blue"
-            rightIcon={<Search2Icon />}
-          >
-            Look
-          </Button>
-        </form>
+          <div className="space-x-5">
+            <Button
+              type="submit"
+              isLoading={props.loading}
+              size="lg"
+              loadingText="Loading"
+              spinnerPlacement="end"
+              colorScheme="blue"
+              backgroundColor="#3182CE"
+              rightIcon={<Search2Icon />}
+            >
+              Look
+            </Button>
 
-        <main>
+            <Button
+              isLoading={props.loading}
+              size="lg"
+              loadingText="Loading"
+              spinnerPlacement="end"
+              colorScheme="blue"
+              backgroundColor="#3182CE"
+            >
+              Random
+            </Button>
+          </div>
+        </form>
+      </header>
+
+      <main className="flex-auto">
+        <div className="my-10">
           <Outlet />
-        </main>
-      </div>
+        </div>
+      </main>
+
+      <footer className="text-xl text-center ">
+        <span>© NFT Looker 2022</span>
+      </footer>
     </div>
   );
 }

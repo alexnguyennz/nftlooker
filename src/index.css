@@ -15,6 +15,14 @@ body {
   overflow-y: scroll; /* force vertical scrollbar to avoid app shift */
 }
 
+/* Chakra-UI Modification for <Tabs /> */
+.css-1ltezim[disabled],
+.css-1ltezim[aria-disabled='true'],
+.css-1ltezim[data-disabled] {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 /* h1 {
   font-family: first;
 } */

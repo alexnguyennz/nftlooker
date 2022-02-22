@@ -1,5 +1,11 @@
 import { useEffect, useState } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  useNavigate,
+  useLocation,
+} from 'react-router-dom';
 
 // PAGES
 import { Layout } from './pages/Layout';
@@ -11,12 +17,17 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [testnets, setTestnets] = useState(false);
 
+  //let navigate = useNavigate();
+  //let location = useLocation();
+
   useEffect(() => {
     console.log('setTestnets', testnets);
+    //console.log('location', location.pathname);
+    //navigate(`${location.pathname}`);
   }, [testnets]);
 
   return (
-    <div className="App">
+    <div className="App ">
       <BrowserRouter>
         <Routes>
           <Route
