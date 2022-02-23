@@ -12,6 +12,7 @@ const {
   getNft,
   getCollectionMetadata,
   getCollectionNfts,
+  getRandomWallet,
 } = require('../src/routes.js');
 
 const corsOptions = {
@@ -22,11 +23,16 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
+const router = express.Router();
+
 // API CALLS
-app.get('/api/nfts', getNfts);
-app.get('/api/nft', getNft);
-app.get('/api/collection/metadata', getCollectionMetadata);
-app.get('/api/collection/nfts', getCollectionNfts);
+router.get('/nfts', getNfts);
+router.get('/nft', getNft);
+router.get('/collection/metadata', getCollectionMetadata);
+router.get('/collection/nfts', getCollectionNfts);
+router.get('/randomWallet', getRandomWallet);
+
+app.use('/api', router);
 
 const PORT = process.env.PORT || 7777;
 

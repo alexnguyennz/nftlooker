@@ -58,6 +58,77 @@ async function resolveAddress(address) {
   }
 }
 
+const getRandomWallet = async (req, res) => {
+  // `https://deep-index.moralis.io/api/v2/dateToBlock?chain=eth&date=1645560375063`,
+
+  // get latest block based on time Etherscan
+  /*let response = await axios
+      .get(
+        `https://api.etherscan.io/api?module=block&action=getblocknobytime&timestamp=${now}&closest=before&apikey=1HDZ2TTTSB2A2P5P1YHSPVUMVDM64UWIWH`
+      )
+      .catch((err) => {
+        console.log(err);
+      }); */
+
+  // Get Internal Transactions by Block Range Etherscan
+  /*response = await axios
+      .get(
+        `https://api.etherscan.io/api?module=account&action=txlistinternal&startblock=${
+          latestBlock - 10000
+        }&endblock=${latestBlock}&page=1&offset=250&sort=asc&apikey=1HDZ2TTTSB2A2P5P1YHSPVUMVDM64UWIWH`
+      )
+      .catch((err) => {
+        console.log(err);
+      }); */
+  const now = Math.floor(Date.now());
+
+  // get latest Ethereum block
+  let response = await axios
+    .get(
+      `https://deep-index.moralis.io/api/v2/dateToBlock?chain=eth&date=${now}`,
+      {
+        headers: {
+          accept: 'application/json',
+          'X-API-KEY': process.env.MORALIS_API_KEY,
+        },
+      }
+    )
+    .catch((err) => {
+      console.log(err);
+    });
+
+  const latestBlock = response.data.block;
+
+  // get a list of NFT transactions
+  response = await axios(
+    `https://deep-index.moralis.io/api/v2/block/${latestBlock}/nft/transfers?chain=eth&limit=250`,
+    {
+      headers: {
+        accept: 'application/json',
+        'X-API-KEY': process.env.MORALIS_API_KEY,
+      },
+    }
+  ).catch((err) => {
+    console.log(err);
+  });
+
+  const transactions = response.data.result;
+
+  console.log(transactions);
+
+  const rand = Math.floor(Math.random() * transactions.length);
+
+  try {
+    if (transactions[rand].to_address) {
+      res.send(transactions[rand].to_address);
+    } else {
+      res.send(transactions[rand].from_address);
+    }
+  } catch (err) {
+    console.log(err);
+  }
+};
+
 // http://localhost:7777/.netlify/functions/server/api/nfts?address=0x2aea6d8220b61950f30674606faaa01c23465299&chain=eth
 const getNfts = async (req, res) => {
   const { chain, address } = req.query;
@@ -266,6 +337,7 @@ module.exports.getNfts = getNfts;
 module.exports.getNft = getNft;
 module.exports.getCollectionMetadata = getCollectionMetadata;
 module.exports.getCollectionNfts = getCollectionNfts;
+module.exports.getRandomWallet = getRandomWallet;
 
 /*
 Promise.allSettled(nfts).then((responses) => {

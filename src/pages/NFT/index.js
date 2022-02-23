@@ -97,7 +97,13 @@ export function NFT(props) {
               <p>
                 DESCRIPTION
                 <br />
-                <span className="text-2xl">{nft.metadata.description}</span>
+                <span className="text-2xl">
+                  {nft.metadata.description ? (
+                    <>{nft.metadata.description}</>
+                  ) : (
+                    <>None</>
+                  )}
+                </span>
               </p>
 
               <p>
@@ -113,7 +119,6 @@ export function NFT(props) {
                   </a>
                 </span>
               </p>
-
               <p>
                 COLLECTION
                 <br />
@@ -123,7 +128,6 @@ export function NFT(props) {
                   </Link>
                 </span>
               </p>
-
               <p>
                 CONTRACT
                 <br />
@@ -137,7 +141,6 @@ export function NFT(props) {
                   </a>
                 </span>
               </p>
-
               <p>
                 TOKEN ID
                 <br />

@@ -15,7 +15,8 @@ import { NFT } from './pages/NFT';
 
 function App() {
   const [loading, setLoading] = useState(false);
-  const [testnets, setTestnets] = useState(false);
+
+  const [testnets, setTestnets] = useState(true);
 
   //let navigate = useNavigate();
   //let location = useLocation();
@@ -46,6 +47,7 @@ function App() {
               element={
                 <UserNFTs
                   loading={loading}
+                  testnets={testnets}
                   onLoading={(isLoading) => setLoading(isLoading)}
                 />
               }

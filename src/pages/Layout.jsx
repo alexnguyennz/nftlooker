@@ -14,6 +14,8 @@ import { ethers } from 'ethers';
 
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 
+import Footer from '../components/layouts/Footer';
+
 // Chakra
 import { Stack, Input } from '@chakra-ui/react';
 import { Button, ButtonGroup } from '@chakra-ui/react';
@@ -45,6 +47,8 @@ import {
 
 import { useDisclosure } from '@chakra-ui/react';
 
+import { library, icon } from '@fortawesome/fontawesome-svg-core';
+
 import {
   Ethereum,
   Polygon,
@@ -54,6 +58,7 @@ import {
 } from '../components/ChainIcons';
 
 import ellipseAddress from '../utils/ellipseAddress';
+import axios from 'axios';
 
 // testing address
 const WALLET_ADDRESS = '0x2aea6d8220b61950f30674606faaa01c23465299';
@@ -74,8 +79,18 @@ export function Layout(props) {
   let params = useParams();
   let location = useLocation();
 
+  const fetchController = new AbortController();
+
+  useEffect(() => {
+    return () => {
+      fetchController.abort();
+      props.onLoading(false);
+    };
+  }, []);
+
   useEffect(() => {
     // reset app state if you go to / route
+    console.log('params', location);
     if (location.pathname == '/') {
       setAddress('');
     }
@@ -87,6 +102,33 @@ export function Layout(props) {
       setAddress(params.walletAddress);
     }
   }, []);
+
+  async function test() {
+    const response = await axios(
+      'https://deep-index.moralis.io/api/v2/nft/0x6e41eedca6cfe4c6a3d3c6999041648c9a14d59e/lowestprice?chain=eth&marketplace=opensea',
+      {
+        headers: {
+          accept: 'application-json',
+          'X-API-KEY': process.env.REACT_APP_MORALIS_API_KEY,
+        },
+      }
+    );
+
+    console.log('test', response);
+  }
+
+  async function getRandomWallet() {
+    props.onLoading(true);
+
+    const response = await axios
+      .get(`/api/randomWallet`, { signal: fetchController.signal })
+      .catch((err) => console.log(err));
+
+    console.log('response', response);
+
+    setAddress(response.data);
+    navigate(`/${response.data}`);
+  }
 
   async function connectWallet() {
     if (ethereum) {
@@ -129,7 +171,7 @@ export function Layout(props) {
   function handleSubmit(e) {
     e.preventDefault();
 
-    navigate(`${address}`);
+    navigate(`${address}`, { state: { address: address } });
   }
 
   return (
@@ -190,7 +232,13 @@ export function Layout(props) {
           </Button>
         ) : (
           <>
-            <Button onClick={() => navigate(`/${walletAddress}`)}>
+            <Button
+              onClick={() =>
+                navigate(`/${walletAddress}`, {
+                  state: { address: walletAddress },
+                })
+              }
+            >
               Portfolio
             </Button>
             <Button colorScheme="red" onClick={disconnectWallet}>
@@ -198,6 +246,7 @@ export function Layout(props) {
             </Button>
           </>
         )}
+
         <Box>
           <Menu closeOnSelect={false}>
             <MenuButton
@@ -205,9 +254,21 @@ export function Layout(props) {
               aria-label="Options"
               icon={<HamburgerIcon />}
             />
-            <MenuList minWidth="100px">
+            <MenuList minWidth="50px">
+              {/*<MenuItem>
+                <FormControl className="flex justify-between">
+                  <FormLabel htmlFor="dark-mode" mb="0">
+                    Dark mode
+                  </FormLabel>
+                  <Switch
+                    id="dark-mode"
+                    isChecked={props.testnets}
+                    onChange={() => props.onSetTestnets(!props.testnets)}
+                  />
+                </FormControl>
+              </MenuItem>*/}
               <MenuItem>
-                <FormControl display="flex" alignItems="center">
+                <FormControl className="flex justify-between items-center">
                   <FormLabel htmlFor="testnet" mb="0">
                     Enable testnets
                   </FormLabel>
@@ -227,23 +288,32 @@ export function Layout(props) {
           <QuestionIcon />
         </button>
 
-        <Modal onClose={onClose} isOpen={isOpen} isCentered>
+        <Modal size="xl" onClose={onClose} isOpen={isOpen} isCentered>
           <ModalOverlay />
-          <ModalContent>
+          <ModalContent className="mx-5">
             <ModalHeader>Info</ModalHeader>
             <ModalCloseButton />
             <ModalBody>
-              <p>Current supported chains:</p>
-              <ul className="list-disc pl-5">
+              <p className="pb-5">
+                NFT Looker is a simple viewer any wallet&apos;s NFTs. You can
+                view an individual NFT or collection for more info.
+              </p>
+              <p>Currently supported chains:</p>
+              <ul className="list-disc pl-5 pb-5">
                 <li>Ethereum</li>
                 <li>Polygon</li>
                 <li>Binance Smart Chain</li>
                 <li>Avalanche</li>
                 <li>Fantom</li>
               </ul>
+              <p className="pb-5">
+                There will be errors with some NFTs due to the variety of
+                different metadata formats used. Some will also have broken
+                links.{' '}
+              </p>
               <p>
-                Please send me an email for any requests, suggestions, bugs,
-                issues, etc.
+                Please send me an email for any requests, suggestions, issues,
+                etc.
               </p>
             </ModalBody>
             <ModalFooter>
@@ -272,6 +342,7 @@ export function Layout(props) {
             onChange={(e) => setAddress(e.currentTarget.value)}
             size="lg"
             autoFocus
+            isDisabled={props.loading || props.randomLoading}
           />
 
           <div className="space-x-5">
@@ -287,17 +358,20 @@ export function Layout(props) {
             >
               Look
             </Button>
-
-            <Button
-              isLoading={props.loading}
-              size="lg"
-              loadingText="Loading"
-              spinnerPlacement="end"
-              colorScheme="blue"
-              backgroundColor="#3182CE"
-            >
-              Random
-            </Button>
+            {!props.loading && (
+              <Button
+                onClick={getRandomWallet}
+                isLoading={props.loading}
+                size="lg"
+                loadingText="Loading"
+                spinnerPlacement="end"
+                colorScheme="blue"
+                backgroundColor="#3182CE"
+              >
+                Random
+                <img src="/icons/shuffle.svg" width="20px" className="ml-2" />
+              </Button>
+            )}
           </div>
         </form>
       </header>
@@ -308,9 +382,7 @@ export function Layout(props) {
         </div>
       </main>
 
-      <footer className="text-xl text-center ">
-        <span>© NFT Looker 2022</span>
-      </footer>
+      <Footer />
     </div>
   );
 }
