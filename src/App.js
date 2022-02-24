@@ -16,7 +16,7 @@ import { NFT } from './pages/NFT';
 function App() {
   const [loading, setLoading] = useState(false);
 
-  const [testnets, setTestnets] = useState(true);
+  const [testnets, setTestnets] = useState(false);
 
   //let navigate = useNavigate();
   //let location = useLocation();

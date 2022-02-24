@@ -10,6 +10,9 @@ const axios = require('axios');
 
 require('dotenv').config();
 
+const mime = require('mime-types');
+const contentType = require('content-type');
+
 var cloudinary = require('cloudinary').v2;
 
 cloudinary.config({
@@ -56,6 +59,14 @@ async function resolveAddress(address) {
       })
       .catch(console.error);
   }
+}
+
+async function getContentType(image) {
+  const response = await axios.get(image).catch((err) => console.log(err));
+
+  const type = contentType.parse(response);
+
+  return type.type;
 }
 
 const getRandomWallet = async (req, res) => {
@@ -129,7 +140,6 @@ const getRandomWallet = async (req, res) => {
   }
 };
 
-// http://localhost:7777/.netlify/functions/server/api/nfts?address=0x2aea6d8220b61950f30674606faaa01c23465299&chain=eth
 const getNfts = async (req, res) => {
   const { chain, address } = req.query;
 
@@ -147,43 +157,87 @@ const getNfts = async (req, res) => {
     }
   );
 
+  //console.log('response', response.data);
+
   const nfts = response.data.result.map(async (item) => {
-    return await axios
-      .get(item.token_uri, {
-        validateStatus: function (status) {
-          return status < 500; // Resolve only if the status code is less than 400
-        },
-      })
-      .then((response) => {
-        let metadata = response.data;
-        //console.log('metadata', metadata);
+    // no null token_uri e.g. with tokenized tweets
 
-        // check if returned metadata JSON was successfully parsed into an object
-        if (typeof metadata === 'object' && metadata !== null) {
-          // format IPFS links
+    const response = await axios.get(item.token_uri).catch((err) => {
+      //if (err.code == 'ENOTFOUND') console.log(err);
+      console.log(err.code);
+    });
 
-          changeIpfsUrl(metadata);
+    // if metadata is encoded
+    let metadata;
 
-          if (metadata.image && !metadata.image.endsWith('.mp4')) {
-            metadata.image = cloudinary.url(metadata.image, {
-              type: 'fetch',
-              transformation: [
-                { height: 300, width: 300 },
-                { fetch_format: 'auto' },
-              ],
-              default_image: DEFAULT_IMG,
-            });
-          }
+    if (item.token_uri.startsWith('data:application/json')) {
+      const json = Buffer.from(
+        item.token_uri.substring(29), // strip out identifier
+        'base64'
+      ).toString();
+      const decoded = JSON.parse(json);
+      //console.log('decoded', decoded);
 
-          return {
-            ...item,
-            metadata,
-          };
-        } else {
-          return null;
+      metadata = decoded;
+    } else {
+      metadata = response.data; // store normal JSON
+    }
+
+    console.log(response.data);
+
+    // check if returned metadata JSON was successfully parsed into an object
+    if (typeof metadata === 'object' && metadata !== null) {
+      // format IPFS links
+
+      if (!metadata.image.startsWith('data:image')) {
+        changeIpfsUrl(metadata);
+      }
+
+      //getContentType(metadata.image).then((response) => console.log(response));
+      //console.log('contenType', contentType);
+
+      const mimeType = mime.lookup(metadata.image);
+      //console.log('mime', mimeType);
+
+      if (metadata.image) {
+        if (metadata.image.startsWith('data:image')) {
+          metadata.image = encodeURIComponent(metadata.image);
+        } else if (metadata.image.endsWith('.gif')) {
+          metadata.image = cloudinary.url(metadata.image, {
+            type: 'fetch',
+            transformation: [
+              { height: 300, width: 300 },
+              { fetch_format: 'mp4' },
+            ],
+            default_image: DEFAULT_IMG,
+          });
+        } else if (metadata.image.endsWith('.mp4')) {
+          const stripped = metadata.image.replace(/^.*:\/\//i, '');
+          metadata.image = cloudinary.url(`remote_https_media/${stripped}`, {
+            resource_type: 'video',
+            eager: [{ width: 400, height: 300, crop: 'pad' }],
+            eager_async: true,
+            default_image: DEFAULT_IMG,
+          });
+        } else if (!metadata.image.endsWith('.mp4')) {
+          metadata.image = cloudinary.url(metadata.image, {
+            type: 'fetch',
+            transformation: [
+              { height: 300, width: 300 },
+              { fetch_format: 'auto' },
+            ],
+            default_image: DEFAULT_IMG,
+          });
         }
-      })
-      .catch((err) => console.log(err));
+      }
+
+      return {
+        ...item,
+        metadata,
+      };
+    } else {
+      return null;
+    }
   });
 
   Promise.allSettled(nfts).then((responses) => {
@@ -197,11 +251,14 @@ const getNfts = async (req, res) => {
     const grouped = data.reduce((acc, element) => {
       // make array if key value doesn't already exist
       try {
-        acc[element.token_address] = acc[element.token_address] || [];
+        if (element.token_address) {
+          acc[element.token_address] = acc[element.token_address] || [];
 
-        acc[element.token_address].push(element);
+          acc[element.token_address].push(element);
+        }
       } catch (err) {
-        //console.log('Broken NFT', err);
+        // Cannot read properties of undefined (reading 'token_address')
+        // console.log(err);
       }
 
       return acc;

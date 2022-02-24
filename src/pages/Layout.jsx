@@ -33,7 +33,12 @@ import {
   Box,
 } from '@chakra-ui/react';
 import { IconButton } from '@chakra-ui/react';
-import { HamburgerIcon, QuestionIcon } from '@chakra-ui/icons';
+import {
+  SunIcon,
+  MoonIcon,
+  HamburgerIcon,
+  QuestionIcon,
+} from '@chakra-ui/icons';
 import { FormControl, FormLabel, Switch } from '@chakra-ui/react';
 import {
   Modal,
@@ -46,6 +51,16 @@ import {
 } from '@chakra-ui/react';
 
 import { useDisclosure } from '@chakra-ui/react';
+
+import { useColorMode, useColorModeValue } from '@chakra-ui/react';
+
+import {
+  Accordion,
+  AccordionItem,
+  AccordionButton,
+  AccordionPanel,
+  AccordionIcon,
+} from '@chakra-ui/react';
 
 import { library, icon } from '@fortawesome/fontawesome-svg-core';
 
@@ -81,6 +96,12 @@ export function Layout(props) {
 
   const fetchController = new AbortController();
 
+  // Color Mode
+  const { colorMode, toggleColorMode } = useColorMode();
+  const colorModeBg = useColorModeValue('white', '#1f2937');
+  const colorModeBody = useColorModeValue('bg-rose-50', 'bg-gray-900'); // chakra gray-800 #1A202C
+  const colorModeInverseBg = useColorModeValue('black', 'white');
+
   useEffect(() => {
     return () => {
       fetchController.abort();
@@ -102,20 +123,6 @@ export function Layout(props) {
       setAddress(params.walletAddress);
     }
   }, []);
-
-  async function test() {
-    const response = await axios(
-      'https://deep-index.moralis.io/api/v2/nft/0x6e41eedca6cfe4c6a3d3c6999041648c9a14d59e/lowestprice?chain=eth&marketplace=opensea',
-      {
-        headers: {
-          accept: 'application-json',
-          'X-API-KEY': process.env.REACT_APP_MORALIS_API_KEY,
-        },
-      }
-    );
-
-    console.log('test', response);
-  }
 
   async function getRandomWallet() {
     props.onLoading(true);
@@ -175,7 +182,9 @@ export function Layout(props) {
   }
 
   return (
-    <div className="p-5 space-y-3 flex flex-col min-h-screen">
+    <div
+      className={`p-5 space-y-3 flex flex-col min-h-screen ${colorModeBody}`}
+    >
       <div className="flex justify-end items-center space-x-3 ">
         {/* TESTING */}
         {process.env.NODE_ENV === 'development' && (
@@ -255,22 +264,23 @@ export function Layout(props) {
               icon={<HamburgerIcon />}
             />
             <MenuList minWidth="50px">
-              {/*<MenuItem>
+              <MenuItem>
                 <FormControl className="flex justify-between">
                   <FormLabel htmlFor="dark-mode" mb="0">
-                    Dark mode
+                    dark mode
                   </FormLabel>
                   <Switch
                     id="dark-mode"
-                    isChecked={props.testnets}
-                    onChange={() => props.onSetTestnets(!props.testnets)}
+                    isChecked={colorMode === 'light' ? false : true}
+                    onChange={toggleColorMode}
                   />
                 </FormControl>
-              </MenuItem>*/}
+              </MenuItem>
+
               <MenuItem>
                 <FormControl className="flex justify-between items-center">
                   <FormLabel htmlFor="testnet" mb="0">
-                    Enable testnets
+                    enable testnets
                   </FormLabel>
                   <Switch
                     id="testnet"
@@ -291,30 +301,70 @@ export function Layout(props) {
         <Modal size="xl" onClose={onClose} isOpen={isOpen} isCentered>
           <ModalOverlay />
           <ModalContent className="mx-5">
-            <ModalHeader>Info</ModalHeader>
+            <ModalHeader></ModalHeader>
             <ModalCloseButton />
-            <ModalBody>
+            <ModalBody className="">
               <p className="pb-5">
-                NFT Looker is a simple viewer any wallet&apos;s NFTs. You can
+                NFT Looker is a simple way to view a wallet&apos;s NFTs. You can
                 view an individual NFT or collection for more info.
               </p>
-              <p>Currently supported chains:</p>
-              <ul className="list-disc pl-5 pb-5">
-                <li>Ethereum</li>
-                <li>Polygon</li>
-                <li>Binance Smart Chain</li>
-                <li>Avalanche</li>
-                <li>Fantom</li>
+
+              <Accordion allowMultiple>
+                <AccordionItem>
+                  <h2>
+                    <AccordionButton>
+                      <Box flex="1" textAlign="left">
+                        Supported Mainnets
+                      </Box>
+                      <AccordionIcon />
+                    </AccordionButton>
+                  </h2>
+                  <AccordionPanel pb={4}>
+                    <ul className="list-disc pl-5">
+                      <li>Ethereum</li>
+                      <li>Polygon</li>
+                      <li>Binance Smart Chain</li>
+                      <li>Avalanche</li>
+                      <li>Fantom</li>
+                    </ul>
+                  </AccordionPanel>
+                </AccordionItem>
+
+                <AccordionItem>
+                  <h2>
+                    <AccordionButton>
+                      <Box flex="1" textAlign="left">
+                        Supported Testnets
+                      </Box>
+                      <AccordionIcon />
+                    </AccordionButton>
+                  </h2>
+                  <AccordionPanel pb={4}>
+                    <ul className="list-disc pl-5">
+                      <li>Ropsten (Ethereum)</li>
+                      <li>Rinkeby (Ethereum)</li>
+                      <li>Goerli (Ethereum)</li>
+                      <li>Kovan (Ethereum)</li>
+                      <li>Mumbai (Polygon)</li>
+                      <li>Testnet (Binance Smart Chain)</li>
+                      <li>Fuji (Avalanche)</li>
+                    </ul>
+                  </AccordionPanel>
+                </AccordionItem>
+              </Accordion>
+
+              <p className="pt-5">
+                NFTs will not appear or display correctly for a number of
+                reasons including:
+              </p>
+              <ul className="list-disc pl-5">
+                <li>
+                  unusual metadata format e.g. not using a property name of
+                  {` "`}image{`"`}
+                </li>
+                <li>broken metadata and/or media (image, video) links</li>
+                <li>dead sites or expired SSL certificates</li>
               </ul>
-              <p className="pb-5">
-                There will be errors with some NFTs due to the variety of
-                different metadata formats used. Some will also have broken
-                links.{' '}
-              </p>
-              <p>
-                Please send me an email for any requests, suggestions, issues,
-                etc.
-              </p>
             </ModalBody>
             <ModalFooter>
               <Button onClick={onClose}>Close</Button>
@@ -343,6 +393,7 @@ export function Layout(props) {
             size="lg"
             autoFocus
             isDisabled={props.loading || props.randomLoading}
+            backgroundColor={colorModeBg}
           />
 
           <div className="space-x-5">
@@ -369,7 +420,15 @@ export function Layout(props) {
                 backgroundColor="#3182CE"
               >
                 Random
-                <img src="/icons/shuffle.svg" width="20px" className="ml-2" />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 512 512"
+                  fill={colorModeBg}
+                  width="20"
+                  className="ml-2"
+                >
+                  <path d="M424.1 287c-15.13-15.12-40.1-4.426-40.1 16.97V352h-48L153.6 108.8c-6-8-15.5-12.8-25.6-12.8H32c-17.69 0-32 14.3-32 32s14.31 32 32 32h80l182.4 243.2c6 8.1 15.5 12.8 25.6 12.8h63.97v47.94c0 21.39 25.86 32.12 40.99 17l79.1-79.98c9.387-9.387 9.387-24.59 0-33.97L424.1 287zM336 160h47.97v48.03c0 21.39 25.87 32.09 40.1 16.97l79.1-79.98c9.387-9.391 9.385-24.59-.001-33.97l-79.1-79.98c-15.13-15.12-40.99-4.391-40.99 17V96H320c-10.06 0-19.56 4.75-25.59 12.81L254 162.7l39.1 53.3 42.9-56zM112 352H32c-17.69 0-32 14.31-32 32s14.31 32 32 32h96c10.06 0 19.56-4.75 25.59-12.81l40.4-53.87L154 296l-42 56z" />
+                </svg>
               </Button>
             )}
           </div>
@@ -382,7 +441,7 @@ export function Layout(props) {
         </div>
       </main>
 
-      <Footer />
+      <Footer colorMode={colorModeInverseBg} />
     </div>
   );
 }

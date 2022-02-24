@@ -83,22 +83,19 @@ export function Collection(props) {
   async function getData() {
     props.onLoading(true);
 
-    const response = await axios(
-      `/api/collection/metadata?chain=${chain}&address=${address}`
-    );
+    let response = await axios
+      .get(`/api/collection/metadata?chain=${chain}&address=${address}`)
+      .catch((err) => console.log(err));
 
     setCollection(response.data);
-    // console.log('Collection page:', response.data);
 
     // Get 5 latest NFTs
-    await axios(
-      `/api/collection/nfts?chain=${chain}&address=${address}&limit=5`
-    ).then((response) => {
-      setcollectionMetadata(response.data);
-      props.onLoading(false);
+    response = await axios
+      .get(`/api/collection/nfts?chain=${chain}&address=${address}&limit=5`)
+      .catch((err) => console.log(err));
 
-      console.log('Collection metadata:', response.data);
-    });
+    setcollectionMetadata(response.data);
+    props.onLoading(false);
   }
 
   function handleChainInfo(chain) {
@@ -135,7 +132,7 @@ export function Collection(props) {
 
   return (
     <div className="space-y-10">
-      {collection && (
+      {!props.loading && collection && (
         <section className="grid grid-cols 1 md:grid-cols-2 gap-5">
           <div className="mx-auto w-full md:w-3/4">
             {collectionMetadata && (

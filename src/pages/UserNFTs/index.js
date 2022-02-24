@@ -580,10 +580,10 @@ export function UserNFTs(props) {
         <p className="mt-10 font-bold text-2xl text-center ">
           No NFTs found :(
           <img
-            src="/img/sad.png"
+            src="/img/sad-chocobo.png"
             alt="sad Moogle art"
             className="mx-auto mt-10"
-            width="450"
+            width="250"
           />
         </p>
       )}

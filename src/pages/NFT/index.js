@@ -11,39 +11,19 @@ import { ArrowBackIcon } from '@chakra-ui/icons';
 
 const mime = require('mime-types');
 
-// filter based on MIME type
-function NFTImage(props) {
-  const nft = props.nft;
-  const image = props.image;
-  const mimeType = mime.lookup(image);
-
-  switch (mimeType) {
-    case 'video/mp4':
-      return (
-        <video width="100%" controls autoPlay muted loop>
-          <source src={`${image}`} type="video/mp4" />
-        </video>
-      );
-    default:
-      return (
-        <a
-          href={nft.metadata.original_image}
-          target="_blank"
-          rel="noopener noreferrer nofollow"
-        >
-          <img src={image} className="mx-auto w-full" />
-        </a>
-      );
-  }
-}
-
 export function NFT(props) {
   const [address, setAddress] = useState('');
+
+  const [loaded, setLoaded] = useState(false);
 
   const [chain, setChain] = useState('');
 
   const [tokenId, setTokenId] = useState('');
   const [nft, setNft] = useState();
+
+  const [chainExplorer, setChainExplorer] = useState('etherscan.io');
+
+  let nftElem;
 
   // React Router
   let location = useLocation();
@@ -54,6 +34,8 @@ export function NFT(props) {
     setChain(params.chain);
     setAddress(params.contractAddress);
     setTokenId(params.tokenId);
+
+    handleChainInfo(params.chain);
   }, [location]);
 
   useEffect(() => {
@@ -61,6 +43,24 @@ export function NFT(props) {
       getData();
     }
   }, [address]);
+
+  useEffect(() => {
+    if (loaded) {
+      const nftElemTest = document.querySelector('img');
+
+      nftElem = nftElemTest;
+
+      console.log('elem', nftElemTest);
+
+      try {
+        if (nftElemTest.complete) {
+          console.log('img loaded');
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    }
+  }, [loaded]);
 
   async function getData() {
     props.onLoading(true);
@@ -71,15 +71,73 @@ export function NFT(props) {
       ).then((response) => {
         setNft(response.data);
         props.onLoading(false);
+        setLoaded(true);
       });
     } catch (err) {
       console.log(err);
     }
   }
 
+  // filter based on MIME type
+  function NFTImage(props) {
+    const nft = props.nft;
+    const image = props.image;
+    const mimeType = mime.lookup(image);
+
+    switch (mimeType) {
+      case 'video/mp4':
+        return (
+          <video width="100%" controls autoPlay muted loop>
+            <source src={`${image}`} type="video/mp4" />
+          </video>
+        );
+      default:
+        return (
+          <a
+            href={nft.metadata.original_image}
+            target="_blank"
+            rel="noopener noreferrer nofollow"
+          >
+            <img src={image} className="mx-auto w-full" />
+          </a>
+        );
+    }
+  }
+
+  function handleChainInfo(chain) {
+    let chainExplorer;
+    let chainName;
+
+    switch (chain) {
+      case 'eth':
+        chainExplorer = 'etherscan.io';
+        chainName = 'Ethereum';
+        break;
+      case 'matic':
+        chainExplorer = 'polygonscan.com';
+        chainName = 'Polygon';
+
+        break;
+      case 'binance':
+        chainExplorer = 'bscscan.com';
+        chainName = 'Binance';
+        break;
+      case 'avalanche':
+        chainExplorer = 'snowtrace.io';
+        chainName = 'Avalanche';
+        break;
+      case 'fantom':
+        chainExplorer = 'ftmscan.com';
+        chainName = 'Fantom';
+        break;
+    }
+
+    setChainExplorer(chainExplorer);
+  }
+
   return (
     <div className="space-y-10">
-      {nft && (
+      {nft && !props.loading && (
         <section className="grid grid-cols 1 md:grid-cols-2 gap-5">
           <div className="mx-auto w-full md:w-3/4">
             <NFTImage
@@ -111,7 +169,7 @@ export function NFT(props) {
                 <br />
                 <span className="text-2xl">
                   <a
-                    href={`https://polygonscan.com/address/${nft.owner_of}`}
+                    href={`https://${chainExplorer}/address/${nft.owner_of}`}
                     target="_blank"
                     rel="noopener noreferrer nofollow"
                   >
