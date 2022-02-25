@@ -6,6 +6,10 @@ import axios from 'axios';
 
 import { Button } from '@chakra-ui/react';
 import { useColorMode, useColorModeValue } from '@chakra-ui/react';
+import { Image } from '@chakra-ui/react';
+import { Spinner } from '@chakra-ui/react';
+
+import ModelViewer from '@google/model-viewer';
 
 const mime = require('mime-types');
 
@@ -50,19 +54,47 @@ function NFTImage(props) {
           Your browser does not support the video tag.
         </video>
       );
+    case 'video/webm':
+      return (
+        <video width="100%" controls autoPlay muted loop>
+          <source src={`${image}`} type="video/webm" />
+          Your browser does not support the video tag.
+        </video>
+      );
+    case 'model/gltf-binary':
+      return (
+        <model-viewer
+          bounds="tight"
+          src="/img/membership.glb"
+          ar
+          ar-modes="webxr scene-viewer quick-look"
+          camera-controls
+          environment-image="neutral"
+          poster="poster.webp"
+          shadow-intensity="1"
+          autoplay
+        ></model-viewer>
+      );
     default:
       return (
         <Link
           to={`/${chain}/collection/${nft.token_address}/nft/${nft.token_id}`}
         >
-          <img
+          <Image
             src={image}
             /*onError={({ currentTarget }) => {
               currentTarget.onerror = null; // prevents looping
               currentTarget.src = '/img/404.webp';
             }}*/
+            fallbackSrc={'/img/loading.svg'}
             className="mx-auto w-full"
           />
+
+          {/*<img
+            src={image}
+            
+            className="mx-auto w-full"
+          />*/}
         </Link>
       );
   }

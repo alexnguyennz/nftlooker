@@ -280,6 +280,10 @@ export function UserNFTs(props) {
     }
   }, [loaded]);
 
+  useEffect(() => {
+    console.log(allCollections);
+  }, [allCollections]);
+
   async function fetchTestnetNfts(chain) {
     await axios
       .get(`/api/nfts?chain=${chain}&address=${address}`, {

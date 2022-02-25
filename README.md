@@ -2,7 +2,7 @@ NFT Looker is a simple application to view a wallet's NFTs on the Ethereum, Poly
 
 Compatible with ENS and Unstoppable Domains.
 
-Images and videos are supported.
+Images, videos, and 3D models are supported.
 
 Tools:
 
@@ -10,9 +10,9 @@ Tools:
 - Express.js - web server/framework
 - TailwindCSS - CSS framework
 - Moralis API - NFT data
-- Covalent API - NFT data
 - Chakra UI - React components
 - Cloudinary API - image transformation/optimisation
+- pm2 - Node.js process manager
 - node-spdy - HTTP/2 support
 
 Initially built for the Road to Web 3 ETHGlobal hackathon.

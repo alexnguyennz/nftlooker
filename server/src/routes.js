@@ -22,7 +22,7 @@ cloudinary.config({
   secure: true,
 });
 
-const DEFAULT_IMG = '404_cnciyv.webp';
+const DEFAULT_IMG = 'no-image_skjijq.png';
 
 const changeIpfsUrl = require('./utils/changeIpfsUrl.js');
 
@@ -35,9 +35,18 @@ const web3Provider = new ethers.providers.InfuraProvider('homestead', {
 
 // Unstoppable resolve
 const { default: Resolution } = require('@unstoppabledomains/resolution');
+const autoprefixer = require('autoprefixer');
 const resolution = new Resolution();
 
 require('dotenv').config();
+
+var ImageKit = require('imagekit');
+
+var imagekit = new ImageKit({
+  publicKey: process.env.IMAGEKIT_API_PUBLIC_KEY,
+  privateKey: process.env.IMAGEKIT_API_PRIVATE_KEY,
+  urlEndpoint: process.env.IMAGEKIT_API_URL,
+});
 
 async function resolveAddress(address) {
   let resolvedAddress = address;
@@ -164,11 +173,13 @@ const getNfts = async (req, res) => {
 
     const response = await axios.get(item.token_uri).catch((err) => {
       //if (err.code == 'ENOTFOUND') console.log(err);
-      console.log(err.code);
+      //console.log(err.code);
     });
 
     // if metadata is encoded
     let metadata;
+
+    //console.log(item.token_uri);
 
     if (item.token_uri.startsWith('data:application/json')) {
       const json = Buffer.from(
@@ -183,7 +194,7 @@ const getNfts = async (req, res) => {
       metadata = response.data; // store normal JSON
     }
 
-    console.log(response.data);
+    //console.log(response.data);
 
     // check if returned metadata JSON was successfully parsed into an object
     if (typeof metadata === 'object' && metadata !== null) {
@@ -201,32 +212,78 @@ const getNfts = async (req, res) => {
 
       if (metadata.image) {
         if (metadata.image.startsWith('data:image')) {
-          metadata.image = encodeURIComponent(metadata.image);
+          //console.log('data:image');
+          //console.log('metadata', metadata);
+          /* cloudinary.v2.uploader.upload(
+            'https://www.google.co.nz/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png',
+            { public_id: 'nftlooker/testetse' },
+            function (error, result) {
+              console.log(result, error);
+            }
+          ); */
+          //metadata.image = encodeURIComponent(metadata.image);
+          /*metadata.image = cloudinary.url(
+            'https://www.google.co.nz/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png',
+            {
+              type: 'fetch',
+              transformation: [
+                {
+                  overlay: {
+                    url: 'aHR0cHM6Ly9yZXMuY2xvdWRpbmFyeS5jb20vaG9vdmVyY2Zpc2QvaW1hZ2UvdXBsb2FkL2ZfYXV0byxxX2F1dG8vd18yMDAsaF8yMDAscl8xMC9lX2NvbG9yaXplLGNvX3JnYjo3NTQwODgvbF90ZXh0OkFyaWFsXzEwMF9ib2xkX2NlbnRlcjoxLGNvX3JnYjpGRkZGRkYvdjE1ODYxMTIyNDMvMXB4LnBuZw==',
+                  },
+                },
+                { flags: 'layer_apply', gravity: 'north_west', x: 15, y: 15 },
+              ],
+            }
+          ); */
+          //console.log('encoded', metadata.image);
         } else if (metadata.image.endsWith('.gif')) {
+          // Cloudinary
           metadata.image = cloudinary.url(metadata.image, {
             type: 'fetch',
             transformation: [
-              { height: 300, width: 300 },
+              { width: 250, height: 250 },
               { fetch_format: 'mp4' },
             ],
             default_image: DEFAULT_IMG,
           });
-        } else if (metadata.image.endsWith('.mp4')) {
+        } else if (
+          metadata.image.endsWith('.mp4') ||
+          metadata.image.endsWith('.webm')
+        ) {
           const stripped = metadata.image.replace(/^.*:\/\//i, '');
+          // Cloudinary
           metadata.image = cloudinary.url(`remote_https_media/${stripped}`, {
             resource_type: 'video',
-            eager: [{ width: 400, height: 300, crop: 'pad' }],
+            eager: [{ width: 250, height: 250, crop: 'pad' }],
             eager_async: true,
             default_image: DEFAULT_IMG,
           });
-        } else if (!metadata.image.endsWith('.mp4')) {
-          metadata.image = cloudinary.url(metadata.image, {
+        } else if (
+          !metadata.image.endsWith('.glb') &&
+          !metadata.image.endsWith('.gitf')
+        ) {
+          // Cloudinary
+          /*metadata.image = cloudinary.url(metadata.image, {
             type: 'fetch',
             transformation: [
-              { height: 300, width: 300 },
+              { width: 250, height: 250 },
               { fetch_format: 'auto' },
             ],
+            quality: 'auto',
             default_image: DEFAULT_IMG,
+          }); */
+
+          // ImageKit
+          metadata.image = imagekit.url({
+            src: `${process.env.IMAGEKIT_API_URL}/${metadata.image}`,
+            transformation: [
+              {
+                height: '250',
+                width: '250',
+                defaultImage: 'no-image_YdTeTrjGbeT.png',
+              },
+            ],
           });
         }
       }
@@ -292,16 +349,58 @@ const getNft = async (req, res) => {
 
     changeIpfsUrl(metadata);
 
-    if (metadata.image && !metadata.image.endsWith('.mp4')) {
-      metadata.image = cloudinary.url(metadata.image, {
-        type: 'fetch',
-        // serve larger image for bigger view
-        transformation: [
-          { height: 1000, width: 1000 },
-          { fetch_format: 'auto' },
-        ],
-        default_image: DEFAULT_IMG,
-      });
+    if (metadata.image) {
+      if (metadata.image.startsWith('data:image')) {
+        //console.log('data:image');
+      } else if (metadata.image.endsWith('.gif')) {
+        // Cloudinary
+        metadata.image = cloudinary.url(metadata.image, {
+          type: 'fetch',
+          transformation: [
+            { width: 250, height: 250 },
+            { fetch_format: 'mp4' },
+          ],
+          default_image: DEFAULT_IMG,
+        });
+      } else if (
+        metadata.image.endsWith('.mp4') ||
+        metadata.image.endsWith('.webm')
+      ) {
+        const stripped = metadata.image.replace(/^.*:\/\//i, '');
+        // Cloudinary
+        metadata.image = cloudinary.url(`remote_https_media/${stripped}`, {
+          resource_type: 'video',
+          eager: [{ width: 250, height: 250, crop: 'pad' }],
+          eager_async: true,
+          default_image: DEFAULT_IMG,
+        });
+      } else if (
+        !metadata.image.endsWith('.glb') &&
+        !metadata.image.endsWith('.gitf')
+      ) {
+        // Cloudinary
+        /*metadata.image = cloudinary.url(metadata.image, {
+          type: 'fetch',
+          transformation: [
+            { width: 250, height: 250 },
+            { fetch_format: 'auto' },
+          ],
+          quality: 'auto',
+          default_image: DEFAULT_IMG,
+        }); */
+
+        // ImageKit
+        metadata.image = imagekit.url({
+          src: `${process.env.IMAGEKIT_API_URL}/${metadata.image}`,
+          transformation: [
+            {
+              height: '1000',
+              width: '1000',
+              defaultImage: 'no-image_YdTeTrjGbeT.png',
+            },
+          ],
+        });
+      }
     }
 
     const nft = {
@@ -309,7 +408,7 @@ const getNft = async (req, res) => {
       metadata,
     };
 
-    console.log('metadata', nft);
+    //console.log('metadata', nft);
 
     res.send(nft);
   } else {
@@ -361,9 +460,10 @@ const getCollectionNfts = async (req, res) => {
           type: 'fetch',
           // serve larger image for bigger view
           transformation: [
-            { height: 300, width: 300 },
+            { height: 250, width: 250 },
             { fetch_format: 'auto' },
           ],
+          quality: 'auto',
           default_image: DEFAULT_IMG,
         });
       }

@@ -4,7 +4,11 @@ import { Link, useNavigate, useLocation, useParams } from 'react-router-dom';
 
 import axios from 'axios';
 
+import { useToast, Button } from '@chakra-ui/react';
+
 import { ArrowBackIcon } from '@chakra-ui/icons';
+
+import ModelViewer from '@google/model-viewer';
 
 // IPFS EXAMPLE
 // http://localhost:3000/collection/0x2953399124f0cbb46d2cbacd8a89cf0599974963/nft/51457428668762326190474255981562178405831810566835418606623410388040178204673
@@ -22,6 +26,9 @@ export function NFT(props) {
   const [nft, setNft] = useState();
 
   const [chainExplorer, setChainExplorer] = useState('etherscan.io');
+
+  const toast = useToast();
+  const statuses = ['success', 'error', 'warning', 'info'];
 
   let nftElem;
 
@@ -78,6 +85,23 @@ export function NFT(props) {
     }
   }
 
+  function fullScreen() {
+    const elem = document.getElementById('nft-model');
+
+    if (!document.fullscreenElement) {
+      elem.requestFullscreen().catch((err) => {
+        toast({
+          title: 'Error attempting to enter fullscreen mode.',
+          status: 'error',
+          duration: 5000,
+          isClosable: true,
+        });
+      });
+    } else {
+      document.exitFullscreen();
+    }
+  }
+
   // filter based on MIME type
   function NFTImage(props) {
     const nft = props.nft;
@@ -90,6 +114,31 @@ export function NFT(props) {
           <video width="100%" controls autoPlay muted loop>
             <source src={`${image}`} type="video/mp4" />
           </video>
+        );
+      case 'video/webm':
+        return (
+          <video width="100%" controls autoPlay muted loop>
+            <source src={`${image}`} type="video/webm" />
+            Your browser does not support the video tag.
+          </video>
+        );
+      case 'model/gltf-binary':
+        return (
+          <>
+            <model-viewer
+              id="nft-model"
+              bounds="tight"
+              src="/img/membership.glb"
+              ar
+              ar-modes="webxr scene-viewer quick-look"
+              camera-controls
+              environment-image="neutral"
+              poster="poster.webp"
+              shadow-intensity="1"
+              autoplay
+            ></model-viewer>
+            <Button onClick={fullScreen}>Fullscreen</Button>
+          </>
         );
       default:
         return (

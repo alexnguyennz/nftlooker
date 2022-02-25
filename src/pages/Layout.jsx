@@ -309,12 +309,49 @@ export function Layout(props) {
                 view an individual NFT or collection for more info.
               </p>
 
+              <p className="pb-5">
+                Compatible with{' '}
+                <a
+                  href="https://ens.domains/"
+                  target="_blank"
+                  rel="noreferrer noopener follow"
+                >
+                  ENS
+                </a>{' '}
+                and{' '}
+                <a
+                  href="https://unstoppabledomains.com/"
+                  target="_blank"
+                  rel="noreferrer noopener follow"
+                >
+                  Unstoppable Domains
+                </a>
+                .
+              </p>
+
               <Accordion allowMultiple>
                 <AccordionItem>
                   <h2>
                     <AccordionButton>
                       <Box flex="1" textAlign="left">
-                        Supported Mainnets
+                        Supported file formats
+                      </Box>
+                      <AccordionIcon />
+                    </AccordionButton>
+                  </h2>
+                  <AccordionPanel pb={4}>
+                    <ul className="list-disc pl-5">
+                      <li>images</li>
+                      <li>videos</li>
+                      <li>3D models (experimental)</li>
+                    </ul>
+                  </AccordionPanel>
+                </AccordionItem>
+                <AccordionItem>
+                  <h2>
+                    <AccordionButton>
+                      <Box flex="1" textAlign="left">
+                        Supported mainnets
                       </Box>
                       <AccordionIcon />
                     </AccordionButton>
@@ -334,7 +371,7 @@ export function Layout(props) {
                   <h2>
                     <AccordionButton>
                       <Box flex="1" textAlign="left">
-                        Supported Testnets
+                        Supported testnets
                       </Box>
                       <AccordionIcon />
                     </AccordionButton>
@@ -358,9 +395,10 @@ export function Layout(props) {
                 reasons including:
               </p>
               <ul className="list-disc pl-5">
+                <li>slow or down IPFS gateways</li>
                 <li>
-                  unusual metadata format e.g. not using a property name of
-                  {` "`}image{`"`}
+                  unusual metadata formats and not using common property names
+                  e.g. name, image, description
                 </li>
                 <li>broken metadata and/or media (image, video) links</li>
                 <li>dead sites or expired SSL certificates</li>

@@ -10,6 +10,8 @@ export function NFTCollection(props) {
 
   //console.log('chain', props.chain);
 
+  // <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-10">
+
   return (
     <section className={`space-y-1`}>
       <h3 className="tracking-wide text-left text-lg font-semibold">
@@ -17,7 +19,7 @@ export function NFTCollection(props) {
           {collection[0].name}
         </Link>
       </h3>
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-10">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 3xl:grid-cols-7 4xl:grid-cols-8 gap-10">
         {collection.map((nft, idx) => (
           <NFTCard key={idx} collection={collection} nft={nft} chain={chain} />
         ))}
