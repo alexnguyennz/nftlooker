@@ -343,7 +343,7 @@ export function Layout(props) {
                     <ul className="list-disc pl-5">
                       <li>images</li>
                       <li>videos</li>
-                      <li>3D models (experimental)</li>
+                      <li>3D models</li>
                     </ul>
                   </AccordionPanel>
                 </AccordionItem>
@@ -442,7 +442,6 @@ export function Layout(props) {
               loadingText="Loading"
               spinnerPlacement="end"
               colorScheme="blue"
-              backgroundColor="#3182CE"
               rightIcon={<Search2Icon />}
             >
               Look
@@ -455,7 +454,6 @@ export function Layout(props) {
                 loadingText="Loading"
                 spinnerPlacement="end"
                 colorScheme="blue"
-                backgroundColor="#3182CE"
               >
                 Random
                 <svg

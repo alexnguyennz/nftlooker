@@ -10,6 +10,10 @@ import { ArrowBackIcon } from '@chakra-ui/icons';
 
 import ModelViewer from '@google/model-viewer';
 
+import { useColorMode, useColorModeValue } from '@chakra-ui/react';
+
+import ReactPlayer from 'react-player';
+
 // IPFS EXAMPLE
 // http://localhost:3000/collection/0x2953399124f0cbb46d2cbacd8a89cf0599974963/nft/51457428668762326190474255981562178405831810566835418606623410388040178204673
 
@@ -29,6 +33,8 @@ export function NFT(props) {
 
   const toast = useToast();
   const statuses = ['success', 'error', 'warning', 'info'];
+
+  const colorModeBg = useColorModeValue('white', '#1f2937');
 
   let nftElem;
 
@@ -86,7 +92,7 @@ export function NFT(props) {
   }
 
   function fullScreen() {
-    const elem = document.getElementById('nft-model');
+    const elem = document.querySelector('model-viewer');
 
     if (!document.fullscreenElement) {
       elem.requestFullscreen().catch((err) => {
@@ -108,20 +114,48 @@ export function NFT(props) {
     const image = props.image;
     const mimeType = mime.lookup(image);
 
+    function pip() {
+      const elem = document.querySelector('video');
+
+      elem.requestPictureInPicture();
+    }
+
+    function Video(props) {
+      return (
+        <>
+          <video width="100%" controls autoPlay muted loop>
+            <source src={`${image}`} type={props.mime} />
+          </video>
+
+          {/*<ReactPlayer
+            id="video-player"
+            url={image}
+            width="100%"
+            controls="true"
+            playing="true"
+            muted="true"
+            loop="true"
+            pip="true"
+            stopOnUnmount={false} // continue playing PIP after ReactPlayer unmounts
+            // fallback
+          />*/}
+
+          <div className="mt-3 text-right">
+            <Button onClick={pip} colorScheme="blue">
+              PIP
+            </Button>
+          </div>
+        </>
+      );
+    }
+
     switch (mimeType) {
+      case 'image/gif':
+        return <Video mime="video/mp4" />;
       case 'video/mp4':
-        return (
-          <video width="100%" controls autoPlay muted loop>
-            <source src={`${image}`} type="video/mp4" />
-          </video>
-        );
+        return <Video mime="video/mp4" />;
       case 'video/webm':
-        return (
-          <video width="100%" controls autoPlay muted loop>
-            <source src={`${image}`} type="video/webm" />
-            Your browser does not support the video tag.
-          </video>
-        );
+        return <Video mime="video/webm" />;
       case 'model/gltf-binary':
         return (
           <>
@@ -137,7 +171,21 @@ export function NFT(props) {
               shadow-intensity="1"
               autoplay
             ></model-viewer>
-            <Button onClick={fullScreen}>Fullscreen</Button>
+            <div className="mt-3 text-right">
+              <Button onClick={fullScreen} colorScheme="blue">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  fill={colorModeBg}
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M1 1v6h2V3h4V1H1zm2 12H1v6h6v-2H3v-4zm14 4h-4v2h6v-6h-2v4zm0-16h-4v2h4v4h2V1h-2z"
+                  />
+                </svg>
+              </Button>
+            </div>
           </>
         );
       default:
