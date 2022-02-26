@@ -15,6 +15,11 @@ import { NFTCard } from '../../components/NFTCard/NFTCard';
 
 import truncateAddress from '../../utils/ellipseAddress';
 
+import Pagination from '@mui/material/Pagination';
+import Stack from '@mui/material/Stack';
+
+import ReactPaginate from 'react-paginate';
+
 const API_KEY = process.env['REACT_APP_COVALENT_API_KEY'];
 
 const mime = require('mime-types');
@@ -65,6 +70,8 @@ export function Collection(props) {
   const [chainExplorer, setChainExplorer] = useState('etherscan.io');
   const [chainName, setChainName] = useState('');
 
+  const items = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+
   // React Router
   let location = useLocation();
   const params = useParams();
@@ -93,7 +100,7 @@ export function Collection(props) {
 
     // Get 5 latest NFTs
     response = await axios
-      .get(`/api/collection/nfts?chain=${chain}&address=${address}&limit=5`)
+      .get(`/api/collection/nfts?chain=${chain}&address=${address}&limit=10`) // limit=5
       .catch((err) => console.log(err));
 
     setcollectionMetadata(response.data);
@@ -130,6 +137,76 @@ export function Collection(props) {
 
     setChainExplorer(chainExplorer);
     setChainName(chainName);
+  }
+
+  function Items({ currentItems }) {
+    return (
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-10">
+        {currentItems &&
+          currentItems.map((nft) => (
+            <NFTCard
+              key={nft.token_id}
+              collection={collection}
+              nft={nft}
+              chain={chain}
+            />
+          ))}
+      </div>
+    );
+  }
+
+  function PaginatedItems({ itemsPerPage }) {
+    const items = collectionMetadata;
+
+    // We start with an empty list of items.
+    const [currentItems, setCurrentItems] = useState(null);
+    const [pageCount, setPageCount] = useState(0);
+    // Here we use item offsets; we could also use page offsets
+    // following the API or data you're working with.
+    const [itemOffset, setItemOffset] = useState(0);
+
+    useEffect(() => {
+      // Fetch items from another resources.
+      const endOffset = itemOffset + itemsPerPage;
+      console.log(`Loading items from ${itemOffset} to ${endOffset}`);
+      setCurrentItems(items.slice(itemOffset, endOffset));
+      setPageCount(Math.ceil(items.length / itemsPerPage));
+    }, [itemOffset, itemsPerPage]);
+
+    // Invoke when user click to request another page.
+    const handlePageClick = (event) => {
+      const newOffset = (event.selected * itemsPerPage) % items.length;
+      console.log(
+        `User requested page number ${event.selected}, which is offset ${newOffset}`
+      );
+      setItemOffset(newOffset);
+    };
+
+    return (
+      <>
+        <Items currentItems={currentItems} />
+        <ReactPaginate
+          nextLabel="Next"
+          onPageChange={handlePageClick}
+          pageRangeDisplayed={3}
+          marginPagesDisplayed={2}
+          pageCount={pageCount}
+          previousLabel="Previous"
+          pageClassName="page-item"
+          pageLinkClassName="page-link"
+          previousClassName="page-item"
+          previousLinkClassName="page-link"
+          nextClassName="page-item"
+          nextLinkClassName="page-link"
+          breakLabel="..."
+          breakClassName="page-item"
+          breakLinkClassName="page-link"
+          containerClassName="pagination"
+          activeClassName="active"
+          renderOnZeroPageCount={null}
+        />
+      </>
+    );
   }
 
   return (
@@ -181,7 +258,6 @@ export function Collection(props) {
       {collectionMetadata && (
         <section>
           <h2 className="mb-1 text-4xl text-center font-bold">Latest NFTs</h2>
-
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-10">
             {collectionMetadata &&
               collectionMetadata.map((nft) => (
@@ -193,6 +269,7 @@ export function Collection(props) {
                 />
               ))}
           </div>
+          {collectionMetadata && <PaginatedItems itemsPerPage={5} />}
         </section>
       )}
     </div>

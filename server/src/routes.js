@@ -10,6 +10,8 @@ const axios = require('axios');
 
 require('dotenv').config();
 
+const MORALIS_API = 'https://deep-index.moralis.io/api/v2';
+
 const mime = require('mime-types');
 const contentType = require('content-type');
 
@@ -82,17 +84,15 @@ async function getContentType(image) {
 const getRandomWallet = async (req, res) => {
   const now = Math.floor(Date.now());
 
+  // Moralis getDateToBlock
   // get latest Ethereum block
   let response = await axios
-    .get(
-      `https://deep-index.moralis.io/api/v2/dateToBlock?chain=eth&date=${now}`,
-      {
-        headers: {
-          accept: 'application/json',
-          'X-API-KEY': process.env.MORALIS_API_KEY,
-        },
-      }
-    )
+    .get(`${MORALIS_API}/dateToBlock?chain=eth&date=${now}`, {
+      headers: {
+        accept: 'application/json',
+        'X-API-KEY': process.env.MORALIS_API_KEY,
+      },
+    })
     .catch((err) => {
       console.log(err);
     });
@@ -100,8 +100,9 @@ const getRandomWallet = async (req, res) => {
   const latestBlock = response.data.block;
 
   // get a list of NFT transactions
+  // Moralis GetNFTTransfersByBlock
   response = await axios(
-    `https://deep-index.moralis.io/api/v2/block/${latestBlock}/nft/transfers?chain=eth&limit=250`,
+    `${MORALIS_API}/block/${latestBlock}/nft/transfers?chain=eth&limit=250`,
     {
       headers: {
         accept: 'application/json',
@@ -127,6 +128,7 @@ const getRandomWallet = async (req, res) => {
   }
 };
 
+// Moralis GetNFTs
 const getNfts = async (req, res) => {
   const { chain, address } = req.query;
 
@@ -135,7 +137,7 @@ const getNfts = async (req, res) => {
   resolvedAddress = await resolveAddress(address);
 
   const response = await axios.get(
-    `https://deep-index.moralis.io/api/v2/${resolvedAddress}/nft?chain=${chain}&format=decimal`,
+    `${MORALIS_API}/${resolvedAddress}/nft?chain=${chain}&format=decimal`,
     {
       headers: {
         accept: 'application/json',
@@ -233,9 +235,9 @@ const getNfts = async (req, res) => {
           // Cloudinary
           metadata.image = cloudinary.url(`remote_https_media/${stripped}`, {
             resource_type: 'video',
-            eager: [{ width: 250, height: 250, crop: 'pad' }],
-            transformation: [{ width: 250, height: 250 }],
-            eager_async: false,
+            //eager: [{ width: 300, height: 250, crop: 'pad' }],
+            //transformation: [{ width: 250, height: 169 }], // 16/9
+            transformation: [{ width: 400, height: 300 }], // 16/9
             default_image: DEFAULT_IMG,
           });
         } else if (
@@ -309,11 +311,12 @@ const getNfts = async (req, res) => {
   });
 };
 
+// Moralis GetTokenIdMetadata
 const getNft = async (req, res) => {
   const { chain, address, tokenId } = req.query;
 
   const response = await axios(
-    `https://deep-index.moralis.io/api/v2/nft/${address}/${tokenId}?chain=${chain}&format=decimal`,
+    `${MORALIS_API}/nft/${address}/${tokenId}?chain=${chain}&format=decimal`,
     {
       headers: {
         accept: 'application/json',
@@ -398,11 +401,12 @@ const getNft = async (req, res) => {
   }
 };
 
+// Moralis GETNFTMetadata
 const getCollectionMetadata = async (req, res) => {
   const { chain, address } = req.query;
 
   const response = await axios(
-    `https://deep-index.moralis.io/api/v2/nft/${address}/metadata?chain=${chain}`,
+    `${MORALIS_API}/nft/${address}/metadata?chain=${chain}`,
     {
       headers: {
         accept: 'application/json',
@@ -414,11 +418,12 @@ const getCollectionMetadata = async (req, res) => {
   res.json(response.data);
 };
 
+// Moralis GetAllTokenIds
 const getCollectionNfts = async (req, res) => {
   const { address, chain, limit } = req.query;
 
   const response = await axios(
-    `https://deep-index.moralis.io/api/v2/nft/${address}?chain=${chain}&format=decimal&limit=${limit}`,
+    `${MORALIS_API}/nft/${address}?chain=${chain}&format=decimal&limit=${limit}`,
     {
       headers: {
         accept: 'application/json',
@@ -433,14 +438,12 @@ const getCollectionNfts = async (req, res) => {
     const metadata = response.data;
 
     if (typeof metadata === 'object' && metadata !== null) {
-      // format IPFS links
-
-      changeIpfsUrl(metadata);
+      changeIpfsUrl(metadata); // format IPFS links
 
       if (metadata.image && !metadata.image.endsWith('.mp4')) {
         metadata.image = cloudinary.url(metadata.image, {
           type: 'fetch',
-          // serve larger image for bigger view
+
           transformation: [
             { height: 250, width: 250 },
             { fetch_format: 'auto' },
@@ -449,8 +452,6 @@ const getCollectionNfts = async (req, res) => {
           default_image: DEFAULT_IMG,
         });
       }
-
-      console.log('metadata', metadata);
 
       return {
         ...item,
@@ -477,26 +478,3 @@ module.exports.getNft = getNft;
 module.exports.getCollectionMetadata = getCollectionMetadata;
 module.exports.getCollectionNfts = getCollectionNfts;
 module.exports.getRandomWallet = getRandomWallet;
-
-/*
-Promise.allSettled(nfts).then((responses) => {
-    const data = responses.map((item) => {
-      return item.value;
-    });
-
-    // console.log(`${chain} nfts`, data);
-
-    // group NFTs by collection
-    const groupedData = data.reduce((acc, element) => {
-      // make array if key value doesn't already exist
-      acc[element.token_address] = acc[element.token_address] || [];
-
-      acc[element.token_address].push(element);
-
-      return acc;
-    }, Object.create(null));
-
-    //console.log('grouped', grouped);
-
-    res.json(groupedData);
-    */
