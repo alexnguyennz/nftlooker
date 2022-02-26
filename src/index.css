@@ -27,3 +27,12 @@ model-viewer {
   width: 100%;
   height: 100%;
 }
+
+/* NFTImage */
+.wrapper svg {
+  display: none;
+}
+
+.wrapper:hover svg {
+  display: block;
+}

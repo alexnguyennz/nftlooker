@@ -13,6 +13,11 @@ import { NFTCard } from '../../components/NFTCard/NFTCard';
 import { Tabs, TabList, TabPanels, Tab, TabPanel } from '@chakra-ui/react';
 import { PhoneIcon } from '@chakra-ui/icons';
 
+import { useToast } from '@chakra-ui/react';
+
+import TabsMUI from '@mui/material/Tabs';
+import TabMUI from '@mui/material/Tab';
+
 import {
   Ethereum,
   Polygon,
@@ -21,22 +26,19 @@ import {
   Fantom,
 } from '../../components/ChainIcons';
 
-import '../../index.css';
-
 // UTILS
 import profilerCallback from '../../utils/profilerCallback';
+import toast from '../../components/Toast/Toast';
 
 export function UserNFTs(props) {
   // States
-  const [address, setAddress] = useState('');
   const [currentLocation, setCurrentLocation] = useState('');
 
   const [noNfts, setNoNfts] = useState('');
 
   const [loaded, setLoaded] = useState(false);
 
-  const [chainTab, setChainTab] = useState();
-  const [testnetChainTab, setTestnetChainTab] = useState();
+  const [chainTab, setChainTab] = useState(1);
 
   const [testCollections, setTestCollections] = useState({
     eth: {
@@ -229,33 +231,36 @@ export function UserNFTs(props) {
     },
   });
 
+  const toastInstance = useToast();
+
   // React Router
   let location = useLocation();
   let params = useParams();
 
-  const fetchController = new AbortController();
+  const abortController = new AbortController();
+
+  async function cancelRequests() {
+    console.log('running cancelrequests');
+  }
 
   useEffect(() => {
     return () => {
-      fetchController.abort();
+      abortController.abort();
+
+      cancelRequests();
+
       props.onLoading(false);
     };
   }, []);
 
   // set address using address param
   useEffect(() => {
-    setAddress(params.walletAddress);
-
-    //getData();
-    //console.log('location', location.state);
-  }, [location]);
-
-  useEffect(() => {
-    // only run when address is valid
-    if (address) {
+    if (params.walletAddress) {
       getData();
     }
-  }, [address]);
+
+    document.title = `nft looker. ${params.walletAddress}`;
+  }, [location]);
 
   useEffect(() => {
     // if loaded is true (all NFT data has been set in state), find out if there are any NFTs or not
@@ -286,8 +291,8 @@ export function UserNFTs(props) {
 
   async function fetchTestnetNfts(chain) {
     await axios
-      .get(`/api/nfts?chain=${chain}&address=${address}`, {
-        signal: fetchController.signal,
+      .get(`/api/nfts?chain=${chain}&address=${params.walletAddress}`, {
+        signal: abortController.signal,
       })
       .then((response) => {
         const data = response.data;
@@ -301,7 +306,7 @@ export function UserNFTs(props) {
 
         // set the chain tab to one that has NFTs
         if (nftCount > 0) {
-          setTestnetChainTab(testnetCollections[chain].order);
+          setChainTab(testnetCollections[chain].order);
         }
 
         //console.log('chains', Object.values(chains));
@@ -315,13 +320,25 @@ export function UserNFTs(props) {
             count: nftCount,
           },
         }));
+      })
+      .catch((err) => {
+        if (err.message == 'canceled') {
+          toast(toastInstance, 'error', 'Fetching NFTs cancelled.');
+        } else {
+          toast(
+            toastInstance,
+            'error',
+            "Couldn't fetch NFTs from NFT Looker server.",
+            `${err.message}`
+          );
+        }
       });
   }
 
   async function fetchNfts(chain) {
     await axios
-      .get(`/api/nfts?chain=${chain}&address=${address}`, {
-        signal: fetchController.signal,
+      .get(`/api/nfts?chain=${chain}&address=${params.walletAddress}`, {
+        signal: abortController.signal,
       })
       .then((response) => {
         const data = response.data;
@@ -349,13 +366,18 @@ export function UserNFTs(props) {
             count: nftCount,
           },
         }));
-
-        // chains.map((chain, idx) => {
-        //   console.log('chains', idx);
-        //   if (allCollections[Object.keys(chain)].count > 0) {
-        //     setChainTab(idx);
-        //   }
-        // });
+      })
+      .catch((err) => {
+        if (err.message == 'canceled') {
+          toast(toastInstance, 'error', 'Fetching NFTs cancelled.');
+        } else {
+          toast(
+            toastInstance,
+            'error',
+            "Couldn't fetch NFTs from NFT Looker server.",
+            `${err.message}`
+          );
+        }
       });
   }
 
@@ -432,10 +454,14 @@ export function UserNFTs(props) {
       ];
     }
 
-    Promise.all(promises).then(() => {
-      props.onLoading(false);
-      setLoaded(true);
-    });
+    Promise.all(promises)
+      .then(() => {
+        props.onLoading(false);
+        setLoaded(true);
+      })
+      .catch((err) => {
+        toast(toastInstance, 'error', "Couldn't contact server.", `${err}`);
+      });
   }
 
   const RenderData = React.memo(function RenderData(props) {
@@ -510,10 +536,9 @@ export function UserNFTs(props) {
         isDisabled={disabled}
         value={idx}
         className={disabled && `css-1ltezim`}
-        borderRadius="25px"
       >
         <div className="flex flex-col md:flex-row">
-          <span className="mr-2 text-center">
+          <span className="md:mr-2 text-center">
             <ChainIcon />
           </span>
           {collections[chain].name}{' '}
@@ -530,7 +555,7 @@ export function UserNFTs(props) {
         onChange={(index) => setChainTab(index)}
         align="center"
         variant="solid-rounded" // variant="enclosed"
-        colorScheme="blue"
+        colorScheme="gray"
         isLazy="true"
         lazyBehavior="true"
       >
@@ -548,7 +573,14 @@ export function UserNFTs(props) {
         )}
 
         {props.testnets && loaded && !noNfts && (
-          <TabList>
+          <TabList
+            sx={{
+              scrollbarWidth: '40px',
+              '::-webkit-scrollbar': {
+                display: 'none',
+              },
+            }}
+          >
             {Object.keys(testnetCollections).map((chain, idx) => (
               <ChainTab
                 chain={chain}

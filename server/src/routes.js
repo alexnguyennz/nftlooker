@@ -23,6 +23,7 @@ cloudinary.config({
 });
 
 const DEFAULT_IMG = 'no-image_skjijq.png';
+const DEFAULT_IMAGEKIT_IMG = 'no-image_70AD3Cs61xQ.png';
 
 const changeIpfsUrl = require('./utils/changeIpfsUrl.js');
 
@@ -79,27 +80,6 @@ async function getContentType(image) {
 }
 
 const getRandomWallet = async (req, res) => {
-  // `https://deep-index.moralis.io/api/v2/dateToBlock?chain=eth&date=1645560375063`,
-
-  // get latest block based on time Etherscan
-  /*let response = await axios
-      .get(
-        `https://api.etherscan.io/api?module=block&action=getblocknobytime&timestamp=${now}&closest=before&apikey=1HDZ2TTTSB2A2P5P1YHSPVUMVDM64UWIWH`
-      )
-      .catch((err) => {
-        console.log(err);
-      }); */
-
-  // Get Internal Transactions by Block Range Etherscan
-  /*response = await axios
-      .get(
-        `https://api.etherscan.io/api?module=account&action=txlistinternal&startblock=${
-          latestBlock - 10000
-        }&endblock=${latestBlock}&page=1&offset=250&sort=asc&apikey=1HDZ2TTTSB2A2P5P1YHSPVUMVDM64UWIWH`
-      )
-      .catch((err) => {
-        console.log(err);
-      }); */
   const now = Math.floor(Date.now());
 
   // get latest Ethereum block
@@ -133,8 +113,6 @@ const getRandomWallet = async (req, res) => {
   });
 
   const transactions = response.data.result;
-
-  console.log(transactions);
 
   const rand = Math.floor(Math.random() * transactions.length);
 
@@ -172,7 +150,7 @@ const getNfts = async (req, res) => {
     // no null token_uri e.g. with tokenized tweets
 
     const response = await axios.get(item.token_uri).catch((err) => {
-      //if (err.code == 'ENOTFOUND') console.log(err);
+      if (err.code == 'ENOTFOUND') console.log(err);
       //console.log(err.code);
     });
 
@@ -256,7 +234,8 @@ const getNfts = async (req, res) => {
           metadata.image = cloudinary.url(`remote_https_media/${stripped}`, {
             resource_type: 'video',
             eager: [{ width: 250, height: 250, crop: 'pad' }],
-            eager_async: true,
+            transformation: [{ width: 250, height: 250 }],
+            eager_async: false,
             default_image: DEFAULT_IMG,
           });
         } else if (
@@ -281,9 +260,12 @@ const getNfts = async (req, res) => {
               {
                 height: '250',
                 width: '250',
-                defaultImage: 'no-image_YdTeTrjGbeT.png',
+                defaultImage: DEFAULT_IMAGEKIT_IMG,
               },
             ],
+            /* signed URLs to prevent modification and expire ImageKit
+            signed: true,
+            expireSeconds: 300, */
           });
         }
       }
@@ -396,7 +378,7 @@ const getNft = async (req, res) => {
             {
               height: '1000',
               width: '1000',
-              defaultImage: 'no-image_YdTeTrjGbeT.png',
+              defaultImage: DEFAULT_IMAGEKIT_IMG,
             },
           ],
         });

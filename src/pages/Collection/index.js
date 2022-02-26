@@ -13,6 +13,8 @@ import changeIpfsUrl from '../../utils/changeIpfsUrl';
 
 import { NFTCard } from '../../components/NFTCard/NFTCard';
 
+import truncateAddress from '../../utils/ellipseAddress';
+
 const API_KEY = process.env['REACT_APP_COVALENT_API_KEY'];
 
 const mime = require('mime-types');
@@ -105,24 +107,24 @@ export function Collection(props) {
     switch (chain) {
       case 'eth':
         chainExplorer = 'etherscan.io';
-        chainName = 'Ethereum';
+        chainName = 'Ethereum (ETH)';
         break;
       case 'matic':
         chainExplorer = 'polygonscan.com';
-        chainName = 'Polygon';
+        chainName = 'Polygon (MATIC)';
 
         break;
       case 'binance':
         chainExplorer = 'bscscan.com';
-        chainName = 'Binance';
+        chainName = 'Binance Smart Chain (BSC)';
         break;
       case 'avalanche':
         chainExplorer = 'snowtrace.io';
-        chainName = 'Avalanche';
+        chainName = 'Avalanche (AVAX)';
         break;
       case 'fantom':
         chainExplorer = 'ftmscan.com';
-        chainName = 'Fantom';
+        chainName = 'Fantom (FTM)';
         break;
     }
 
@@ -160,7 +162,7 @@ export function Collection(props) {
                     target="_blank"
                     rel="noreferrer noopener nofollow"
                   >
-                    {collection.token_address}
+                    {truncateAddress(collection.token_address)}
                     {` `}
                     <ExternalLinkIcon />
                   </a>
@@ -168,7 +170,7 @@ export function Collection(props) {
               </p>
 
               <p>
-                SYMBOL
+                SYMBOL / TICKER
                 <br />
                 <span className="text-2xl">{collection.symbol}</span>
               </p>

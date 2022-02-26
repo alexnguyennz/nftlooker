@@ -111,7 +111,7 @@ export function Layout(props) {
 
   useEffect(() => {
     // reset app state if you go to / route
-    console.log('params', location);
+    //console.log('params', location);
     if (location.pathname == '/') {
       setAddress('');
     }
@@ -178,7 +178,15 @@ export function Layout(props) {
   function handleSubmit(e) {
     e.preventDefault();
 
-    navigate(`${address}`, { state: { address: address } });
+    navigate(`${address}`);
+  }
+
+  function handleTestnetsToggle() {
+    props.onSetTestnets(!props.testnets);
+
+    if (address) {
+      navigate(`${address}`);
+    }
   }
 
   return (
@@ -237,7 +245,7 @@ export function Layout(props) {
             rightIcon={<AccountBalanceWalletIcon />}
             onClick={connectWallet}
           >
-            Connect
+            connect
           </Button>
         ) : (
           <>
@@ -280,12 +288,13 @@ export function Layout(props) {
               <MenuItem>
                 <FormControl className="flex justify-between items-center">
                   <FormLabel htmlFor="testnet" mb="0">
-                    enable testnets
+                    add testnets
                   </FormLabel>
                   <Switch
                     id="testnet"
                     isChecked={props.testnets}
-                    onChange={() => props.onSetTestnets(!props.testnets)}
+                    onChange={handleTestnetsToggle}
+                    isDisabled={props.loading}
                   />
                 </FormControl>
               </MenuItem>
@@ -401,7 +410,7 @@ export function Layout(props) {
                   e.g. name, image, description
                 </li>
                 <li>broken metadata and/or media (image, video) links</li>
-                <li>dead sites or expired SSL certificates</li>
+                <li>dead or insecure sites</li>
               </ul>
             </ModalBody>
             <ModalFooter>
@@ -417,7 +426,7 @@ export function Layout(props) {
         </h1>
 
         <h2 className="text-xl font-semibold">
-          View NFTs across multiple blockchains.
+          view NFTs across multiple blockchains.
         </h2>
 
         <form
@@ -444,7 +453,7 @@ export function Layout(props) {
               colorScheme="blue"
               rightIcon={<Search2Icon />}
             >
-              Look
+              look
             </Button>
             {!props.loading && (
               <Button
@@ -455,7 +464,7 @@ export function Layout(props) {
                 spinnerPlacement="end"
                 colorScheme="blue"
               >
-                Random
+                random
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 512 512"

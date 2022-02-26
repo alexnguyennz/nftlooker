@@ -8,11 +8,26 @@ import { useToast, Button } from '@chakra-ui/react';
 
 import { ArrowBackIcon } from '@chakra-ui/icons';
 
-import ModelViewer from '@google/model-viewer';
+import ModelViewer from '@google/model-viewer'; // 3D models
 
 import { useColorMode, useColorModeValue } from '@chakra-ui/react';
 
-import ReactPlayer from 'react-player';
+import {
+  Table,
+  Thead,
+  Tbody,
+  Tfoot,
+  Tr,
+  Th,
+  Td,
+  TableCaption,
+} from '@chakra-ui/react';
+
+import { ExternalLinkIcon } from '@chakra-ui/icons';
+
+import toast from '../../components/Toast/Toast';
+
+import truncateAddress from '../../utils/ellipseAddress';
 
 // IPFS EXAMPLE
 // http://localhost:3000/collection/0x2953399124f0cbb46d2cbacd8a89cf0599974963/nft/51457428668762326190474255981562178405831810566835418606623410388040178204673
@@ -31,8 +46,7 @@ export function NFT(props) {
 
   const [chainExplorer, setChainExplorer] = useState('etherscan.io');
 
-  const toast = useToast();
-  const statuses = ['success', 'error', 'warning', 'info'];
+  const toastInstance = useToast();
 
   const colorModeBg = useColorModeValue('white', '#1f2937');
 
@@ -96,12 +110,12 @@ export function NFT(props) {
 
     if (!document.fullscreenElement) {
       elem.requestFullscreen().catch((err) => {
-        toast({
-          title: 'Error attempting to enter fullscreen mode.',
-          status: 'error',
-          duration: 5000,
-          isClosable: true,
-        });
+        toast(
+          toastInstance,
+          'error',
+          'Error attempting to enter fullscreen mode.',
+          `${err}`
+        );
       });
     } else {
       document.exitFullscreen();
@@ -243,13 +257,13 @@ export function NFT(props) {
               image={nft.metadata && nft.metadata.image}
             />
           </div>
-          <div className="space-y-2">
+          <div>
             <h3 className="pb-2 border-b border-gray-500 text-4xl font-bold ">
               {nft.metadata.name}
             </h3>
 
             <div className="space-y-5">
-              <p>
+              <div>
                 DESCRIPTION
                 <br />
                 <span className="text-2xl">
@@ -259,9 +273,47 @@ export function NFT(props) {
                     <>None</>
                   )}
                 </span>
-              </p>
+              </div>
 
-              <p>
+              {nft.metadata.attributes && (
+                <div>
+                  ATTRIBUTES
+                  <br />
+                  <div className="text-2xl">
+                    {nft.metadata.attributes.map((attribute) => {
+                      const values = Object.values(attribute);
+
+                      return (
+                        <div
+                          className="grid grid-cols-2 xl:w-2/3 2xl:w-2/5"
+                          key={values[0]}
+                        >
+                          <span>{values[0]}:</span>
+                          <span>{values[1]}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {nft.metadata.external_url && (
+                <div>
+                  <ExternalLinkIcon />
+                  <br />
+                  <span className="text-2xl">
+                    <a
+                      href={nft.metadata.external_url}
+                      target="_blank"
+                      rel="noopener noreferrer nofollow"
+                    >
+                      {nft.metadata.external_url}
+                    </a>
+                  </span>
+                </div>
+              )}
+
+              <div>
                 OWNER
                 <br />
                 <span className="text-2xl">
@@ -270,11 +322,11 @@ export function NFT(props) {
                     target="_blank"
                     rel="noopener noreferrer nofollow"
                   >
-                    {nft.owner_of}
+                    {truncateAddress(nft.owner_of)}
                   </a>
                 </span>
-              </p>
-              <p>
+              </div>
+              <div>
                 COLLECTION
                 <br />
                 <span className="text-2xl">
@@ -282,8 +334,8 @@ export function NFT(props) {
                     <ArrowBackIcon /> {nft.name}
                   </Link>
                 </span>
-              </p>
-              <p>
+              </div>
+              <div>
                 CONTRACT
                 <br />
                 <span className="text-2xl">
@@ -292,15 +344,15 @@ export function NFT(props) {
                     target="_blank"
                     rel="noopener noreferrer nofollow"
                   >
-                    {nft.token_address}
+                    {truncateAddress(nft.token_address)}
                   </a>
                 </span>
-              </p>
-              <p>
+              </div>
+              <div>
                 TOKEN ID
                 <br />
                 <span className="text-2xl break-all">{nft.token_id}</span>
-              </p>
+              </div>
             </div>
           </div>
         </section>

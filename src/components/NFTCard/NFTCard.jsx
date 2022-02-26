@@ -9,6 +9,10 @@ import { useColorMode, useColorModeValue } from '@chakra-ui/react';
 import { Image } from '@chakra-ui/react';
 import { Spinner } from '@chakra-ui/react';
 
+import { Tooltip } from '@chakra-ui/react';
+
+import { ExternalLinkIcon } from '@chakra-ui/icons';
+
 import ModelViewer from '@google/model-viewer';
 
 const mime = require('mime-types');
@@ -49,14 +53,14 @@ function NFTImage(props) {
       );
     case 'video/mp4':
       return (
-        <video width="100%" controls autoPlay muted loop>
+        <video width="100%" controls autoPlay muted loop className="z-20">
           <source src={`${image}`} type="video/mp4" />
           Your browser does not support the video tag.
         </video>
       );
     case 'video/webm':
       return (
-        <video width="100%" controls autoPlay muted loop>
+        <video width="100%" controls autoPlay muted loop className="z-20">
           <source src={`${image}`} type="video/webm" />
           Your browser does not support the video tag.
         </video>
@@ -117,9 +121,23 @@ export function NFTCard(props) {
         <div
           className={`mt-auto overflow-hidden rounded-lg shadow-md  transition-all hover:-translate-y-2 ${colorModeBg}`}
         >
-          {nft.metadata && (
-            <NFTImage collection={collection} nft={nft} chain={chain} />
-          )}
+          <div className="wrapper relative">
+            <div className="absolute right-0 m-3">
+              <Tooltip label="Open original NFT link" openDelay={750} hasArrow>
+                <a
+                  href={nft.metadata.original_image}
+                  target="_blank"
+                  rel="noreferrer noopener nofollow"
+                  className="z-0"
+                >
+                  <ExternalLinkIcon color="gray.600" boxSize={5} />
+                </a>
+              </Tooltip>
+            </div>
+            {nft.metadata && (
+              <NFTImage collection={collection} nft={nft} chain={chain} />
+            )}
+          </div>
 
           <div className="p-3 mt-auto space-y-2">
             <h3 className="text-center font-semibold">
@@ -129,7 +147,7 @@ export function NFTCard(props) {
                 {nft.metadata && nft.metadata.name}
               </Link>
             </h3>
-            <div className="float-right pb-3">
+            <div className="flex justify-end">
               <Button size="xs">
                 <Link
                   to={`/${chain}/collection/${nft.token_address}/nft/${nft.token_id}`}
