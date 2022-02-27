@@ -13,6 +13,7 @@ const {
   getCollectionMetadata,
   getCollectionNfts,
   getRandomWallet,
+  searchNfts,
 } = require('../src/routes.js');
 
 const corsOptions = {
@@ -31,6 +32,7 @@ router.get('/nft', getNft);
 router.get('/collection/metadata', getCollectionMetadata);
 router.get('/collection/nfts', getCollectionNfts);
 router.get('/randomWallet', getRandomWallet);
+router.get('/search', searchNfts);
 
 app.use('/api', router);
 

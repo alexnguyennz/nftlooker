@@ -12,6 +12,7 @@ import { Layout } from './pages/Layout';
 import { UserNFTs } from './pages/UserNFTs';
 import { Collection } from './pages/Collection';
 import { NFT } from './pages/NFT';
+import { SearchNFTs } from './pages/SearchNFTs';
 
 function App() {
   const [loading, setLoading] = useState(false);
@@ -20,12 +21,6 @@ function App() {
 
   //let navigate = useNavigate();
   //let location = useLocation();
-
-  useEffect(() => {
-    console.log('setTestnets', testnets);
-    //console.log('location', location.pathname);
-    //navigate(`${location.pathname}`);
-  }, [testnets]);
 
   return (
     <div className="App ">
@@ -70,6 +65,15 @@ function App() {
                 />
               }
             />
+            <Route
+              path="search/:q"
+              element={
+                <SearchNFTs
+                  loading={loading}
+                  onLoading={(isLoading) => setLoading(isLoading)}
+                />
+              }
+            ></Route>
           </Route>
         </Routes>
       </BrowserRouter>

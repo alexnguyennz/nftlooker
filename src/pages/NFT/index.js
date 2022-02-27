@@ -72,6 +72,10 @@ export function NFT(props) {
   }, [address]);
 
   useEffect(() => {
+    console.log(nft);
+  }, [nft]);
+
+  useEffect(() => {
     if (loaded) {
       const nftElemTest = document.querySelector('img');
 
@@ -280,13 +284,13 @@ export function NFT(props) {
                   ATTRIBUTES
                   <br />
                   <div className="text-2xl">
-                    {nft.metadata.attributes.map((attribute) => {
+                    {nft.metadata.attributes.map((attribute, idx) => {
                       const values = Object.values(attribute);
 
                       return (
                         <div
                           className="grid grid-cols-2 xl:w-2/3 2xl:w-2/5"
-                          key={values[0]}
+                          key={idx} // must use idx as there can be duplicate attribute keys and values
                         >
                           <span>{values[0]}:</span>
                           <span>{values[1]}</span>

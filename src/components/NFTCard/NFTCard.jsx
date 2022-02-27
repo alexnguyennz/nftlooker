@@ -122,18 +122,24 @@ export function NFTCard(props) {
           className={`mt-auto overflow-hidden rounded-lg shadow-md  transition-all hover:-translate-y-2 ${colorModeBg}`}
         >
           <div className="wrapper relative">
-            <div className="absolute right-0 m-3">
-              <Tooltip label="Open original NFT link" openDelay={750} hasArrow>
-                <a
-                  href={nft.metadata.original_image}
-                  target="_blank"
-                  rel="noreferrer noopener nofollow"
-                  className="z-0"
+            {nft.metadata.original_image && (
+              <div className="absolute right-0 m-3">
+                <Tooltip
+                  label="Open original NFT link"
+                  openDelay={750}
+                  hasArrow
                 >
-                  <ExternalLinkIcon color="gray.600" boxSize={5} />
-                </a>
-              </Tooltip>
-            </div>
+                  <a
+                    href={nft.metadata.original_image}
+                    target="_blank"
+                    rel="noreferrer noopener nofollow"
+                    className="z-0"
+                  >
+                    <ExternalLinkIcon color="gray.600" boxSize={5} />
+                  </a>
+                </Tooltip>
+              </div>
+            )}
             {nft.metadata && (
               <NFTImage collection={collection} nft={nft} chain={chain} />
             )}

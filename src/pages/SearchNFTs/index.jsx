@@ -6,17 +6,7 @@ import { useLocation, useParams } from 'react-router-dom';
 import axios from 'axios';
 
 import { NFTCollection } from '../../components/NFTCollection/NFTCollection';
-import { NFTCard } from '../../components/NFTCard/NFTCard';
-
-// Chakra
-
 import { Tabs, TabList, TabPanels, Tab, TabPanel } from '@chakra-ui/react';
-import { PhoneIcon } from '@chakra-ui/icons';
-
-import { useToast } from '@chakra-ui/react';
-
-import TabsMUI from '@mui/material/Tabs';
-import TabMUI from '@mui/material/Tab';
 
 import {
   Ethereum,
@@ -26,118 +16,23 @@ import {
   Fantom,
 } from '../../components/ChainIcons';
 
+import { useToast } from '@chakra-ui/react';
+
+import TabsMUI from '@mui/material/Tabs';
+import TabMUI from '@mui/material/Tab';
+
 // UTILS
 import profilerCallback from '../../utils/profilerCallback';
 import toast from '../../components/Toast/Toast';
 
-export function UserNFTs(props) {
-  // States
-
+export function SearchNFTs(props) {
   const [noNfts, setNoNfts] = useState('');
 
   const [loaded, setLoaded] = useState(false);
 
   const [chainTab, setChainTab] = useState(1);
 
-  const [testCollections, setTestCollections] = useState({
-    eth: {
-      name: 'Ethereum',
-      loaded: false,
-      data: {},
-      count: 0,
-      order: 0,
-      testnet: false,
-    },
-    matic: {
-      name: 'Polygon',
-      loaded: false,
-      data: {},
-      count: 0,
-      order: 1,
-      testnet: false,
-    },
-    binance: {
-      name: 'Binance',
-      loaded: false,
-      data: {},
-      count: 0,
-      order: 2,
-      testnet: false,
-    },
-    avalanche: {
-      name: 'Avalanche',
-      loaded: false,
-      data: {},
-      count: 0,
-      order: 3,
-      testnet: false,
-    },
-    fantom: {
-      name: 'Fantom',
-      loaded: false,
-      data: {},
-      count: 0,
-      order: 4,
-      testnet: false,
-    },
-    ropsten: {
-      name: 'Ropsten', // ETH
-      loaded: false,
-      data: {},
-      count: 0,
-      order: 5,
-      testnet: true,
-    },
-    rinkeby: {
-      name: 'Rinkeby', // ETH
-      loaded: false,
-      data: {},
-      count: 0,
-      order: 6,
-      testnet: true,
-    },
-    goerli: {
-      name: 'Goerli', // ETH
-      loaded: false,
-      data: {},
-      count: 0,
-      order: 7,
-      testnet: true,
-    },
-    kovan: {
-      name: 'Kovan', // ETH
-      loaded: false,
-      data: {},
-      count: 0,
-      order: 8,
-      testnet: true,
-    },
-    mumbai: {
-      name: 'Mumbai', // MATIC
-      loaded: false,
-      data: {},
-      count: 0,
-      order: 9,
-      testnet: true,
-    },
-    '0x61': {
-      name: 'Testnet', // BSC
-      loaded: false,
-      data: {},
-      count: 0,
-      order: 10,
-      testnet: true,
-    },
-
-    '0xa869': {
-      name: 'Fuji', // AVAX
-      loaded: false,
-      data: {},
-      count: 0,
-      order: 11,
-      testnet: true,
-    },
-  });
+  const [apiLimit, setApiLimit] = useState(15);
 
   const [allCollections, setAllCollections] = useState({
     eth: {
@@ -230,11 +125,11 @@ export function UserNFTs(props) {
     },
   });
 
-  const toastInstance = useToast();
-
   // React Router
   let location = useLocation();
   let params = useParams();
+
+  const toastInstance = useToast();
 
   const abortController = new AbortController();
 
@@ -254,11 +149,11 @@ export function UserNFTs(props) {
 
   // set address using address param
   useEffect(() => {
-    if (params.walletAddress) {
+    if (params.q) {
       getData();
     }
 
-    document.title = `nft looker. ${params.walletAddress}`;
+    document.title = `nft looker. ${params.q}`;
   }, [location]);
 
   useEffect(() => {
@@ -290,9 +185,12 @@ export function UserNFTs(props) {
 
   async function fetchTestnetNfts(chain) {
     await axios
-      .get(`/api/nfts?chain=${chain}&address=${params.walletAddress}`, {
-        signal: abortController.signal,
-      })
+      .get(
+        `/api/search?chain=${chain}&q=${params.q}&filter=global&limit=${apiLimit}`,
+        {
+          signal: abortController.signal,
+        }
+      )
       .then((response) => {
         const data = response.data;
 
@@ -336,9 +234,12 @@ export function UserNFTs(props) {
 
   async function fetchNfts(chain) {
     await axios
-      .get(`/api/nfts?chain=${chain}&address=${params.walletAddress}`, {
-        signal: abortController.signal,
-      })
+      .get(
+        `/api/search?chain=${chain}&q=${params.q}&filter=global&limit=${apiLimit}`,
+        {
+          signal: abortController.signal,
+        }
+      )
       .then((response) => {
         const data = response.data;
 
@@ -379,45 +280,6 @@ export function UserNFTs(props) {
         }
       });
   }
-
-  /*
-  async function getAllData() {
-    // reset loading states
-    props.onLoading(true);
-    setTestnetsLoaded(false);
-
-    let promises = [];
-
-    if (props.testnets) {
-      promises = [
-        fetchNfts('eth'),
-        fetchNfts('matic'),
-        fetchNfts('binance'),
-        fetchNfts('avalanche'),
-        fetchNfts('fantom'),
-        fetchTestnetNfts('ropsten'),
-        fetchTestnetNfts('rinkeby'),
-        fetchTestnetNfts('goerli'),
-        fetchTestnetNfts('kovan'),
-        fetchTestnetNfts('0x61'),
-        fetchTestnetNfts('mumbai'),
-        fetchTestnetNfts('0xa869'),
-      ];
-    } else {
-      promises = [
-        fetchNfts('eth'),
-        fetchNfts('matic'),
-        fetchNfts('binance'),
-        fetchNfts('avalanche'),
-        fetchNfts('fantom'),
-      ];
-    }
-
-    Promise.all(promises).then(() => {
-      props.onLoading(false);
-      setTestnetsLoaded(true);
-    });
-  }*/
 
   async function getData() {
     // reset loading states
@@ -624,43 +486,4 @@ export function UserNFTs(props) {
       )}
     </>
   );
-}
-
-{
-  /* testnetsLoaded && !noNfts && (
-        <Tabs
-          index={testnetChainTab}
-          onChange={(index) => setTestnetChainTab(index)}
-          align="center"
-          variant="solid-rounded" // variant="enclosed"
-          colorScheme="blue"
-          isLazy="true"
-          lazyBehavior="true"
-        >
-          <TabList>
-            {Object.keys(testnetCollections).map((chain, idx) => (
-              <TestnetChainTab chain={chain} key={idx} index={idx} />
-            ))}
-          </TabList>
-
-          <TabPanels>
-            {Object.keys(testnetCollections).map((chain, idx) => (
-              <TabPanel value={idx} key={chain}>
-                <RenderTestnetData chain={chain} />
-              </TabPanel>
-            ))}
-          </TabPanels>
-        </Tabs>
-      )}
-      {noNfts && (
-        <p className="mt-10 font-bold text-2xl text-center ">
-          No NFTs found :(
-          <img
-            src="/img/sad.png"
-            alt="sad Moogle art"
-            className="mx-auto mt-10"
-            width="450"
-          />
-        </p>
-          ) */
 }

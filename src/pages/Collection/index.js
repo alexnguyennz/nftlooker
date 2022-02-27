@@ -70,7 +70,7 @@ export function Collection(props) {
   const [chainExplorer, setChainExplorer] = useState('etherscan.io');
   const [chainName, setChainName] = useState('');
 
-  const items = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+  const [loaded, setLoaded] = useState(false);
 
   // React Router
   let location = useLocation();
@@ -89,8 +89,14 @@ export function Collection(props) {
     }
   }, [address]);
 
+  useEffect(() => {
+    console.log('loaded', loaded);
+    console.log('metadata', collectionMetadata);
+  }, [loaded]);
+
   async function getData() {
     props.onLoading(true);
+    setLoaded(false);
 
     let response = await axios
       .get(`/api/collection/metadata?chain=${chain}&address=${address}`)
@@ -98,13 +104,14 @@ export function Collection(props) {
 
     setCollection(response.data);
 
-    // Get 5 latest NFTs
+    // Get latest NFTs
     response = await axios
-      .get(`/api/collection/nfts?chain=${chain}&address=${address}&limit=10`) // limit=5
+      .get(`/api/collection/nfts?chain=${chain}&address=${address}&limit=50`)
       .catch((err) => console.log(err));
 
     setcollectionMetadata(response.data);
     props.onLoading(false);
+    setLoaded(true);
   }
 
   function handleChainInfo(chain) {
@@ -168,7 +175,6 @@ export function Collection(props) {
     useEffect(() => {
       // Fetch items from another resources.
       const endOffset = itemOffset + itemsPerPage;
-      console.log(`Loading items from ${itemOffset} to ${endOffset}`);
       setCurrentItems(items.slice(itemOffset, endOffset));
       setPageCount(Math.ceil(items.length / itemsPerPage));
     }, [itemOffset, itemsPerPage]);
@@ -176,9 +182,6 @@ export function Collection(props) {
     // Invoke when user click to request another page.
     const handlePageClick = (event) => {
       const newOffset = (event.selected * itemsPerPage) % items.length;
-      console.log(
-        `User requested page number ${event.selected}, which is offset ${newOffset}`
-      );
       setItemOffset(newOffset);
     };
 
@@ -211,7 +214,7 @@ export function Collection(props) {
 
   return (
     <div className="space-y-10">
-      {!props.loading && collection && (
+      {loaded && collection && (
         <section className="grid grid-cols 1 md:grid-cols-2 gap-5">
           <div className="mx-auto w-full md:w-3/4">
             {collectionMetadata && (
@@ -256,9 +259,17 @@ export function Collection(props) {
         </section>
       )}
       {collectionMetadata && (
-        <section>
-          <h2 className="mb-1 text-4xl text-center font-bold">Latest NFTs</h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-10">
+        <section>{loaded && <PaginatedItems itemsPerPage={5} />}</section>
+      )}
+    </div>
+  );
+}
+
+{
+  /*<h2 className="mb-1 text-4xl text-center font-bold">Latest NFTs</h2>*/
+}
+{
+  /*<div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-10">
             {collectionMetadata &&
               collectionMetadata.map((nft) => (
                 <NFTCard
@@ -268,10 +279,5 @@ export function Collection(props) {
                   chain={chain}
                 />
               ))}
-          </div>
-          {collectionMetadata && <PaginatedItems itemsPerPage={5} />}
-        </section>
-      )}
-    </div>
-  );
+              </div>*/
 }
