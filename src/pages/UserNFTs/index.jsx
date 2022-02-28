@@ -5,6 +5,14 @@ import { useLocation, useParams } from 'react-router-dom';
 
 import axios from 'axios';
 
+// Redux
+import { useSelector, useDispatch } from 'react-redux';
+import { isLoading, isNotLoading } from '../../state/loading/loadingSlice';
+import {
+  toggleTestnets,
+  testnetsState,
+} from '../../state/testnets/testnetsSlice';
+
 import { NFTCollection } from '../../components/NFTCollection/NFTCollection';
 import { NFTCard } from '../../components/NFTCard/NFTCard';
 
@@ -31,13 +39,16 @@ import profilerCallback from '../../utils/profilerCallback';
 import toast from '../../components/Toast/Toast';
 
 export function UserNFTs(props) {
+  const dispatch = useDispatch();
+  const testnets = useSelector(testnetsState);
+
   // States
 
   const [noNfts, setNoNfts] = useState('');
 
   const [loaded, setLoaded] = useState(false);
 
-  const [chainTab, setChainTab] = useState(1);
+  const [chainTab, setChainTab] = useState(0);
 
   const [testCollections, setTestCollections] = useState({
     eth: {
@@ -247,8 +258,6 @@ export function UserNFTs(props) {
       abortController.abort();
 
       cancelRequests();
-
-      props.onLoading(false);
     };
   }, []);
 
@@ -264,7 +273,7 @@ export function UserNFTs(props) {
   useEffect(() => {
     // if loaded is true (all NFT data has been set in state), find out if there are any NFTs or not
     if (loaded) {
-      if (props.testnets) {
+      if (testnets) {
         const noNfts =
           Object.values(allCollections).every(
             (collection) => collection.count == 0
@@ -421,14 +430,14 @@ export function UserNFTs(props) {
 
   async function getData() {
     // reset loading states
-    props.onLoading(true);
+    dispatch(isLoading());
     setLoaded(false);
 
     console.log('getData');
 
     let promises;
 
-    if (props.testnets) {
+    if (testnets) {
       promises = [
         fetchNfts('eth'),
         fetchNfts('matic'),
@@ -455,7 +464,7 @@ export function UserNFTs(props) {
 
     Promise.all(promises)
       .then(() => {
-        props.onLoading(false);
+        dispatch(isNotLoading());
         setLoaded(true);
       })
       .catch((err) => {
@@ -526,7 +535,6 @@ export function UserNFTs(props) {
 
     return (
       <Tab
-        onChange={() => setChainTab(idx)}
         title={
           !collections[chain].count
             ? 'No NFTs found.'
@@ -571,7 +579,7 @@ export function UserNFTs(props) {
           </TabList>
         )}
 
-        {props.testnets && loaded && !noNfts && (
+        {testnets && loaded && !noNfts && (
           <TabList
             sx={{
               scrollbarWidth: '40px',
@@ -600,7 +608,7 @@ export function UserNFTs(props) {
               </TabPanel>
             ))}
 
-          {props.testnets &&
+          {testnets &&
             loaded &&
             !noNfts &&
             Object.keys(testnetCollections).map((chain, idx) => (

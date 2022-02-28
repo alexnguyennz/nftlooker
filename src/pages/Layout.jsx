@@ -9,6 +9,22 @@ import {
   useLocation,
 } from 'react-router-dom';
 
+// Redux
+import { useSelector, useDispatch } from 'react-redux';
+import {
+  isLoading,
+  isNotLoading,
+  loadingState,
+} from '../state/loading/loadingSlice';
+import { toggleTestnets, testnetsState } from '../state/testnets/testnetsSlice';
+import {
+  changeLimit,
+  changeFilter,
+  searchLimitState,
+  searchFilterState,
+} from '../state/search/searchSlice';
+import { changeTab, tabState } from '../state/tab/tabSlice';
+
 // Ethers
 import { ethers } from 'ethers';
 
@@ -76,7 +92,10 @@ import {
 import ellipseAddress from '../utils/ellipseAddress';
 import axios from 'axios';
 
+// Tags
 import { TagsInput } from 'react-tag-input-component';
+import ReactTagInput from '@pathofdev/react-tag-input';
+import '@pathofdev/react-tag-input/build/index.css';
 
 // testing address
 const WALLET_ADDRESS = '0x2aea6d8220b61950f30674606faaa01c23465299';
@@ -86,7 +105,8 @@ export function Layout(props) {
   const [walletConnected, setWalletConnected] = useState(false);
   const [walletAddress, setWalletAddress] = useState(null);
 
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(['']);
+  const [tags, setTags] = useState([]);
 
   // Modal
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -100,6 +120,14 @@ export function Layout(props) {
   let location = useLocation();
 
   const fetchController = new AbortController();
+
+  // Redux
+  const loading = useSelector(loadingState);
+  const testnets = useSelector(testnetsState);
+  const searchLimit = useSelector(searchLimitState);
+  const searchFilter = useSelector(searchFilterState);
+  const tab = useSelector(tabState);
+  const dispatch = useDispatch();
 
   // Color Mode
   const { colorMode, toggleColorMode } = useColorMode();
@@ -115,7 +143,7 @@ export function Layout(props) {
   useEffect(() => {
     return () => {
       fetchController.abort();
-      props.onLoading(false);
+      dispatch(isNotLoading());
     };
   }, []);
 
@@ -135,7 +163,7 @@ export function Layout(props) {
   }, []);
 
   async function getRandomWallet() {
-    props.onLoading(true);
+    dispatch(isLoading());
 
     const response = await axios
       .get(`/api/randomWallet`, { signal: fetchController.signal })
@@ -202,7 +230,7 @@ export function Layout(props) {
   }
 
   function handleTestnetsToggle() {
-    props.onSetTestnets(!props.testnets);
+    dispatch(toggleTestnets());
 
     if (address) {
       navigate(`${address}`);
@@ -312,9 +340,9 @@ export function Layout(props) {
                   </FormLabel>
                   <Switch
                     id="testnet"
-                    isChecked={props.testnets}
+                    isChecked={testnets}
                     onChange={handleTestnetsToggle}
-                    isDisabled={props.loading}
+                    isDisabled={loading}
                   />
                 </FormControl>
               </MenuItem>
@@ -447,12 +475,14 @@ export function Layout(props) {
         </h1>
 
         <h2 className="text-xl font-semibold">
-          view NFTs across multiple blockchains.
+          {tab == 0 ? `view NFTs for any wallet.` : `search for any NFT.`}
         </h2>
 
         {/* Type
 "line" | "enclosed" | "enclosed-colored" | "soft-rounded" | "solid-rounded" | "unstyled"*/}
         <Tabs
+          index={tab}
+          onChange={(index) => dispatch(changeTab(index))}
           align="center"
           size="lg"
           variant="soft-rounded"
@@ -461,14 +491,11 @@ export function Layout(props) {
           //backgroundColor={colorModeBody}
         >
           <TabList>
-            <Tab>View</Tab>
-            <Tab>Search</Tab>
+            <Tab>view</Tab>
+            <Tab>search</Tab>
           </TabList>
           <TabPanels>
             <TabPanel>
-              <h3 className="text-lg font-semibold">
-                view a wallet{`'`}s NFTs
-              </h3>
               <form
                 onSubmit={handleSubmit}
                 className="space-y-3 mx-auto text-center lg:w-1/2"
@@ -479,14 +506,14 @@ export function Layout(props) {
                   onChange={(e) => setAddress(e.currentTarget.value)}
                   size="lg"
                   autoFocus
-                  isDisabled={props.loading || props.randomLoading}
+                  isDisabled={loading}
                   backgroundColor={colorModeBg}
                 />
 
                 <div className="space-x-5">
                   <Button
                     type="submit"
-                    isLoading={props.loading}
+                    isLoading={loading}
                     size="lg"
                     loadingText="Loading"
                     spinnerPlacement="end"
@@ -496,10 +523,11 @@ export function Layout(props) {
                   >
                     view
                   </Button>
-                  {!props.loading && (
+
+                  {!loading && (
                     <Button
                       onClick={getRandomWallet}
-                      isLoading={props.loading}
+                      isLoading={loading}
                       size="lg"
                       loadingText="Loading"
                       spinnerPlacement="end"
@@ -521,10 +549,6 @@ export function Layout(props) {
               </form>
             </TabPanel>
             <TabPanel>
-              <h3 className="text-lg font-semibold">
-                search for NFTs with keywords
-              </h3>
-
               <form
                 //onSubmit={handleSearch}
                 onSubmit={handleSearch}
@@ -539,15 +563,13 @@ export function Layout(props) {
                     placeHolder="Enter keywords"
                   />
                   </div>*/}
-                <div className="flex items-center space-x-3">
-                  <Input
+                {/*<div className="flex items-center space-x-3">
+                  <ReactTagInput
+                    tags={tags}
+                    onChange={(newTags) => setTags(newTags)}
                     placeholder="Enter keywords"
-                    value={search}
-                    onChange={(e) => setSearch(e.currentTarget.value)}
-                    size="lg"
-                    autoFocus
-                    isDisabled={props.loading || props.randomLoading}
-                    backgroundColor={colorModeBg}
+                    removeOnBackspace="yes"
+                    maxTags={10}
                   />
                   <Box>
                     <Menu
@@ -562,6 +584,7 @@ export function Layout(props) {
                         icon={<SettingsIcon />}
                         padding="18px"
                         paddingY="24px"
+                        //colorScheme="pink"
                       />
                       <MenuList minWidth="120px" className="p-3">
                         <MenuOptionGroup
@@ -582,12 +605,78 @@ export function Layout(props) {
                       </MenuList>
                     </Menu>
                   </Box>
+                </div>*/}
+
+                <div className="flex items-center space-x-3">
+                  <Input
+                    placeholder="Enter keywords"
+                    value={search}
+                    onChange={(e) => setSearch(e.currentTarget.value)}
+                    size="lg"
+                    autoFocus
+                    isDisabled={loading}
+                    backgroundColor={colorModeBg}
+                  />
+                  <Box>
+                    <Menu
+                      closeOnSelect={false}
+                      isLazy
+                      lazyBehavior
+                      padding="50px"
+                    >
+                      <MenuButton
+                        as={IconButton}
+                        aria-label="Options"
+                        icon={<SettingsIcon />}
+                        padding="18px"
+                        paddingY="24px"
+                        //colorScheme="pink"
+                      />
+                      <MenuList minWidth="120px" className="p-3">
+                        <MenuOptionGroup
+                          title="Limit"
+                          className="text-left"
+                          marginLeft="0"
+                        >
+                          <Select
+                            defaultValue={searchLimit}
+                            onChange={(e) =>
+                              dispatch(changeLimit(e.currentTarget.value))
+                            }
+                          >
+                            <option value="5">5</option>
+                            <option value="10">10</option>
+                            <option value="25">25</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                          </Select>
+                        </MenuOptionGroup>
+                        <MenuOptionGroup
+                          title="Filter"
+                          className="text-left"
+                          marginLeft="0"
+                        >
+                          <Select
+                            defaultValue={searchFilter}
+                            onChange={(e) =>
+                              dispatch(changeFilter(e.currentTarget.value))
+                            }
+                          >
+                            <option value="global">All</option>
+                            <option value="name">Name</option>
+                            <option value="description">Description</option>
+                            <option value="attributes">Attributes</option>
+                          </Select>
+                        </MenuOptionGroup>
+                      </MenuList>
+                    </Menu>
+                  </Box>
                 </div>
 
                 <div className="space-x-5">
                   <Button
                     type="submit"
-                    isLoading={props.loading}
+                    isLoading={loading}
                     size="lg"
                     loadingText="Loading"
                     spinnerPlacement="end"

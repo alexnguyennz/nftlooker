@@ -8,10 +8,12 @@ Tools:
 
 - React - frontend
 - Express.js - web server/framework
+- Redux - state management
 - TailwindCSS - CSS framework
 - Moralis API - NFT data
 - Chakra UI - React components
-- Cloudinary API - image transformation/optimisation
+- Cloudinary API - image transformation & optimisation
+- ImageKit API - image transformation & optimisation
 - pm2 - Node.js process manager
 - node-spdy - HTTP/2 support
 

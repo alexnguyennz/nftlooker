@@ -158,27 +158,46 @@ model-viewer {
     --chakra-colors-blue-600: #2b6cb0;
 */
 
-.search-box {
+.react-tag-input {
   width: 100%;
   min-width: 0px;
-  outline: 2px solid transparent;
-  outline-offset: 2px;
-  position: relative;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  -ms-appearance: none;
+  outline: 2px solid transparent !important;
+  outline-offset: 2px !important;
+  position: relative !important;
   appearance: none;
-  transition-property: var(--chakra-transition-property-common);
-  transition-duration: var(--chakra-transition-duration-normal);
-  font-size: var(--chakra-fontSizes-lg);
-  -webkit-padding-start: var(--chakra-space-4);
-  padding-inline-start: var(--chakra-space-4);
-  -webkit-padding-end: var(--chakra-space-4);
-  padding-inline-end: var(--chakra-space-4);
-  height: var(--chakra-sizes-12);
-  border-radius: var(--chakra-radii-md);
+  transition-property: var(--chakra-transition-property-common) !important;
+  transition-duration: var(--chakra-transition-duration-normal) !important;
+  font-size: var(--chakra-fontSizes-lg) !important;
+  -webkit-padding-start: var(--chakra-space-4) !important;
+  padding-inline-start: var(--chakra-space-4) !important;
+  padding-left: 9px !important;
+  padding-top: 6px !important;
+  padding-bottom: 6px !important;
+  -webkit-padding-end: var(--chakra-space-4) !important;
+  padding-inline-end: var(--chakra-space-4) !important;
+
+  /* padding-top: 3px !important;
+  padding-bottom: 3px !important; */
+  border-radius: var(--chakra-radii-md) !important;
   border: 1px solid;
   border-color: inherit;
   background: inherit;
-  background-color: var(--chakra-colors-white);
+  background-color: var(--chakra-colors-white) !important;
+}
+
+.react-tag-input:focus,
+.react-tag-input[data-focus] {
+  z-index: 1 !important;
+  border-color: #3182ce !important;
+  box-shadow: 0 0 0 1px #3182ce !important;
+}
+
+.react-tag-input__tag,
+.react-tag-input__tag__content,
+.react-tag-input__tag__remove {
+  background-color: #e2e8f0 !important;
+}
+
+.react-tag-input__tag__content {
+  margin-bottom: 2px;
 }

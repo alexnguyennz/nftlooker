@@ -2,6 +2,10 @@ import { useEffect, useState } from 'react';
 
 import { Link, useNavigate, useLocation, useParams } from 'react-router-dom';
 
+// Redux
+import { useDispatch } from 'react-redux';
+import { isLoading, isNotLoading } from '../../state/loading/loadingSlice';
+
 import axios from 'axios';
 
 import { useToast, Button } from '@chakra-ui/react';
@@ -35,6 +39,8 @@ import truncateAddress from '../../utils/ellipseAddress';
 const mime = require('mime-types');
 
 export function NFT(props) {
+  const dispatch = useDispatch();
+  // states
   const [address, setAddress] = useState('');
 
   const [loaded, setLoaded] = useState(false);
@@ -94,14 +100,15 @@ export function NFT(props) {
   }, [loaded]);
 
   async function getData() {
-    props.onLoading(true);
+    dispatch(isLoading());
+    setLoaded(false);
 
     try {
       await axios(
         `/api/nft?chain=${chain}&address=${address}&tokenId=${tokenId}`
       ).then((response) => {
         setNft(response.data);
-        props.onLoading(false);
+        dispatch(isNotLoading());
         setLoaded(true);
       });
     } catch (err) {
@@ -284,19 +291,20 @@ export function NFT(props) {
                   ATTRIBUTES
                   <br />
                   <div className="text-2xl">
-                    {nft.metadata.attributes.map((attribute, idx) => {
-                      const values = Object.values(attribute);
+                    {nft.metadata.attributes &&
+                      nft.metadata.attributes.map((attribute, idx) => {
+                        const values = Object.values(attribute);
 
-                      return (
-                        <div
-                          className="grid grid-cols-2 xl:w-2/3 2xl:w-2/5"
-                          key={idx} // must use idx as there can be duplicate attribute keys and values
-                        >
-                          <span>{values[0]}:</span>
-                          <span>{values[1]}</span>
-                        </div>
-                      );
-                    })}
+                        return (
+                          <div
+                            className="grid grid-cols-2 xl:w-2/3 2xl:w-2/5"
+                            key={idx} // must use idx as there can be duplicate attribute keys and values
+                          >
+                            <span>{values[0]}:</span>
+                            <span>{values[1]}</span>
+                          </div>
+                        );
+                      })}
                   </div>
                 </div>
               )}

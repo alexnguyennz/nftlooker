@@ -3,6 +3,10 @@ import { useEffect, useState } from 'react';
 // React Router
 import { Link, useLocation, useParams } from 'react-router-dom';
 
+// Redux
+import { useDispatch } from 'react-redux';
+import { isLoading, isNotLoading } from '../../state/loading/loadingSlice';
+
 import axios from 'axios';
 
 import { Divider } from '@chakra-ui/react';
@@ -59,6 +63,8 @@ function NFTImage(props) {
 }
 
 export function Collection(props) {
+  const dispatch = useDispatch();
+
   // States
   const [address, setAddress] = useState('');
 
@@ -95,7 +101,7 @@ export function Collection(props) {
   }, [loaded]);
 
   async function getData() {
-    props.onLoading(true);
+    dispatch(isLoading());
     setLoaded(false);
 
     let response = await axios
@@ -110,7 +116,7 @@ export function Collection(props) {
       .catch((err) => console.log(err));
 
     setcollectionMetadata(response.data);
-    props.onLoading(false);
+    dispatch(isNotLoading());
     setLoaded(true);
   }
 

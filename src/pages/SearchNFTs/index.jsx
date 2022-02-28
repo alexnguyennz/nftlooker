@@ -3,6 +3,15 @@ import React, { useEffect, useState, Profiler } from 'react';
 // React Router
 import { useLocation, useParams } from 'react-router-dom';
 
+// Redux
+import { useSelector, useDispatch } from 'react-redux';
+import { isLoading, isNotLoading } from '../../state/loading/loadingSlice';
+import {
+  searchLimitState,
+  searchFilterState,
+} from '../../state/search/searchSlice';
+import { changeTab } from '../../state/tab/tabSlice';
+
 import axios from 'axios';
 
 import { NFTCollection } from '../../components/NFTCollection/NFTCollection';
@@ -26,13 +35,18 @@ import profilerCallback from '../../utils/profilerCallback';
 import toast from '../../components/Toast/Toast';
 
 export function SearchNFTs(props) {
+  const dispatch = useDispatch();
+
+  const searchLimit = useSelector(searchLimitState);
+  const searchFilter = useSelector(searchFilterState);
+
+  // state
+
   const [noNfts, setNoNfts] = useState('');
 
   const [loaded, setLoaded] = useState(false);
 
   const [chainTab, setChainTab] = useState(1);
-
-  const [apiLimit, setApiLimit] = useState(15);
 
   const [allCollections, setAllCollections] = useState({
     eth: {
@@ -138,12 +152,14 @@ export function SearchNFTs(props) {
   }
 
   useEffect(() => {
+    dispatch(changeTab(1));
+
     return () => {
       abortController.abort();
 
       cancelRequests();
 
-      props.onLoading(false);
+      dispatch(isNotLoading());
     };
   }, []);
 
@@ -153,7 +169,7 @@ export function SearchNFTs(props) {
       getData();
     }
 
-    document.title = `nft looker. ${params.q}`;
+    document.title = `nft looker. Search for ${params.q}`;
   }, [location]);
 
   useEffect(() => {
@@ -186,7 +202,7 @@ export function SearchNFTs(props) {
   async function fetchTestnetNfts(chain) {
     await axios
       .get(
-        `/api/search?chain=${chain}&q=${params.q}&filter=global&limit=${apiLimit}`,
+        `/api/search?chain=${chain}&q=${params.q}&filter=${searchFilter}&limit=${searchLimit}`,
         {
           signal: abortController.signal,
         }
@@ -235,7 +251,7 @@ export function SearchNFTs(props) {
   async function fetchNfts(chain) {
     await axios
       .get(
-        `/api/search?chain=${chain}&q=${params.q}&filter=global&limit=${apiLimit}`,
+        `/api/search?chain=${chain}&q=${params.q}&filter=${searchFilter}&limit=${searchLimit}`,
         {
           signal: abortController.signal,
         }
@@ -283,7 +299,7 @@ export function SearchNFTs(props) {
 
   async function getData() {
     // reset loading states
-    props.onLoading(true);
+    dispatch(isLoading());
     setLoaded(false);
 
     console.log('getData');
@@ -317,7 +333,7 @@ export function SearchNFTs(props) {
 
     Promise.all(promises)
       .then(() => {
-        props.onLoading(false);
+        dispatch(isNotLoading());
         setLoaded(true);
       })
       .catch((err) => {
