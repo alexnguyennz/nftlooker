@@ -23,6 +23,7 @@
     "encoding": "^0.1.13",
     "ethers": "^5.5.4",
     "express": "^4.17.2",
+    "fastify": "^4.0.0-alpha.1",
     "http-proxy-middleware": "^2.0.3",
     "imagekit": "^3.2.5",
     "mime-types": "^2.1.34",

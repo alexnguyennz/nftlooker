@@ -98,10 +98,10 @@ import ReactTagInput from '@pathofdev/react-tag-input';
 import '@pathofdev/react-tag-input/build/index.css';
 
 // testing address
-const WALLET_ADDRESS = '0x2aea6d8220b61950f30674606faaa01c23465299';
+//const WALLET_ADDRESS = '0x2aea6d8220b61950f30674606faaa01c23465299';
 
 export function Layout(props) {
-  const [address, setAddress] = useState(WALLET_ADDRESS);
+  const [address, setAddress] = useState('');
   const [walletConnected, setWalletConnected] = useState(false);
   const [walletAddress, setWalletAddress] = useState(null);
 
@@ -141,13 +141,6 @@ export function Layout(props) {
   const colorModeInverseBg = useColorModeValue('black', 'white');
 
   useEffect(() => {
-    return () => {
-      fetchController.abort();
-      dispatch(isNotLoading());
-    };
-  }, []);
-
-  useEffect(() => {
     // reset app state if you go to / route
     //console.log('params', location);
     if (location.pathname == '/') {
@@ -157,10 +150,50 @@ export function Layout(props) {
 
   // set the input field to the walletAddress param
   useEffect(() => {
+    web3();
+
     if (params.walletAddress) {
       setAddress(params.walletAddress);
     }
+
+    return () => {
+      fetchController.abort();
+      dispatch(isNotLoading());
+    };
   }, []);
+
+  useEffect(() => {
+    if (window.ethereum) {
+      window.ethereum.on('accountsChanged', (accounts) => {
+        if (accounts.length > 0) {
+          console.log('change');
+          //const accounts = await ethereum.request({ method: "eth_accounts" });
+        } else {
+          // setWallet("");
+          console.log('change');
+          // setStatus("🦊 Connect to Metamask using the top right button.");
+        }
+      });
+    }
+  }, []);
+
+  // detect account change
+  async function web3() {
+    if (ethereum) {
+      // persist connect state
+      if (localStorage.getItem('WEB3_CONNECTED')) {
+        connectWallet();
+      }
+
+      ethereum.on('accountsChanged', async (accounts) => {
+        if (accounts.length > 0) {
+          connectWallet();
+        } else {
+          disconnectWallet();
+        }
+      });
+    }
+  }
 
   async function getRandomWallet() {
     dispatch(isLoading());
@@ -184,6 +217,9 @@ export function Layout(props) {
         setWalletAddress(account[0]);
         setWalletConnected(true);
 
+        // persist connect state
+        localStorage.setItem('WEB3_CONNECTED', true);
+
         // manually get data for NFTs
         setAddress(account[0]);
 
@@ -202,6 +238,9 @@ export function Layout(props) {
       provider = null;
       setWalletAddress('');
       setWalletConnected(false);
+
+      // persist connect state
+      localStorage.removeItem('WEB3_CONNECTED');
 
       // reset app state
       setAddress('');
@@ -232,9 +271,9 @@ export function Layout(props) {
   function handleTestnetsToggle() {
     dispatch(toggleTestnets());
 
-    if (address) {
-      navigate(`${address}`);
-    }
+    console.log(location.pathname);
+
+    navigate(location.pathname);
   }
 
   return (
@@ -297,17 +336,11 @@ export function Layout(props) {
           </Button>
         ) : (
           <>
-            <Button
-              onClick={() =>
-                navigate(`/${walletAddress}`, {
-                  state: { address: walletAddress },
-                })
-              }
-            >
-              Portfolio
+            <Button onClick={() => navigate(`/${walletAddress}`)}>
+              portfolio
             </Button>
             <Button colorScheme="red" onClick={disconnectWallet}>
-              Disconnect
+              disconnect
             </Button>
           </>
         )}
@@ -356,7 +389,7 @@ export function Layout(props) {
         </button>
 
         <Modal size="xl" onClose={onClose} isOpen={isOpen} isCentered>
-          <ModalOverlay />
+          <ModalOverlay overflowY="scroll" /> {/* force scrollbar */}
           <ModalContent className="mx-5">
             <ModalHeader></ModalHeader>
             <ModalCloseButton />

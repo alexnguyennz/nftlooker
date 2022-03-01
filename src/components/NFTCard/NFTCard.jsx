@@ -41,7 +41,7 @@ function NFTImage(props) {
 
   //getContentType(image).then((response) => (type = response));
 
-  console.log('mime', mimeType);
+  //console.log('mime', mimeType);
 
   switch (mimeType) {
     case 'image/gif':

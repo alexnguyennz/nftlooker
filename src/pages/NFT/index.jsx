@@ -3,372 +3,168 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate, useLocation, useParams } from 'react-router-dom';
 
 // Redux
-import { useDispatch } from 'react-redux';
-import { isLoading, isNotLoading } from '../../state/loading/loadingSlice';
-
-import axios from 'axios';
-
-import { useToast, Button } from '@chakra-ui/react';
-
-import { ArrowBackIcon } from '@chakra-ui/icons';
-
-import ModelViewer from '@google/model-viewer'; // 3D models
-
-import { useColorMode, useColorModeValue } from '@chakra-ui/react';
-
+import { useDispatch, useSelector } from 'react-redux';
 import {
-  Table,
-  Thead,
-  Tbody,
-  Tfoot,
-  Tr,
-  Th,
-  Td,
-  TableCaption,
-} from '@chakra-ui/react';
+  viewIsLoading,
+  viewIsNotLoading,
+  loadingState,
+} from '../../state/loading/loadingSlice';
 
-import { ExternalLinkIcon } from '@chakra-ui/icons';
+// React Query
+import axios from 'axios';
+import { useQuery } from 'react-query';
 
-import toast from '../../components/Toast/Toast';
+// Chakra UI
+import { ArrowBackIcon, ExternalLinkIcon } from '@chakra-ui/icons';
 
+// ModelViewer
+import ModelViewer from '@google/model-viewer'; // don't think I need this
+
+// Components
+import NFTImage from '../../components/NFTImage/NFTImage';
+
+// UTILS
 import truncateAddress from '../../utils/ellipseAddress';
+import chainExplorer from '../../utils/chainExplorer';
 
-// IPFS EXAMPLE
-// http://localhost:3000/collection/0x2953399124f0cbb46d2cbacd8a89cf0599974963/nft/51457428668762326190474255981562178405831810566835418606623410388040178204673
+export function NFT() {
+  const params = useParams(); // React Router
+  const dispatch = useDispatch(); // React Redux
 
-const mime = require('mime-types');
-
-export function NFT(props) {
-  const dispatch = useDispatch();
-  // states
-  const [address, setAddress] = useState('');
-
-  const [loaded, setLoaded] = useState(false);
-
-  const [chain, setChain] = useState('');
-
-  const [tokenId, setTokenId] = useState('');
-  const [nft, setNft] = useState();
-
-  const [chainExplorer, setChainExplorer] = useState('etherscan.io');
-
-  const toastInstance = useToast();
-
-  const colorModeBg = useColorModeValue('white', '#1f2937');
-
-  let nftElem;
-
-  // React Router
-  let location = useLocation();
-  let params = useParams();
-  let navigate = useNavigate();
-
-  useEffect(() => {
-    setChain(params.chain);
-    setAddress(params.contractAddress);
-    setTokenId(params.tokenId);
-
-    handleChainInfo(params.chain);
-  }, [location]);
-
-  useEffect(() => {
-    if (address && tokenId) {
-      getData();
-    }
-  }, [address]);
-
-  useEffect(() => {
-    console.log(nft);
-  }, [nft]);
-
-  useEffect(() => {
-    if (loaded) {
-      const nftElemTest = document.querySelector('img');
-
-      nftElem = nftElemTest;
-
-      console.log('elem', nftElemTest);
-
-      try {
-        if (nftElemTest.complete) {
-          console.log('img loaded');
-        }
-      } catch (err) {
-        console.log(err);
-      }
-    }
-  }, [loaded]);
-
-  async function getData() {
-    dispatch(isLoading());
-    setLoaded(false);
-
-    try {
-      await axios(
-        `/api/nft?chain=${chain}&address=${address}&tokenId=${tokenId}`
-      ).then((response) => {
-        setNft(response.data);
-        dispatch(isNotLoading());
-        setLoaded(true);
-      });
-    } catch (err) {
-      console.log(err);
-    }
-  }
-
-  function fullScreen() {
-    const elem = document.querySelector('model-viewer');
-
-    if (!document.fullscreenElement) {
-      elem.requestFullscreen().catch((err) => {
-        toast(
-          toastInstance,
-          'error',
-          'Error attempting to enter fullscreen mode.',
-          `${err}`
-        );
-      });
-    } else {
-      document.exitFullscreen();
-    }
-  }
-
-  // filter based on MIME type
-  function NFTImage(props) {
-    const nft = props.nft;
-    const image = props.image;
-    const mimeType = mime.lookup(image);
-
-    function pip() {
-      const elem = document.querySelector('video');
-
-      elem.requestPictureInPicture();
-    }
-
-    function Video(props) {
-      return (
-        <>
-          <video width="100%" controls autoPlay muted loop>
-            <source src={`${image}`} type={props.mime} />
-          </video>
-
-          {/*<ReactPlayer
-            id="video-player"
-            url={image}
-            width="100%"
-            controls="true"
-            playing="true"
-            muted="true"
-            loop="true"
-            pip="true"
-            stopOnUnmount={false} // continue playing PIP after ReactPlayer unmounts
-            // fallback
-          />*/}
-
-          <div className="mt-3 text-right">
-            <Button onClick={pip} colorScheme="blue">
-              PIP
-            </Button>
-          </div>
-        </>
+  // React Query
+  const { isLoading, error, data } = useQuery(
+    'nftMetadata',
+    async () => {
+      const { data } = await axios(
+        `/api/nft?chain=${params.chain}&address=${params.contractAddress}&tokenId=${params.tokenId}`
       );
-    }
+      return data;
+    },
+    { refetchOnWindowFocus: false }
+  );
 
-    switch (mimeType) {
-      case 'image/gif':
-        return <Video mime="video/mp4" />;
-      case 'video/mp4':
-        return <Video mime="video/mp4" />;
-      case 'video/webm':
-        return <Video mime="video/webm" />;
-      case 'model/gltf-binary':
-        return (
-          <>
-            <model-viewer
-              id="nft-model"
-              bounds="tight"
-              src="/img/membership.glb"
-              ar
-              ar-modes="webxr scene-viewer quick-look"
-              camera-controls
-              environment-image="neutral"
-              poster="poster.webp"
-              shadow-intensity="1"
-              autoplay
-            ></model-viewer>
-            <div className="mt-3 text-right">
-              <Button onClick={fullScreen} colorScheme="blue">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="20"
-                  height="20"
-                  fill={colorModeBg}
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M1 1v6h2V3h4V1H1zm2 12H1v6h6v-2H3v-4zm14 4h-4v2h6v-6h-2v4zm0-16h-4v2h4v4h2V1h-2z"
-                  />
-                </svg>
-              </Button>
-            </div>
-          </>
-        );
-      default:
-        return (
-          <a
-            href={nft.metadata.original_image}
-            target="_blank"
-            rel="noopener noreferrer nofollow"
-          >
-            <img src={image} className="mx-auto w-full" />
-          </a>
-        );
-    }
-  }
+  useEffect(() => {
+    if (data) dispatch(viewIsNotLoading());
+    else dispatch(viewIsLoading());
+  }, [data]);
 
-  function handleChainInfo(chain) {
-    let chainExplorer;
-    let chainName;
-
-    switch (chain) {
-      case 'eth':
-        chainExplorer = 'etherscan.io';
-        chainName = 'Ethereum';
-        break;
-      case 'matic':
-        chainExplorer = 'polygonscan.com';
-        chainName = 'Polygon';
-
-        break;
-      case 'binance':
-        chainExplorer = 'bscscan.com';
-        chainName = 'Binance';
-        break;
-      case 'avalanche':
-        chainExplorer = 'snowtrace.io';
-        chainName = 'Avalanche';
-        break;
-      case 'fantom':
-        chainExplorer = 'ftmscan.com';
-        chainName = 'Fantom';
-        break;
-    }
-
-    setChainExplorer(chainExplorer);
-  }
+  if (isLoading) return null;
+  if (error) return 'An error has occurred: ' + error.message;
 
   return (
     <div className="space-y-10">
-      {nft && !props.loading && (
-        <section className="grid grid-cols 1 md:grid-cols-2 gap-5">
-          <div className="mx-auto w-full md:w-3/4">
-            <NFTImage
-              nft={nft}
-              chain={params.chain}
-              image={nft.metadata && nft.metadata.image}
-            />
-          </div>
-          <div>
-            <h3 className="pb-2 border-b border-gray-500 text-4xl font-bold ">
-              {nft.metadata.name}
-            </h3>
+      <section className="grid grid-cols 1 md:grid-cols-2 gap-5">
+        <div className="mx-auto w-full md:w-3/4">
+          <NFTImage
+            nft={data}
+            chain={params.chain}
+            image={data.metadata && data.metadata.image}
+          />
+        </div>
+        <div>
+          <h3 className="pb-2 border-b border-gray-500 text-4xl font-bold ">
+            {data.metadata.name}
+          </h3>
 
-            <div className="space-y-5">
+          <div className="space-y-5">
+            <div>
+              DESCRIPTION
+              <br />
+              <span className="text-2xl">
+                {data.metadata.description ? (
+                  <>{data.metadata.description}</>
+                ) : (
+                  <>None</>
+                )}
+              </span>
+            </div>
+
+            {data.metadata.attributes && (
               <div>
-                DESCRIPTION
+                ATTRIBUTES
                 <br />
-                <span className="text-2xl">
-                  {nft.metadata.description ? (
-                    <>{nft.metadata.description}</>
-                  ) : (
-                    <>None</>
-                  )}
-                </span>
+                <div className="text-2xl">
+                  {data.metadata.attributes &&
+                    data.metadata.attributes.map((attribute, idx) => {
+                      const values = Object.values(attribute);
+
+                      return (
+                        <div
+                          className="grid grid-cols-2 xl:w-2/3 2xl:w-2/5"
+                          key={idx} // must use idx as there can be duplicate attribute keys and values
+                        >
+                          <span>{values[0]}:</span>
+                          <span>{values[1]}</span>
+                        </div>
+                      );
+                    })}
+                </div>
               </div>
+            )}
 
-              {nft.metadata.attributes && (
-                <div>
-                  ATTRIBUTES
-                  <br />
-                  <div className="text-2xl">
-                    {nft.metadata.attributes &&
-                      nft.metadata.attributes.map((attribute, idx) => {
-                        const values = Object.values(attribute);
-
-                        return (
-                          <div
-                            className="grid grid-cols-2 xl:w-2/3 2xl:w-2/5"
-                            key={idx} // must use idx as there can be duplicate attribute keys and values
-                          >
-                            <span>{values[0]}:</span>
-                            <span>{values[1]}</span>
-                          </div>
-                        );
-                      })}
-                  </div>
-                </div>
-              )}
-
-              {nft.metadata.external_url && (
-                <div>
-                  <ExternalLinkIcon />
-                  <br />
-                  <span className="text-2xl">
-                    <a
-                      href={nft.metadata.external_url}
-                      target="_blank"
-                      rel="noopener noreferrer nofollow"
-                    >
-                      {nft.metadata.external_url}
-                    </a>
-                  </span>
-                </div>
-              )}
-
+            {data.metadata.external_url && (
               <div>
-                OWNER
+                <ExternalLinkIcon />
                 <br />
                 <span className="text-2xl">
                   <a
-                    href={`https://${chainExplorer}/address/${nft.owner_of}`}
+                    href={data.metadata.external_url}
                     target="_blank"
                     rel="noopener noreferrer nofollow"
                   >
-                    {truncateAddress(nft.owner_of)}
+                    {data.metadata.external_url}
                   </a>
                 </span>
               </div>
-              <div>
-                COLLECTION
-                <br />
-                <span className="text-2xl">
-                  <Link to={`/${chain}/collection/${nft.token_address}`}>
-                    <ArrowBackIcon /> {nft.name}
-                  </Link>
-                </span>
-              </div>
-              <div>
-                CONTRACT
-                <br />
-                <span className="text-2xl">
-                  <a
-                    href={`https://polygonscan.com/address/${nft.token_address}`}
-                    target="_blank"
-                    rel="noopener noreferrer nofollow"
-                  >
-                    {truncateAddress(nft.token_address)}
-                  </a>
-                </span>
-              </div>
-              <div>
-                TOKEN ID
-                <br />
-                <span className="text-2xl break-all">{nft.token_id}</span>
-              </div>
+            )}
+
+            <div>
+              OWNER
+              <br />
+              <span className="text-2xl">
+                <a
+                  href={`https://${chainExplorer(params.chain)}/address/${
+                    data.owner_of
+                  }`}
+                  target="_blank"
+                  rel="noopener noreferrer nofollow"
+                >
+                  {truncateAddress(data.owner_of)}
+                </a>
+              </span>
+            </div>
+            <div>
+              COLLECTION
+              <br />
+              <span className="text-2xl">
+                <Link to={`/${params.chain}/collection/${data.token_address}`}>
+                  <ArrowBackIcon /> {data.name}
+                </Link>
+              </span>
+            </div>
+            <div>
+              CONTRACT
+              <br />
+              <span className="text-2xl">
+                <a
+                  href={`https://${chainExplorer(params.chain)}/address/${
+                    data.token_address
+                  }`}
+                  target="_blank"
+                  rel="noopener noreferrer nofollow"
+                >
+                  {truncateAddress(data.token_address)}
+                </a>
+              </span>
+            </div>
+            <div>
+              TOKEN ID
+              <br />
+              <span className="text-2xl break-all">{data.token_id}</span>
             </div>
           </div>
-        </section>
-      )}
+        </div>
+      </section>
     </div>
   );
 }

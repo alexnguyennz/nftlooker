@@ -13,6 +13,9 @@ import {
   testnetsState,
 } from '../../state/testnets/testnetsSlice';
 
+// React Query
+import { useQuery } from 'react-query';
+
 import { NFTCollection } from '../../components/NFTCollection/NFTCollection';
 import { NFTCard } from '../../components/NFTCard/NFTCard';
 
@@ -20,11 +23,8 @@ import { NFTCard } from '../../components/NFTCard/NFTCard';
 
 import { Tabs, TabList, TabPanels, Tab, TabPanel } from '@chakra-ui/react';
 import { PhoneIcon } from '@chakra-ui/icons';
-
+import { Tooltip } from '@chakra-ui/react';
 import { useToast } from '@chakra-ui/react';
-
-import TabsMUI from '@mui/material/Tabs';
-import TabMUI from '@mui/material/Tab';
 
 import {
   Ethereum,
@@ -294,7 +294,7 @@ export function UserNFTs(props) {
   }, [loaded]);
 
   useEffect(() => {
-    console.log(allCollections);
+    //console.log(allCollections);
   }, [allCollections]);
 
   async function fetchTestnetNfts(chain) {
@@ -313,7 +313,9 @@ export function UserNFTs(props) {
         });
 
         // set the chain tab to one that has NFTs
-        if (nftCount > 0) {
+        if (nftCount > 0 && testnetCollections[chain].order < chainTab) {
+          //console.log('setting tab', testnetCollections[chain].order);
+          //console.log('chainTab', chainTab);
           setChainTab(testnetCollections[chain].order);
         }
 
@@ -433,8 +435,6 @@ export function UserNFTs(props) {
     dispatch(isLoading());
     setLoaded(false);
 
-    console.log('getData');
-
     let promises;
 
     if (testnets) {
@@ -534,24 +534,30 @@ export function UserNFTs(props) {
     const disabled = !collections[chain].count;
 
     return (
-      <Tab
-        title={
+      <Tooltip
+        label={
           !collections[chain].count
             ? 'No NFTs found.'
             : `${collections[chain].count} NFTs found.`
         }
-        isDisabled={disabled}
-        value={idx}
-        className={disabled && `css-1ltezim`}
+        aria-label="NFT count tooltip"
+        openDelay={750}
+        shouldWrapChildren
       >
-        <div className="flex flex-col md:flex-row">
-          <span className="md:mr-2 text-center">
-            <ChainIcon />
-          </span>
-          {collections[chain].name}{' '}
-          {collections[chain].count > 0 && `(${collections[chain].count})`}
-        </div>
-      </Tab>
+        <Tab
+          isDisabled={disabled}
+          value={idx}
+          className={disabled && `css-1ltezim`}
+        >
+          <div className="flex flex-col md:flex-row">
+            <span className="md:mr-2 text-center">
+              <ChainIcon />
+            </span>
+            {collections[chain].name}{' '}
+            {collections[chain].count > 0 && `(${collections[chain].count})`}
+          </div>
+        </Tab>
+      </Tooltip>
     );
   }
 
@@ -563,8 +569,8 @@ export function UserNFTs(props) {
         align="center"
         variant="solid-rounded" // variant="enclosed"
         colorScheme="gray"
-        isLazy="true"
-        lazyBehavior="true"
+        isLazy={true}
+        lazyBehavior={true}
       >
         {loaded && !noNfts && (
           <TabList>

@@ -7,6 +7,10 @@ import { useLocation, useParams } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { isLoading, isNotLoading } from '../../state/loading/loadingSlice';
 import {
+  toggleTestnets,
+  testnetsState,
+} from '../../state/testnets/testnetsSlice';
+import {
   searchLimitState,
   searchFilterState,
 } from '../../state/search/searchSlice';
@@ -37,6 +41,7 @@ import toast from '../../components/Toast/Toast';
 export function SearchNFTs(props) {
   const dispatch = useDispatch();
 
+  const testnets = useSelector(testnetsState);
   const searchLimit = useSelector(searchLimitState);
   const searchFilter = useSelector(searchFilterState);
 
@@ -175,7 +180,7 @@ export function SearchNFTs(props) {
   useEffect(() => {
     // if loaded is true (all NFT data has been set in state), find out if there are any NFTs or not
     if (loaded) {
-      if (props.testnets) {
+      if (testnets) {
         const noNfts =
           Object.values(allCollections).every(
             (collection) => collection.count == 0
@@ -196,7 +201,7 @@ export function SearchNFTs(props) {
   }, [loaded]);
 
   useEffect(() => {
-    console.log(allCollections);
+    //console.log(allCollections);
   }, [allCollections]);
 
   async function fetchTestnetNfts(chain) {
@@ -302,11 +307,9 @@ export function SearchNFTs(props) {
     dispatch(isLoading());
     setLoaded(false);
 
-    console.log('getData');
-
     let promises;
 
-    if (props.testnets) {
+    if (testnets) {
       promises = [
         fetchNfts('eth'),
         fetchNfts('matic'),
@@ -433,8 +436,8 @@ export function SearchNFTs(props) {
         align="center"
         variant="solid-rounded" // variant="enclosed"
         colorScheme="gray"
-        isLazy="true"
-        lazyBehavior="true"
+        isLazy={true}
+        lazyBehavior={true}
       >
         {loaded && !noNfts && (
           <TabList>
@@ -449,7 +452,7 @@ export function SearchNFTs(props) {
           </TabList>
         )}
 
-        {props.testnets && loaded && !noNfts && (
+        {testnets && loaded && !noNfts && (
           <TabList
             sx={{
               scrollbarWidth: '40px',
@@ -478,7 +481,7 @@ export function SearchNFTs(props) {
               </TabPanel>
             ))}
 
-          {props.testnets &&
+          {testnets &&
             loaded &&
             !noNfts &&
             Object.keys(testnetCollections).map((chain, idx) => (

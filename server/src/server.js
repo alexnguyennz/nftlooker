@@ -1,56 +1,41 @@
-const spdy = require('spdy');
-const express = require('express');
 const fs = require('fs');
 
-const app = express();
+const router = require('fastify')({
+  // local HTTPS
+  https: {
+    allowHTTP1: true, // fallback support for HTTP1
+    key: fs.readFileSync('cert/server.key'),
+    cert: fs.readFileSync('cert/server.crt'),
+  },
+  logger: true,
+});
 
-const cors = require('cors');
-
-// ROUTE DATA
-const {
-  getNfts,
-  getNft,
-  getCollectionMetadata,
-  getCollectionNfts,
-  getRandomWallet,
-  searchNfts,
-} = require('../src/routes.js');
-
-const corsOptions = {
-  origin: '*',
-  methods: 'GET',
-  optionsSuccessStatus: 200,
-};
-
-app.use(cors(corsOptions));
-
-const router = express.Router();
+// ROUTE METHODS
+const getRandomWallet = require('./routes/getRandomWallet.js');
+const getWalletNfts = require('./routes/getWalletNfts.js');
+const getNft = require('./routes/getNft.js');
+const getCollectionMetadata = require('./routes/getCollectionMetadata.js');
+const getCollectionNfts = require('./routes/getCollectionNfts.js');
+const searchNfts = require('./routes/searchNfts.js');
 
 // API CALLS
-router.get('/nfts', getNfts);
-router.get('/nft', getNft);
-router.get('/collection/metadata', getCollectionMetadata);
-router.get('/collection/nfts', getCollectionNfts);
-router.get('/randomWallet', getRandomWallet);
-router.get('/search', searchNfts);
+router.get('/api/nfts', getWalletNfts);
+router.get('/api/nft', getNft);
+router.get('/api/collection/metadata', getCollectionMetadata);
+router.get('/api/collection/nfts', getCollectionNfts);
+router.get('/api/randomWallet', getRandomWallet);
+router.get('/api/search', searchNfts);
 
-app.use('/api', router);
-
+// run Fastify server
 const PORT = process.env.PORT || 7777;
 
-spdy
-  .createServer(
-    {
-      key: fs.readFileSync('cert/server.key'),
-      cert: fs.readFileSync('cert/server.crt'),
-    },
-    app
-  )
-  .listen(PORT, (err) => {
-    if (err) {
-      console.error(err);
-      return process.exit(1);
-    }
+const main = async () => {
+  try {
+    await router.listen(PORT);
+  } catch (err) {
+    router.log.error(err);
+    process.exit(1);
+  }
+};
 
-    console.log(`Server running on ${PORT}`);
-  });
+main();

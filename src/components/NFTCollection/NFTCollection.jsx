@@ -10,6 +10,8 @@ export function NFTCollection(props) {
 
   //console.log('chain', props.chain);
 
+  //console.log(collection);
+
   // <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-10">
 
   return (

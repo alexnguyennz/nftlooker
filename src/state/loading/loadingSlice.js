@@ -6,6 +6,12 @@ export const loadingSlice = createSlice({
     value: false,
   },
   reducers: {
+    viewIsLoading: (state) => {
+      state.value = true;
+    },
+    viewIsNotLoading: (state) => {
+      state.value = false;
+    },
     isLoading: (state) => {
       state.value = true;
     },
@@ -15,7 +21,8 @@ export const loadingSlice = createSlice({
   },
 });
 
-export const { isLoading, isNotLoading } = loadingSlice.actions;
+export const { isLoading, isNotLoading, viewIsLoading, viewIsNotLoading } =
+  loadingSlice.actions;
 export const loadingState = (state) => state.loading.value;
 
 export default loadingSlice.reducer;
