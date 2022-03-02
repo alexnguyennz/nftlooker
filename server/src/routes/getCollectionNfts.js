@@ -10,14 +10,13 @@ const {
   DEFAULT_IMAGEKIT_IMG,
 } = require('../utils/image.js');
 const changeIpfsUrl = require('../utils/changeIpfsUrl.js');
-const resolveDomain = require('../utils/resolve.js');
 
 // Moralis GetAllTokenIds
 const getCollectionNfts = async (req, res) => {
-  const { address, chain, limit } = req.query;
+  const { address, chain, limit, offset } = req.query;
 
   const response = await axios.get(
-    `${process.env.MORALIS_API_URL}/nft/${address}?chain=${chain}&format=decimal&limit=${limit}`,
+    `${process.env.MORALIS_API_URL}/nft/${address}?chain=${chain}&format=decimal&limit=${limit}&offset=${offset}`,
     {
       headers: {
         accept: 'application/json',

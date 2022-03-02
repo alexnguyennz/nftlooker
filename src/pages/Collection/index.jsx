@@ -1,289 +1,248 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
-// React Router
-import { Link, useLocation, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 
 // Redux
 import { useDispatch } from 'react-redux';
-import { isLoading, isNotLoading } from '../../state/loading/loadingSlice';
+import {
+  viewIsLoading,
+  viewIsNotLoading,
+} from '../../state/loading/loadingSlice';
 
+// React Query
 import axios from 'axios';
+import { useQueries, useInfiniteQuery } from 'react-query';
 
-import { Divider } from '@chakra-ui/react';
+// Chakra UI
+import { Button, Alert, AlertIcon } from '@chakra-ui/react';
+import { ChevronDownIcon, AddIcon, ExternalLinkIcon } from '@chakra-ui/icons';
 
-import { ExternalLinkIcon } from '@chakra-ui/icons';
-
-import changeIpfsUrl from '../../utils/changeIpfsUrl';
-
+// Components
 import { NFTCard } from '../../components/NFTCard/NFTCard';
+import NFTImage from '../../components/NFTImage/NFTImage';
 
+// UTILS
 import truncateAddress from '../../utils/ellipseAddress';
+import { explorer, chainName } from '../../utils/chainExplorer';
 
-import Pagination from '@mui/material/Pagination';
-import Stack from '@mui/material/Stack';
-
-import ReactPaginate from 'react-paginate';
-
-const API_KEY = process.env['REACT_APP_COVALENT_API_KEY'];
-
-const mime = require('mime-types');
-
-function NFTImage(props) {
-  const collection = props.collection;
-  const chain = props.chain;
-
-  const nft = props.nft;
-  const image = nft.metadata.image;
-  const mimeType = mime.lookup(image);
-
-  switch (mimeType) {
-    case 'video/mp4':
-      return (
-        <video width="100%" controls autoPlay muted loop>
-          <source src={`${image}`} type="video/mp4" />
-          Your browser does not support the video tag.
-        </video>
-      );
-    default:
-      return (
-        <Link
-          to={`/${chain}/collection/${nft.token_address}/nft/${nft.token_id}`}
-        >
-          <img
-            src={image}
-            onError={({ currentTarget }) => {
-              currentTarget.onerror = null; // prevents looping
-              currentTarget.src = '/img/404.webp';
-            }}
-            className="mx-auto w-full"
-          />
-        </Link>
-      );
-  }
+async function fetchData(call) {
+  const { data } = await axios(call);
+  return data;
 }
 
-export function Collection(props) {
-  const dispatch = useDispatch();
+export function Collection() {
+  const params = useParams(); // React Router
+  const dispatch = useDispatch(); // React Redux
 
-  // States
-  const [address, setAddress] = useState('');
+  // React Query
+  const results = useQueries([
+    {
+      queryKey: 'collectionMetadata',
+      queryFn: async () => {
+        const { data } = await axios(
+          `/api/collection/metadata?chain=${params.chain}&address=${params.contractAddress}`
+        );
+        return data;
+      },
+      refetchOnWindowFocus: false,
+    },
+    {
+      queryKey: 'collectionNfts',
+      queryFn: async () => {
+        const { data } = await axios(
+          `/api/collection/nfts?chain=${params.chain}&address=${params.contractAddress}&offset=0&limit=1`
+        );
+        return data;
+      },
+      refetchOnWindowFocus: false,
+    },
+  ]);
 
-  const [chain, setChain] = useState('');
-
-  const [collection, setCollection] = useState();
-  const [collectionMetadata, setcollectionMetadata] = useState();
-
-  const [chainExplorer, setChainExplorer] = useState('etherscan.io');
-  const [chainName, setChainName] = useState('');
-
-  const [loaded, setLoaded] = useState(false);
-
-  // React Router
-  let location = useLocation();
-  const params = useParams();
-
-  useEffect(() => {
-    setAddress(params.contractAddress);
-    setChain(params.chain);
-
-    handleChainInfo(params.chain);
-  }, [location]);
-
-  useEffect(() => {
-    if (address) {
-      getData();
-    }
-  }, [address]);
+  //console.log('results', results[2].data[0]);
+  const loaded = results.every((result) => result.isSuccess);
 
   useEffect(() => {
-    console.log('loaded', loaded);
-    console.log('metadata', collectionMetadata);
+    if (loaded) dispatch(viewIsNotLoading());
+    else dispatch(viewIsLoading());
   }, [loaded]);
 
-  async function getData() {
-    dispatch(isLoading());
-    setLoaded(false);
+  return (
+    <>
+      {loaded && (
+        <div className="space-y-10">
+          <section className="grid grid-cols 1 md:grid-cols-2 gap-5">
+            <CollectionThumbnail result={results[1].data[0]} />{' '}
+            <CollectionMetadata result={results[0]} />
+          </section>
+          <CollectionNfts />
+        </div>
+      )}
+    </>
+  );
+}
 
-    let response = await axios
-      .get(`/api/collection/metadata?chain=${chain}&address=${address}`)
-      .catch((err) => console.log(err));
+async function fetchNfts({ pageParam = 0 }) {
+  const params = useParams();
 
-    setCollection(response.data);
+  const { data } = await axios(
+    `/api/collection/nfts?chain=${params.chain}&address=${params.contractAddress}&offset=${pageParam}&limit=5`
+  );
+  return { data, nextPage: pageParam + 1, totalOffset: 100 };
+}
 
-    // Get latest NFTs
-    response = await axios
-      .get(`/api/collection/nfts?chain=${chain}&address=${address}&limit=50`)
-      .catch((err) => console.log(err));
+export function CollectionNfts() {
+  const params = useParams(); // React Router
 
-    setcollectionMetadata(response.data);
-    dispatch(isNotLoading());
-    setLoaded(true);
-  }
-
-  function handleChainInfo(chain) {
-    let chainExplorer;
-    let chainName;
-
-    switch (chain) {
-      case 'eth':
-        chainExplorer = 'etherscan.io';
-        chainName = 'Ethereum (ETH)';
-        break;
-      case 'matic':
-        chainExplorer = 'polygonscan.com';
-        chainName = 'Polygon (MATIC)';
-
-        break;
-      case 'binance':
-        chainExplorer = 'bscscan.com';
-        chainName = 'Binance Smart Chain (BSC)';
-        break;
-      case 'avalanche':
-        chainExplorer = 'snowtrace.io';
-        chainName = 'Avalanche (AVAX)';
-        break;
-      case 'fantom':
-        chainExplorer = 'ftmscan.com';
-        chainName = 'Fantom (FTM)';
-        break;
-    }
-
-    setChainExplorer(chainExplorer);
-    setChainName(chainName);
-  }
-
-  function Items({ currentItems }) {
-    return (
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-10">
-        {currentItems &&
-          currentItems.map((nft) => (
-            <NFTCard
-              key={nft.token_id}
-              collection={collection}
-              nft={nft}
-              chain={chain}
-            />
-          ))}
-      </div>
+  const fetchTest = async ({ pageParam = 0 }) => {
+    const { data } = await axios(
+      `/api/collection/nfts?chain=${params.chain}&address=${params.contractAddress}&limit=5&offset=` +
+        pageParam
     );
-  }
 
-  function PaginatedItems({ itemsPerPage }) {
-    const items = collectionMetadata;
+    let offset = pageParam + 5; // manually increase each "page"
 
-    // We start with an empty list of items.
-    const [currentItems, setCurrentItems] = useState(null);
-    const [pageCount, setPageCount] = useState(0);
-    // Here we use item offsets; we could also use page offsets
-    // following the API or data you're working with.
-    const [itemOffset, setItemOffset] = useState(0);
+    return { data, offset };
+  };
 
-    useEffect(() => {
-      // Fetch items from another resources.
-      const endOffset = itemOffset + itemsPerPage;
-      setCurrentItems(items.slice(itemOffset, endOffset));
-      setPageCount(Math.ceil(items.length / itemsPerPage));
-    }, [itemOffset, itemsPerPage]);
-
-    // Invoke when user click to request another page.
-    const handlePageClick = (event) => {
-      const newOffset = (event.selected * itemsPerPage) % items.length;
-      setItemOffset(newOffset);
-    };
-
-    return (
-      <>
-        <Items currentItems={currentItems} />
-        <ReactPaginate
-          nextLabel="Next"
-          onPageChange={handlePageClick}
-          pageRangeDisplayed={3}
-          marginPagesDisplayed={2}
-          pageCount={pageCount}
-          previousLabel="Previous"
-          pageClassName="page-item"
-          pageLinkClassName="page-link"
-          previousClassName="page-item"
-          previousLinkClassName="page-link"
-          nextClassName="page-item"
-          nextLinkClassName="page-link"
-          breakLabel="..."
-          breakClassName="page-item"
-          breakLinkClassName="page-link"
-          containerClassName="pagination"
-          activeClassName="active"
-          renderOnZeroPageCount={null}
-        />
-      </>
-    );
-  }
+  // infinite queries
+  const {
+    data,
+    error,
+    isLoading,
+    isError,
+    isFetching,
+    isFetchingNextPage,
+    fetchNextPage,
+    hasNextPage,
+  } = useInfiniteQuery('nftMetadata', fetchTest, {
+    refetchOnWindowFocus: false,
+    getNextPageParam: (lastPage) => {
+      if (lastPage.offset <= 500) return lastPage.offset; // only allow up to 100 pages / 500 offsets
+    },
+  });
 
   return (
-    <div className="space-y-10">
-      {loaded && collection && (
-        <section className="grid grid-cols 1 md:grid-cols-2 gap-5">
-          <div className="mx-auto w-full md:w-3/4">
-            {collectionMetadata && (
-              <NFTImage nft={collectionMetadata[0]} chain={params.chain} />
+    <div>
+      {isLoading ? (
+        <></>
+      ) : isError ? (
+        <Alert status="error" justifyContent="center">
+          <AlertIcon />
+          Error fetching NFTs for this collection.
+        </Alert>
+      ) : (
+        <>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-10">
+            {data.pages.map((page) => (
+              <React.Fragment key={page.offset}>
+                {page.data.map((nft) => (
+                  <NFTCard
+                    key={nft.token_id}
+                    collection={data}
+                    nft={nft}
+                    chain={params.chain}
+                  />
+                ))}
+              </React.Fragment>
+            ))}
+          </div>
+
+          <div className="text-center mt-5">
+            {hasNextPage ? (
+              <Button
+                type="submit"
+                onClick={() => fetchNextPage()}
+                disabled={!hasNextPage || isFetchingNextPage}
+                isLoading={isFetchingNextPage}
+                loadingText="Loading"
+                spinnerPlacement="end"
+                colorScheme="blue"
+                rightIcon={<ChevronDownIcon />}
+              >
+                More
+              </Button>
+            ) : (
+              <Alert status="error">
+                <AlertIcon />
+                Limit reached.
+              </Alert>
             )}
           </div>
-          <div className="space-y-2">
-            <h3 className="pb-2 border-b border-gray-500 text-4xl font-bold ">
-              {collection.name}
-            </h3>
-
-            <div className="space-y-5">
-              <p>
-                CHAIN
-                <br />
-                <span className="text-2xl">{chainName}</span>
-              </p>
-
-              <p>
-                CONTRACT
-                <br />
-                <span className="text-2xl">
-                  <a
-                    href={`https://${chainExplorer}/address/${collection.token_address}`}
-                    target="_blank"
-                    rel="noreferrer noopener nofollow"
-                  >
-                    {truncateAddress(collection.token_address)}
-                    {` `}
-                    <ExternalLinkIcon />
-                  </a>
-                </span>
-              </p>
-
-              <p>
-                SYMBOL / TICKER
-                <br />
-                <span className="text-2xl">{collection.symbol}</span>
-              </p>
-            </div>
-          </div>
-        </section>
-      )}
-      {collectionMetadata && (
-        <section>{loaded && <PaginatedItems itemsPerPage={5} />}</section>
+        </>
       )}
     </div>
   );
 }
 
-{
-  /*<h2 className="mb-1 text-4xl text-center font-bold">Latest NFTs</h2>*/
+function CollectionThumbnail(props) {
+  const params = useParams(); // React Router
+
+  const data = props.result;
+
+  /* if (isLoading) return null;
+  if (error) return 'An error has occurred: ' + error.message; */
+
+  // hacky solution
+  const image = data.metadata.image
+    .replace('h-250', 'h-1000')
+    .replace('w-250', 'h-1000');
+
+  return (
+    <div className="mx-auto w-full md:w-3/4">
+      <NFTImage
+        nft={data}
+        chain={params.chain}
+        image={data.metadata && image}
+      />
+    </div>
+  );
 }
-{
-  /*<div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-10">
-            {collectionMetadata &&
-              collectionMetadata.map((nft) => (
-                <NFTCard
-                  key={nft.token_id}
-                  collection={collection}
-                  nft={nft}
-                  chain={chain}
-                />
-              ))}
-              </div>*/
+
+export function CollectionMetadata(props) {
+  const params = useParams(); // React Router
+
+  const data = props.result.data;
+
+  /* if (isLoading) return null;
+  if (error) return 'An error has occurred: ' + error.message; */
+
+  return (
+    <div className="space-y-2">
+      <h3 className="pb-2 border-b border-gray-500 text-4xl font-bold ">
+        {data.name}
+      </h3>
+
+      <div className="space-y-5">
+        <p>
+          CHAIN
+          <br />
+          <span className="text-2xl">{chainName(params.chain)}</span>
+        </p>
+
+        <p>
+          CONTRACT
+          <br />
+          <span className="text-2xl">
+            <a
+              href={`https://${explorer(params.chain)}/address/${
+                data.token_address
+              }`}
+              target="_blank"
+              rel="noreferrer noopener nofollow"
+            >
+              {truncateAddress(data.token_address)}
+              {` `}
+              <ExternalLinkIcon />
+            </a>
+          </span>
+        </p>
+
+        <p>
+          SYMBOL / TICKER
+          <br />
+          <span className="text-2xl">{data.symbol}</span>
+        </p>
+      </div>
+    </div>
+  );
 }

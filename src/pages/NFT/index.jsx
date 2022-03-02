@@ -1,13 +1,12 @@
 import { useEffect, useState } from 'react';
 
-import { Link, useNavigate, useLocation, useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 
 // Redux
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import {
   viewIsLoading,
   viewIsNotLoading,
-  loadingState,
 } from '../../state/loading/loadingSlice';
 
 // React Query
@@ -25,7 +24,7 @@ import NFTImage from '../../components/NFTImage/NFTImage';
 
 // UTILS
 import truncateAddress from '../../utils/ellipseAddress';
-import chainExplorer from '../../utils/chainExplorer';
+import { explorer } from '../../utils/chainExplorer';
 
 export function NFT() {
   const params = useParams(); // React Router
@@ -123,7 +122,7 @@ export function NFT() {
               <br />
               <span className="text-2xl">
                 <a
-                  href={`https://${chainExplorer(params.chain)}/address/${
+                  href={`https://${explorer(params.chain)}/address/${
                     data.owner_of
                   }`}
                   target="_blank"
@@ -147,7 +146,7 @@ export function NFT() {
               <br />
               <span className="text-2xl">
                 <a
-                  href={`https://${chainExplorer(params.chain)}/address/${
+                  href={`https://${explorer(params.chain)}/address/${
                     data.token_address
                   }`}
                   target="_blank"

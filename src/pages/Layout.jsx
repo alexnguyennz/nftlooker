@@ -283,38 +283,42 @@ export function Layout(props) {
       <div className="flex justify-end items-center space-x-3 ">
         {/* TESTING */}
         {process.env.NODE_ENV === 'development' && (
-          <div className="text-center space-x-3">
-            <Button
-              onClick={() =>
-                navigate(`/0x2aea6d8220b61950f30674606faaa01c23465299`)
-              }
-              size="xs"
-            >
-              ETH/MATIC
-            </Button>
-            <Button onClick={() => navigate(`/alice.eth`)} size="xs">
-              .eth
-            </Button>
-            <Button onClick={() => navigate(`/brad.crypto`)} size="xs">
-              .crypto
-            </Button>
-            <Button
-              onClick={() =>
-                navigate(`/0x40a7dc2ac7d5fc35da3a9d99552b18cd91188735`)
-              }
-              size="xs"
-            >
-              BSC
-            </Button>
-            <Button
-              onClick={() =>
-                navigate(`/0x3a52c7df1bb5e70a0a13e9c9c00f258fe9da68fd`)
-              }
-              size="xs"
-            >
-              FTM/AVAX
-            </Button>
-          </div>
+          <Box>
+            <Menu closeOnSelect={false}>
+              <MenuButton as={Button} aria-label="Options">
+                Testing
+              </MenuButton>
+              <MenuList minWidth="50px">
+                <MenuItem
+                  onClick={() =>
+                    navigate(`/0x2aea6d8220b61950f30674606faaa01c23465299`)
+                  }
+                >
+                  ETH/MATIC
+                </MenuItem>
+                <MenuItem onClick={() => navigate(`/alice.eth`)}>
+                  alice.eth
+                </MenuItem>
+                <MenuItem onClick={() => navigate(`/brad.crypto`)}>
+                  brad.crypto
+                </MenuItem>
+                <MenuItem
+                  onClick={() =>
+                    navigate(`/0x40a7dc2ac7d5fc35da3a9d99552b18cd91188735`)
+                  }
+                >
+                  BSC
+                </MenuItem>
+                <MenuItem
+                  onClick={() =>
+                    navigate(`/0x3a52c7df1bb5e70a0a13e9c9c00f258fe9da68fd`)
+                  }
+                >
+                  FTM/AVAX
+                </MenuItem>
+              </MenuList>
+            </Menu>
+          </Box>
         )}
         {walletAddress && (
           <a

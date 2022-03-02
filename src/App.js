@@ -9,7 +9,7 @@ import {
 
 // PAGES
 import { Layout } from './pages/Layout';
-import { UserNFTs } from './pages/UserNFTs';
+import { UserNFTs, UserNFTsTest } from './pages/UserNFTs';
 import { Collection } from './pages/Collection';
 import { NFT } from './pages/NFT';
 import { SearchNFTs } from './pages/SearchNFTs';
@@ -20,7 +20,7 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Layout />}>
-            <Route path=":walletAddress" element={<UserNFTs />} />
+            <Route path=":walletAddress" element={<UserNFTsTest />} />
             <Route
               path=":chain/collection/:contractAddress"
               element={<Collection />}

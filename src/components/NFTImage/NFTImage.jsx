@@ -42,19 +42,6 @@ export default function NFTImage(props) {
           <source src={`${image}`} type={props.mime} />
         </video>
 
-        {/*<ReactPlayer
-          id="video-player"
-          url={image}
-          width="100%"
-          controls="true"
-          playing="true"
-          muted="true"
-          loop="true"
-          pip="true"
-          stopOnUnmount={false} // continue playing PIP after ReactPlayer unmounts
-          // fallback
-        />*/}
-
         <div className="mt-3 text-right">
           <Button onClick={pip} colorScheme="blue">
             PIP
@@ -106,7 +93,7 @@ export default function NFTImage(props) {
     default:
       return (
         <a
-          href={nft.metadata.original_image}
+          href={nft.metadata.original_image && nft.metadata.original_image}
           target="_blank"
           rel="noopener noreferrer nofollow"
         >

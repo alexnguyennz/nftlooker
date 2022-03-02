@@ -7,14 +7,14 @@ Images, videos, and 3D models are supported.
 Tools:
 
 - React - frontend
-- Express.js - web server/framework
-- Redux - state management
-- TailwindCSS - CSS framework
 - Moralis API - NFT data
-- Chakra UI - React components
+- Fastify - web server/framework
+- Redux - state management
+- React Query - fetch data management
 - Cloudinary API - image transformation & optimisation
 - ImageKit API - image transformation & optimisation
+- TailwindCSS - CSS framework
+- Chakra UI - React components
 - pm2 - Node.js process manager
-- node-spdy - HTTP/2 support
 
 Initially built for the Road to Web 3 ETHGlobal hackathon.
