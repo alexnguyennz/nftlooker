@@ -20,7 +20,7 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Layout />}>
-            <Route path=":walletAddress" element={<UserNFTsTest />} />
+            <Route path=":walletAddress" element={<UserNFTs />} />
             <Route
               path=":chain/collection/:contractAddress"
               element={<Collection />}

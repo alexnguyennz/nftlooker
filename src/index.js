@@ -13,7 +13,14 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 // Chakra UI
 import { ChakraProvider } from '@chakra-ui/react';
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      // refetchOnMount: 'always',
+    },
+  },
+});
 
 ReactDOM.render(
   <React.StrictMode>
