@@ -38,6 +38,9 @@ import { Button, ButtonGroup } from '@chakra-ui/react';
 import { Search2Icon, SettingsIcon } from '@chakra-ui/icons';
 import { Tabs, TabList, TabPanels, Tab, TabPanel } from '@chakra-ui/react';
 import {
+  useDisclosure,
+  useColorMode,
+  useColorModeValue,
   Menu,
   MenuButton,
   MenuList,
@@ -48,16 +51,6 @@ import {
   MenuDivider,
   Box,
   Select,
-} from '@chakra-ui/react';
-import { IconButton } from '@chakra-ui/react';
-import {
-  SunIcon,
-  MoonIcon,
-  HamburgerIcon,
-  QuestionIcon,
-} from '@chakra-ui/icons';
-import { FormControl, FormLabel, Switch } from '@chakra-ui/react';
-import {
   Modal,
   ModalOverlay,
   ModalContent,
@@ -65,19 +58,24 @@ import {
   ModalFooter,
   ModalBody,
   ModalCloseButton,
-} from '@chakra-ui/react';
-
-import { useDisclosure } from '@chakra-ui/react';
-
-import { useColorMode, useColorModeValue } from '@chakra-ui/react';
-
-import {
+  FormControl,
+  FormLabel,
+  Switch,
   Accordion,
   AccordionItem,
   AccordionButton,
   AccordionPanel,
   AccordionIcon,
+  IconButton,
 } from '@chakra-ui/react';
+import {
+  SunIcon,
+  MoonIcon,
+  HamburgerIcon,
+  QuestionIcon,
+  CloseIcon,
+  SmallCloseIcon,
+} from '@chakra-ui/icons';
 
 import { library, icon } from '@fortawesome/fontawesome-svg-core';
 
@@ -255,10 +253,11 @@ export function Layout(props) {
   function handleSubmit(e) {
     e.preventDefault();
 
-    if (!address) {
-      console.log('none');
+    if (address) {
+      navigate(`${address}`);
+    } else {
+      //alert('nivalid');
     }
-    navigate(`${address}`);
   }
 
   function handleSearch(e) {
@@ -271,7 +270,7 @@ export function Layout(props) {
   function handleTestnetsToggle() {
     dispatch(toggleTestnets());
 
-    console.log(location.pathname);
+    // console.log(location.pathname);
 
     navigate(location.pathname);
   }
@@ -333,6 +332,7 @@ export function Layout(props) {
         {!walletConnected ? (
           <Button
             colorScheme="red"
+            backgroundColor="red.400"
             rightIcon={<AccountBalanceWalletIcon />}
             onClick={connectWallet}
           >
@@ -343,7 +343,12 @@ export function Layout(props) {
             <Button onClick={() => navigate(`/${walletAddress}`)}>
               portfolio
             </Button>
-            <Button colorScheme="red" onClick={disconnectWallet}>
+            <Button
+              colorScheme="red"
+              backgroundColor="red.400"
+              rightIcon={<AccountBalanceWalletIcon />}
+              onClick={disconnectWallet}
+            >
               disconnect
             </Button>
           </>
@@ -545,6 +550,7 @@ export function Layout(props) {
                   autoFocus
                   isDisabled={loading}
                   backgroundColor={colorModeBg}
+                  isRequired
                 />
 
                 <div className="space-x-5">
@@ -556,15 +562,28 @@ export function Layout(props) {
                     spinnerPlacement="end"
                     colorScheme="blue"
                     rightIcon={<Search2Icon />}
-                    //isDisabled={!address}
                   >
                     view
                   </Button>
 
+                  {/*loading && (
+                    <Button
+                      type="submit"
+                      size="lg"
+                      loadingText="Loading"
+                      spinnerPlacement="end"
+                      colorScheme="red"
+                      backgroundColor="red.400"
+                      rightIcon={<SmallCloseIcon />}
+                      //isDisabled={!address}
+                    >
+                      cancel
+                    </Button>
+                  ) */}
+
                   {!loading && (
                     <Button
                       onClick={getRandomWallet}
-                      isLoading={loading}
                       size="lg"
                       loadingText="Loading"
                       spinnerPlacement="end"
@@ -653,6 +672,7 @@ export function Layout(props) {
                     autoFocus
                     isDisabled={loading}
                     backgroundColor={colorModeBg}
+                    isRequired
                   />
                   <Box>
                     <Menu

@@ -16,7 +16,7 @@ import {
 
 // React Query
 import axios from 'axios';
-import { useQuery, useQueries } from 'react-query';
+import { useQueries } from 'react-query';
 
 import { NFTCollection } from '../../components/NFTCollection/NFTCollection';
 
@@ -48,7 +48,8 @@ export function UserNFTs() {
   let location = useLocation();
   let params = useParams();
 
-  const dispatch = useDispatch(); // React Redux
+  // React Redux
+  const dispatch = useDispatch();
   const testnets = useSelector(testnetsState);
   const loading = useSelector(loadingState);
 
@@ -59,94 +60,58 @@ export function UserNFTs() {
 
   const [chainTab, setChainTab] = useState(0);
 
-  const [allCollections, setAllCollections] = useState({
-    eth: {
-      name: 'Ethereum',
-      loaded: false,
-      data: {},
-      count: 0,
-      order: 0,
+  const [collections, setCollections] = useState({
+    mainnets: {
+      eth: {
+        name: 'Ethereum',
+        order: 0,
+      },
+      matic: {
+        name: 'Polygon',
+        order: 1,
+      },
+      binance: {
+        name: 'Binance',
+        order: 2,
+      },
+      avalanche: {
+        name: 'Avalanche',
+        order: 3,
+      },
+      fantom: {
+        name: 'Fantom',
+        order: 4,
+      },
     },
-    matic: {
-      name: 'Polygon',
-      loaded: false,
-      data: {},
-      count: 0,
-      order: 1,
-    },
-    binance: {
-      name: 'Binance',
-      loaded: false,
-      data: {},
-      count: 0,
-      order: 2,
-    },
-    avalanche: {
-      name: 'Avalanche',
-      loaded: false,
-      data: {},
-      count: 0,
-      order: 3,
-    },
-    fantom: {
-      name: 'Fantom',
-      loaded: false,
-      data: {},
-      count: 0,
-      order: 4,
-    },
-  });
-
-  const [testnetCollections, setTestnetCollections] = useState({
-    ropsten: {
-      name: 'Ropsten', // ETH
-      loaded: false,
-      data: {},
-      count: 0,
-      order: 0,
-    },
-    rinkeby: {
-      name: 'Rinkeby', // ETH
-      loaded: false,
-      data: {},
-      count: 0,
-      order: 1,
-    },
-    goerli: {
-      name: 'Goerli', // ETH
-      loaded: false,
-      data: {},
-      count: 0,
-      order: 2,
-    },
-    kovan: {
-      name: 'Kovan', // ETH
-      loaded: false,
-      data: {},
-      count: 0,
-      order: 3,
-    },
-    mumbai: {
-      name: 'Mumbai', // MATIC
-      loaded: false,
-      data: {},
-      count: 0,
-      order: 5,
-    },
-    '0x61': {
-      name: 'Testnet', // BSC
-      loaded: false,
-      data: {},
-      count: 0,
-      order: 4,
-    },
-
-    '0xa869': {
-      name: 'Fuji', // AVAX
-      loaded: false,
-      data: {},
-      count: 0,
-      order: 6,
+    testnets: {
+      ropsten: {
+        name: 'Ropsten', // ETH
+        order: 5,
+      },
+      rinkeby: {
+        name: 'Rinkeby', // ETH
+        order: 6,
+      },
+      goerli: {
+        name: 'Goerli', // ETH
+        order: 7,
+      },
+      kovan: {
+        name: 'Kovan', // ETH
+        order: 8,
+      },
+      mumbai: {
+        name: 'Mumbai', // MATIC
+        order: 9,
+      },
+      '0x61': {
+        name: 'Testnet', // BSC
+        order: 10,
+      },
+      '0xa869': {
+        name: 'Fuji', // AVAX
+        order: 11,
+      },
     },
   });
 
@@ -155,126 +120,67 @@ export function UserNFTs() {
     document.title = `nft looker. ${params.walletAddress}`;
   }, [params]);
 
-  let chainQueries;
+  let chainQueries = [];
   // React Query
   if (!testnets) {
-    chainQueries = useQueries(
-      Object.keys(allCollections).map((chain) => {
-        return {
-          queryKey: [chain, location],
-          queryFn: () => fetchNfts(chain, true),
-        };
-      })
+    chainQueries.push(
+      useQueries(
+        Object.keys(collections.mainnets).map((chain) => {
+          return {
+            queryKey: [chain, location],
+            queryFn: () => fetchNfts(chain, true),
+          };
+        })
+      )
     );
   } else {
-    chainQueries = useQueries([
-      {
-        queryKey: ['eth', location],
-        queryFn: () => fetchNfts('eth', true),
-      },
-      {
-        queryKey: ['matic', location],
-        queryFn: () => fetchNfts('matic', true),
-      },
-      {
-        queryKey: ['binance', location],
-        queryFn: () => fetchNfts('binance', true),
-      },
-      {
-        queryKey: ['avalanche', location],
-        queryFn: () => fetchNfts('avalanche', true),
-      },
-      {
-        queryKey: ['fantom', location],
-        queryFn: () => fetchNfts('fantom', true),
-      },
-      {
-        queryKey: ['ropsten', location],
-        queryFn: () => fetchNfts('ropsten', false),
-      },
-      {
-        queryKey: ['rinkeby', location],
-        queryFn: () => fetchNfts('rinkeby', false),
-      },
-      {
-        queryKey: ['goerli', location],
-        queryFn: () => fetchNfts('goerli', false),
-      },
-      {
-        queryKey: ['kovan', location],
-        queryFn: () => fetchNfts('kovan', false),
-      },
-      {
-        queryKey: ['0x61', location],
-        queryFn: () => fetchNfts('0x61', false),
-      },
-      {
-        queryKey: ['mumbai', location],
-        queryFn: () => fetchNfts('mumbai', false),
-      },
-      {
-        queryKey: ['0xa869', location],
-        queryFn: () => fetchNfts('0xa869', false),
-      },
-    ]);
+    const mainnets = Object.keys(collections.mainnets).map((chain) => {
+      return {
+        queryKey: [chain, location],
+        queryFn: () => fetchNfts(chain, true),
+      };
+    });
+
+    const testnets = Object.keys(collections.testnets).map((chain) => {
+      return {
+        queryKey: [chain, location],
+        queryFn: () => fetchNfts(chain, false),
+      };
+    });
+
+    const merged = [...mainnets, ...testnets];
+
+    chainQueries.push(useQueries(merged));
   }
 
-  /*
-    1: loaded is false, so viewIsLoading() will be dispatched
-    2: React Query runs, and when chainQueries status is successful, setLoaded to true
-    3: In loaded useEffect, when true, viewIsNotLoading() is dispatched
-    4: After the first testnet run, the loading state of the chainQueries doesn't change back to loading, it stays on success
-  */
-
-  /* useEffect(() => {
-    if (loaded) {
-      dispatch(viewIsNotLoading());
-    } else {
-      dispatch(viewIsLoading());
-    }
-  }, [loaded]); */
-
   useEffect(() => {
-    //setLoaded(false);
-  }, [testnets]);
-
-  useEffect(() => {
-    //setLoaded(chainQueries.every((query) => query.isSuccess));
-
-    if (chainQueries.some((query) => query.isFetching)) {
+    if (chainQueries[0].some((query) => query.isFetching)) {
       dispatch(viewIsLoading());
     } else {
       dispatch(viewIsNotLoading());
     }
-
-    /*console.log(
-      'chainQueries useEffect; setLoaded =',
-      chainQueries.every((query) => query.isSuccess)
-    ); */
   }, [chainQueries]);
 
   useEffect(() => {
-    dispatch(viewIsLoading());
-  }, [location]);
-
-  //console.log('chainQueries', chainQueries);
+    console.log('collections', collections);
+  }, [collections]);
 
   useEffect(() => {
     // if loaded is true (all NFT data has been set in state), find out if there are any NFTs or not
     if (!loading) {
       if (testnets) {
         const noNfts =
-          Object.values(allCollections).every(
+          Object.values(collections['mainnets']).every(
             (collection) => collection.count == 0
           ) &&
-          Object.values(testnetCollections).every(
+          Object.values(collections['testnets']).every(
             (collection) => collection.count == 0
           );
 
         setNoNfts(noNfts);
       } else {
         setNoNfts(
-          Object.values(allCollections).every(
+          Object.values(collections['mainnets']).every(
             (collection) => collection.count == 0
           )
         );
@@ -283,7 +189,7 @@ export function UserNFTs() {
   }, [loading]);
 
   async function fetchNfts(chain, isMainnet) {
-    const response = await axios
+    const { data } = await axios
       .get(`/api/nfts?chain=${chain}&address=${params.walletAddress}`, {
         signal: abortController.signal,
       })
@@ -300,8 +206,6 @@ export function UserNFTs() {
         }
       });
 
-    const data = response.data;
-
     // count the number of NFTs
     let nftCount = 0;
 
@@ -312,30 +216,36 @@ export function UserNFTs() {
     // set the chain tab to one that has NFTs
     if (isMainnet) {
       if (nftCount > 0) {
-        setChainTab(allCollections[chain].order);
+        setChainTab(collections['mainnets'][chain].order);
       }
 
-      setAllCollections((prevState) => ({
+      setCollections((prevState) => ({
         ...prevState,
-        [chain]: {
-          ...prevState[chain],
-          data: data,
-          loaded: true,
-          count: nftCount,
+        mainnets: {
+          ...prevState['mainnets'],
+          [chain]: {
+            ...prevState['mainnets'][chain],
+            data: data,
+            loaded: true,
+            count: nftCount,
+          },
         },
       }));
     } else {
       if (nftCount > 0) {
-        setChainTab(testnetCollections[chain].order);
+        setChainTab(collections['testnets'][chain].order);
       }
 
-      setTestnetCollections((prevState) => ({
+      setCollections((prevState) => ({
         ...prevState,
-        [chain]: {
-          ...prevState[chain],
-          data: data,
-          loaded: true,
-          count: nftCount,
+        testnets: {
+          ...prevState['testnets'],
+          [chain]: {
+            ...prevState['testnets'][chain],
+            data: data,
+            loaded: true,
+            count: nftCount,
+          },
         },
       }));
     }
@@ -365,41 +275,41 @@ export function UserNFTs() {
     );
   });
 
+  function ChainIcon(props) {
+    switch (props.chain) {
+      case 'eth':
+        return <Ethereum />;
+      case 'matic':
+        return <Polygon />;
+      case 'binance':
+        return <Binance />;
+      case 'avalanche':
+        return <Avalanche />;
+      case 'fantom':
+        return <Fantom />;
+      case 'ropsten':
+        return <Ethereum />;
+      case 'rinkeby':
+        return <Ethereum />;
+      case 'goerli':
+        return <Ethereum />;
+      case 'kovan':
+        return <Ethereum />;
+      case 'mumbai':
+        return <Polygon />;
+      case '0x61':
+        return <Binance />;
+      case '0xa869':
+        return <Avalanche />;
+      default:
+        return <Ethereum />;
+    }
+  }
+
   function ChainTab(props) {
     const chain = props.chain;
     const collections = props.collections;
     const idx = props.index;
-
-    function ChainIcon() {
-      switch (chain) {
-        case 'eth':
-          return <Ethereum />;
-        case 'matic':
-          return <Polygon />;
-        case 'binance':
-          return <Binance />;
-        case 'avalanche':
-          return <Avalanche />;
-        case 'fantom':
-          return <Fantom />;
-        case 'ropsten':
-          return <Ethereum />;
-        case 'rinkeby':
-          return <Ethereum />;
-        case 'goerli':
-          return <Ethereum />;
-        case 'kovan':
-          return <Ethereum />;
-        case 'mumbai':
-          return <Polygon />;
-        case '0x61':
-          return <Binance />;
-        case '0xa869':
-          return <Avalanche />;
-        default:
-          return <Ethereum />;
-      }
-    }
 
     // bool state if count is 0 or not (no NFTs)
     const disabled = !collections[chain].count;
@@ -422,7 +332,7 @@ export function UserNFTs() {
         >
           <div className="flex flex-col md:flex-row">
             <span className="md:mr-2 text-center">
-              <ChainIcon />
+              <ChainIcon chain={chain} />
             </span>
             {collections[chain].name}{' '}
             {collections[chain].count > 0 && `(${collections[chain].count})`}
@@ -452,10 +362,10 @@ export function UserNFTs() {
         >
           {!loading && !noNfts && (
             <TabList>
-              {Object.keys(allCollections).map((chain, idx) => (
+              {Object.keys(collections['mainnets']).map((chain, idx) => (
                 <ChainTab
                   chain={chain}
-                  collections={allCollections}
+                  collections={collections['mainnets']}
                   index={idx}
                   key={idx}
                 />
@@ -464,18 +374,11 @@ export function UserNFTs() {
           )}
 
           {testnets && !loading && !noNfts && (
-            <TabList
-              sx={{
-                scrollbarWidth: '40px',
-                '::-webkit-scrollbar': {
-                  display: 'none',
-                },
-              }}
-            >
-              {Object.keys(testnetCollections).map((chain, idx) => (
+            <TabList>
+              {Object.keys(collections['testnets']).map((chain, idx) => (
                 <ChainTab
                   chain={chain}
-                  collections={testnetCollections}
+                  collections={collections['testnets']}
                   index={idx}
                   key={idx}
                 />
@@ -486,18 +389,26 @@ export function UserNFTs() {
           <TabPanels>
             {!loading &&
               !noNfts &&
-              Object.keys(allCollections).map((chain, idx) => (
+              Object.keys(collections['mainnets']).map((chain, idx) => (
                 <TabPanel value={idx} key={chain}>
-                  {<RenderData chain={chain} collections={allCollections} />}
+                  {
+                    <RenderData
+                      chain={chain}
+                      collections={collections['mainnets']}
+                    />
+                  }
                 </TabPanel>
               ))}
 
             {testnets &&
               !loading &&
               !noNfts &&
-              Object.keys(testnetCollections).map((chain, idx) => (
+              Object.keys(collections['testnets']).map((chain, idx) => (
                 <TabPanel value={idx} key={chain}>
-                  <RenderData chain={chain} collections={testnetCollections} />
+                  <RenderData
+                    chain={chain}
+                    collections={collections['testnets']}
+                  />
                 </TabPanel>
               ))}
           </TabPanels>
