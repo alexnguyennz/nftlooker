@@ -27,11 +27,9 @@ router.get('/api/randomWallet', getRandomWallet);
 router.get('/api/search', searchNfts);
 
 // run Fastify server
-const PORT = process.env.PORT || 7777;
-
 const main = async () => {
   try {
-    await router.listen(PORT);
+    await router.listen(process.env.PORT || 7777);
   } catch (err) {
     router.log.error(err);
     process.exit(1);
