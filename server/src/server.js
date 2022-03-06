@@ -2,11 +2,11 @@ const fs = require('fs');
 
 const router = require('fastify')({
   // local HTTPS
-  https: {
+  /* https: {
     allowHTTP1: true, // fallback support for HTTP1
     key: fs.readFileSync('cert/server.key'),
     cert: fs.readFileSync('cert/server.crt'),
-  },
+  }, */
   logger: true,
 });
 
