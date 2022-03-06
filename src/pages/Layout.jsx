@@ -25,6 +25,8 @@ import {
 } from '../state/search/searchSlice';
 import { changeTab, tabState } from '../state/tab/tabSlice';
 
+import { useIsFetching } from 'react-query';
+
 // Ethers
 import { ethers } from 'ethers';
 
@@ -105,6 +107,16 @@ export function Layout(props) {
 
   const [search, setSearch] = useState(['']);
   const [tags, setTags] = useState([]);
+
+  const isFetching = useIsFetching();
+
+  useEffect(() => {
+    if (isFetching != 0) {
+      console.log('FETCHING');
+    } else {
+      console.log('STOPPED FETCHING');
+    }
+  });
 
   // Modal
   const { isOpen, onOpen, onClose } = useDisclosure();

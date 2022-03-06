@@ -63,7 +63,6 @@ export function UserNFTs() {
   const loading = useSelector(loadingState);
 
   const toastInstance = useToast();
-  const abortController = new AbortController();
 
   const [noNfts, setNoNfts] = useState('');
 
@@ -75,8 +74,6 @@ export function UserNFTs() {
   // set address using address param
   useEffect(() => {
     return () => {
-      abortController.abort();
-
       dispatch(viewIsNotLoading());
     };
   }, []);
@@ -95,7 +92,7 @@ export function UserNFTs() {
         Object.keys(collections.mainnets).map((chain) => {
           return {
             queryKey: [params.walletAddress, chain, location],
-            queryFn: () => fetchNfts(chain, true),
+            queryFn: ({ signal }) => fetchNfts(chain, true, signal),
           };
         })
       )
@@ -104,14 +101,14 @@ export function UserNFTs() {
     const mainnets = Object.keys(collections.mainnets).map((chain) => {
       return {
         queryKey: [params.walletAddress, chain, location],
-        queryFn: () => fetchNfts(chain, true),
+        queryFn: ({ signal }) => fetchNfts(chain, true, signal),
       };
     });
 
     const testnets = Object.keys(collections.testnets).map((chain) => {
       return {
         queryKey: [params.walletAddress, chain, location],
-        queryFn: () => fetchNfts(chain, false),
+        queryFn: ({ signal }) => fetchNfts(chain, false, signal),
       };
     });
 
@@ -151,24 +148,20 @@ export function UserNFTs() {
     }
   }, [loading]);
 
-  async function fetchNfts(chain, isMainnet) {
+  async function fetchNfts(chain, isMainnet, signal) {
     try {
-      const { data } = await axios
-        .get(`/api/nfts?chain=${chain}&address=${params.walletAddress}`, {
-          signal: abortController.signal,
-        })
-        .catch((err) => {
-          if (err.message == 'canceled') {
-            toast(toastInstance, 'error', 'Fetching NFTs cancelled.');
-          } else {
-            toast(
-              toastInstance,
-              'error',
-              "Couldn't fetch NFTs from NFT Looker server.",
-              `${err.message}`
-            );
-          }
-        });
+      const { data } = await axios(
+        `/api/nfts?chain=${chain}&address=${params.walletAddress}`,
+        {
+          signal,
+        }
+      ).catch((err) => {
+        if (err.message == 'canceled') {
+          toast(toastInstance, 'error', 'Cancelled.');
+        } else {
+          toast(toastInstance, 'error', 'Server error', `${err.message}`);
+        }
+      });
 
       // count the number of NFTs
       let nftCount = 0;
@@ -346,7 +339,7 @@ export function UserNFTs() {
           </TabList>
 
           {testnets && (
-            <TabList overflowX="scroll">
+            <TabList>
               {Object.keys(collections['testnets']).map((chain, idx) => (
                 <ChainTab
                   chain={chain}

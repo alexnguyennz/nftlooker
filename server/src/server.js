@@ -26,6 +26,10 @@ router.get('/api/collection/nfts', getCollectionNfts);
 router.get('/api/randomWallet', getRandomWallet);
 router.get('/api/search', searchNfts);
 
+router.addHook('onClose', (router) => {
+  console.log('onClose');
+});
+
 // run Fastify server
 const main = async () => {
   try {
