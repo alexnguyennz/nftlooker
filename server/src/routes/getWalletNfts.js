@@ -107,13 +107,25 @@ const getWalletNfts = async (req, res) => {
           //console.log('encoded', metadata.image);
         } else if (metadata.image.endsWith('.gif')) {
           // Cloudinary
-          metadata.image = cloudinary.url(metadata.image, {
+          /* metadata.image = cloudinary.url(metadata.image, {
             type: 'fetch',
             transformation: [
               { width: 250, height: 250 },
               { fetch_format: 'mp4' },
             ],
             default_image: DEFAULT_CLOUDINARY_IMG,
+          }); */
+
+          // ImageKit
+          metadata.image = imagekit.url({
+            src: `${process.env.IMAGEKIT_API_URL}/${metadata.image}`,
+            transformation: [
+              {
+                height: '250',
+                width: '250',
+                defaultImage: DEFAULT_IMAGEKIT_IMG,
+              },
+            ],
           });
         } else if (
           metadata.image.endsWith('.mp4') ||
@@ -136,7 +148,7 @@ const getWalletNfts = async (req, res) => {
           !metadata.image.endsWith('.gitf')
         ) {
           // Cloudinary
-          metadata.image = cloudinary.url(metadata.image, {
+          /* metadata.image = cloudinary.url(metadata.image, {
             type: 'fetch',
             transformation: [
               { width: 250, height: 250 },
@@ -144,9 +156,20 @@ const getWalletNfts = async (req, res) => {
             ],
             quality: 'auto',
             default_image: DEFAULT_CLOUDINARY_IMG,
-          });
+          }); */
 
           // ImageKit
+          metadata.image = imagekit.url({
+            src: `${process.env.IMAGEKIT_API_URL}/${metadata.image}`,
+            transformation: [
+              {
+                height: '250',
+                width: '250',
+                defaultImage: DEFAULT_IMAGEKIT_IMG,
+                // blur: '6', // low size placeholder
+              },
+            ],
+          });
         }
       }
 

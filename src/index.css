@@ -23,6 +23,13 @@ body {
   cursor: not-allowed;
 }
 
+.css-2g0tz1:focus,
+.css-2g0tz1[data-focus],
+.css-18rgift:focus,
+.css-18rgift[data-focus] {
+  box-shadow: none !important;
+}
+
 model-viewer {
   width: 100%;
   height: 100%;
@@ -200,4 +207,23 @@ model-viewer {
 
 .react-tag-input__tag__content {
   margin-bottom: 2px;
+}
+
+/* React Horizontal Scrolling Menu */
+/* Chakra-UI Modification for <Tabs /> */
+.css-2g0tz1:focus,
+.css-2g0tz1[data-focus],
+.css-18rgift:focus,
+.css-18rgift[data-focus] {
+  box-shadow: none !important;
+}
+
+/* chrome and chromium based */
+.react-horizontal-scrolling-menu--scroll-container::-webkit-scrollbar {
+  display: none;
+}
+
+.react-horizontal-scrolling-menu--scroll-container {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
 }

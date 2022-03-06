@@ -38,6 +38,7 @@
     "path-browserify": "^1.0.1",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
+    "react-horizontal-scrolling-menu": "^2.7.1",
     "react-paginate": "^8.1.2",
     "react-player": "^2.9.0",
     "react-query": "^3.34.16",

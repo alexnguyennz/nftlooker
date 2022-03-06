@@ -12,8 +12,8 @@ import {
 // Redux
 import { useSelector, useDispatch } from 'react-redux';
 import {
-  isLoading,
-  isNotLoading,
+  viewIsLoading,
+  viewIsNotLoading,
   loadingState,
 } from '../state/loading/loadingSlice';
 import { toggleTestnets, testnetsState } from '../state/testnets/testnetsSlice';
@@ -152,11 +152,13 @@ export function Layout(props) {
 
     if (params.walletAddress) {
       setAddress(params.walletAddress);
+    } else if (params.q) {
+      setSearch(params.q);
     }
 
     return () => {
       fetchController.abort();
-      dispatch(isNotLoading());
+      dispatch(viewIsNotLoading());
     };
   }, []);
 
@@ -194,13 +196,11 @@ export function Layout(props) {
   }
 
   async function getRandomWallet() {
-    dispatch(isLoading());
+    dispatch(viewIsLoading());
 
     const response = await axios
       .get(`/api/randomWallet`, { signal: fetchController.signal })
       .catch((err) => console.log(err));
-
-    console.log('response', response);
 
     setAddress(response.data);
     navigate(`/${response.data}`);
@@ -262,16 +262,12 @@ export function Layout(props) {
 
   function handleSearch(e) {
     e.preventDefault();
-    console.log('running search');
 
     navigate(`/search/${search}`);
   }
 
   function handleTestnetsToggle() {
     dispatch(toggleTestnets());
-
-    // console.log(location.pathname);
-
     navigate(location.pathname);
   }
 

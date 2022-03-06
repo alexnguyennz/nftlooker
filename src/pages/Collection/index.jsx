@@ -93,7 +93,7 @@ async function fetchNfts({ pageParam = 0 }) {
 export function CollectionNfts() {
   const params = useParams(); // React Router
 
-  const fetchTest = async ({ pageParam = 0 }) => {
+  const fetchNfts = async ({ pageParam = 0 }) => {
     const { data } = await axios(
       `/api/collection/nfts?chain=${params.chain}&address=${params.contractAddress}&limit=5&offset=` +
         pageParam
@@ -114,7 +114,7 @@ export function CollectionNfts() {
     isFetchingNextPage,
     fetchNextPage,
     hasNextPage,
-  } = useInfiniteQuery('nftMetadata', fetchTest, {
+  } = useInfiniteQuery('nftMetadata', fetchNfts, {
     refetchOnWindowFocus: false,
     getNextPageParam: (lastPage) => {
       if (lastPage.offset <= 500) return lastPage.offset; // only allow up to 100 pages / 500 offsets

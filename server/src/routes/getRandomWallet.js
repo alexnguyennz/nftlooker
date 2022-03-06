@@ -51,7 +51,11 @@ const getRandomWallet = async (req, res) => {
   const rand = Math.floor(Math.random() * transactions.length);
 
   try {
-    if (transactions[rand].to_address) {
+    if (
+      transactions[rand].to_address &&
+      transactions[rand].to_address !=
+        '0x0000000000000000000000000000000000000000'
+    ) {
       res.send(transactions[rand].to_address);
     } else {
       res.send(transactions[rand].from_address);

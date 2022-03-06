@@ -9,7 +9,7 @@ import {
 
 // PAGES
 import { Layout } from './pages/Layout';
-import { UserNFTs, UserNFTsTest } from './pages/UserNFTs';
+import { UserNFTs } from './pages/UserNFTs';
 import { Collection } from './pages/Collection';
 import { NFT } from './pages/NFT';
 import { SearchNFTs } from './pages/SearchNFTs';
