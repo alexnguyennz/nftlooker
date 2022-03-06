@@ -7,5 +7,5 @@ export default function profilerCallback(
   commitTime,
   interactions
 ) {
-  console.log(`${id} (${phase}) Actual Duration: ${actualDuration}`);
+  // console.log(`${id} (${phase}) Actual Duration: ${actualDuration}`);
 }
