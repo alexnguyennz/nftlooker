@@ -49,7 +49,7 @@ const getNft = async (req, res) => {
         metadata.image = cloudinary.url(metadata.image, {
           type: 'fetch',
           transformation: [
-            { width: 250, height: 250 },
+            { width: 1000, height: 1000 },
             { fetch_format: 'mp4' },
           ],
           default_image: DEFAULT_CLOUDINARY_IMG,
@@ -62,8 +62,7 @@ const getNft = async (req, res) => {
         // Cloudinary
         metadata.image = cloudinary.url(`remote_https_media/${stripped}`, {
           resource_type: 'video',
-          eager: [{ width: 250, height: 250, crop: 'pad' }],
-          eager_async: true,
+          transformation: [{ width: 1000, height: 750 }], // 4/3
           default_image: DEFAULT_CLOUDINARY_IMG,
         });
       } else if (

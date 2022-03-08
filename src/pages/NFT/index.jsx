@@ -129,6 +129,14 @@ export function NFT() {
                   rel="noopener noreferrer nofollow"
                 >
                   {truncateAddress(data.owner_of)}
+                </a>{' '}
+                -{' '}
+                <a
+                  href={`/${data.owner_of}`}
+                  target="_blank"
+                  rel="noopener noreferrer nofollow"
+                >
+                  View NFTs
                 </a>
               </span>
             </div>

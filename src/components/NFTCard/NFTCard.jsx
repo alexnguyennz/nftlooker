@@ -15,6 +15,9 @@ import { ExternalLinkIcon } from '@chakra-ui/icons';
 
 import ModelViewer from '@google/model-viewer';
 
+// Components
+//import NFTImage from '../../components/NFTImage/NFTImage';
+
 const mime = require('mime-types');
 
 const contentType = require('content-type');
@@ -30,18 +33,11 @@ async function getContentType(image) {
 }
 
 function NFTImage(props) {
-  const collection = props.collection;
   const chain = props.chain;
 
   const nft = props.nft;
   const image = nft.metadata.image;
   const mimeType = mime.lookup(image);
-
-  let type;
-
-  //getContentType(image).then((response) => (type = response));
-
-  //console.log('mime', mimeType);
 
   switch (mimeType) {
     case 'image/gif':
@@ -69,14 +65,16 @@ function NFTImage(props) {
       return (
         <model-viewer
           bounds="tight"
-          src="/img/membership.glb"
+          src={image}
           ar
           ar-modes="webxr scene-viewer quick-look"
           camera-controls
           environment-image="neutral"
-          poster="poster.webp"
+          //poster="poster.webp"
           shadow-intensity="1"
           autoplay
+          width="100px"
+          height="100px"
         ></model-viewer>
       );
     default:

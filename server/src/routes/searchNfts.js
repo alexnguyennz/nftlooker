@@ -10,7 +10,6 @@ const {
   DEFAULT_IMAGEKIT_IMG,
 } = require('../utils/image.js');
 const changeIpfsUrl = require('../utils/changeIpfsUrl.js');
-const resolveDomain = require('../utils/resolve.js');
 
 // Moralis SearchNFTs
 const searchNfts = async (req, res) => {
@@ -35,11 +34,9 @@ const searchNfts = async (req, res) => {
   const nfts = response.data.result.map(async (item) => {
     // get missing name property that is missing from this endpoint
     // GetTokenIdMetadata
-    //console.log(item);
-
-    /* let responseTest = await axios
+    /* let nameResponse = await axios
       .get(
-        `${MORALIS_API}/nft/${item.token_address}/${item.token_id}?chain=${chain}&format=decimal`,
+        `${process.env.MORALIS_API_URL}/nft/${item.token_address}/${item.token_id}?chain=${chain}&format=decimal`,
         {
           headers: {
             accept: 'application/json',
@@ -49,9 +46,9 @@ const searchNfts = async (req, res) => {
       )
       .catch((err) => {
         console.log(err);
-      }); */
+      });
 
-    //console.log(responseTest.data.name);
+    item.name = nameResponse.data.name; */
 
     const response = await axios.get(item.token_uri).catch((err) => {
       if (err.code == 'ENOTFOUND') console.log(err);
@@ -160,11 +157,12 @@ const searchNfts = async (req, res) => {
   });
 
   await Promise.allSettled(nfts).then((responses) => {
+    //console.log('responses', responses[0]);
     const data = responses.map((item) => {
       return item.value;
     });
 
-    // console.log(`${chain} nfts`, data);
+    console.log(`${chain} nfts`, data);
 
     // group NFTs by collection
     const grouped = data.reduce((acc, element) => {
@@ -183,7 +181,7 @@ const searchNfts = async (req, res) => {
       return acc;
     }, Object.create(null));
 
-    //console.log('grouped', grouped);
+    //console.log(grouped);
 
     res.send(grouped);
   });

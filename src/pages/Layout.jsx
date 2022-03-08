@@ -69,6 +69,7 @@ import {
   AccordionPanel,
   AccordionIcon,
   IconButton,
+  Spinner,
 } from '@chakra-ui/react';
 import {
   SunIcon,
@@ -89,7 +90,10 @@ import {
   Fantom,
 } from '../components/ChainIcons';
 
+// UTILS
 import ellipseAddress from '../utils/ellipseAddress';
+import { explorer } from '../utils/chainExplorer';
+
 import axios from 'axios';
 
 // Tags
@@ -104,6 +108,7 @@ export function Layout(props) {
   const [address, setAddress] = useState('');
   const [walletConnected, setWalletConnected] = useState(false);
   const [walletAddress, setWalletAddress] = useState(null);
+  const [chain, setChain] = useState(null);
 
   const [search, setSearch] = useState(['']);
   const [tags, setTags] = useState([]);
@@ -232,8 +237,9 @@ export function Layout(props) {
 
         // manually get data for NFTs
         setAddress(account[0]);
-
         navigate(`/${account[0]}`);
+
+        setChain(ethereum.networkVersion);
 
         console.log('Connected wallet:', account[0]);
       } catch (err) {
@@ -329,10 +335,10 @@ export function Layout(props) {
         )}
         {walletAddress && (
           <a
-            href={`https://etherscan.io/address/${walletAddress}`}
+            href={`https://${explorer(chain)}/address/${walletAddress}`}
             target="_blank"
             rel="noreferrer noopener nofollow"
-            title="View on Etherscan"
+            title={`View on ${explorer(chain)}`}
           >
             {ellipseAddress(walletAddress)}
           </a>
@@ -510,6 +516,10 @@ export function Layout(props) {
                 </li>
                 <li>broken metadata and/or media (image, video) links</li>
                 <li>dead or insecure sites</li>
+                <li>
+                  general unreliability and poor performance when accessing IPFS
+                  data
+                </li>
               </ul>
             </ModalBody>
             <ModalFooter>
@@ -562,19 +572,41 @@ export function Layout(props) {
                 />
 
                 <div className="space-x-5">
-                  <Button
-                    type="submit"
-                    isLoading={loading}
-                    size="lg"
-                    loadingText="Loading"
-                    spinnerPlacement="end"
-                    colorScheme="blue"
-                    rightIcon={<Search2Icon />}
-                  >
-                    view
-                  </Button>
+                  {!loading && (
+                    <>
+                      <Button
+                        type="submit"
+                        isLoading={loading}
+                        size="lg"
+                        loadingText="Loading"
+                        spinnerPlacement="end"
+                        colorScheme="blue"
+                        rightIcon={<Search2Icon />}
+                      >
+                        view
+                      </Button>
+                      <Button
+                        onClick={getRandomWallet}
+                        size="lg"
+                        loadingText="Loading"
+                        spinnerPlacement="end"
+                        colorScheme="blue"
+                      >
+                        random
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 512 512"
+                          fill={colorModeBg}
+                          width="20"
+                          className="ml-2"
+                        >
+                          <path d="M424.1 287c-15.13-15.12-40.1-4.426-40.1 16.97V352h-48L153.6 108.8c-6-8-15.5-12.8-25.6-12.8H32c-17.69 0-32 14.3-32 32s14.31 32 32 32h80l182.4 243.2c6 8.1 15.5 12.8 25.6 12.8h63.97v47.94c0 21.39 25.86 32.12 40.99 17l79.1-79.98c9.387-9.387 9.387-24.59 0-33.97L424.1 287zM336 160h47.97v48.03c0 21.39 25.87 32.09 40.1 16.97l79.1-79.98c9.387-9.391 9.385-24.59-.001-33.97l-79.1-79.98c-15.13-15.12-40.99-4.391-40.99 17V96H320c-10.06 0-19.56 4.75-25.59 12.81L254 162.7l39.1 53.3 42.9-56zM112 352H32c-17.69 0-32 14.31-32 32s14.31 32 32 32h96c10.06 0 19.56-4.75 25.59-12.81l40.4-53.87L154 296l-42 56z" />
+                        </svg>
+                      </Button>
+                    </>
+                  )}
 
-                  {/*loading && (
+                  {loading && (
                     <Button
                       type="submit"
                       size="lg"
@@ -582,31 +614,10 @@ export function Layout(props) {
                       spinnerPlacement="end"
                       colorScheme="red"
                       backgroundColor="red.400"
-                      rightIcon={<SmallCloseIcon />}
-                      //isDisabled={!address}
+                      rightIcon={<Spinner w={4} h={4} />}
+                      onClick={() => navigate('/')}
                     >
                       cancel
-                    </Button>
-                  ) */}
-
-                  {!loading && (
-                    <Button
-                      onClick={getRandomWallet}
-                      size="lg"
-                      loadingText="Loading"
-                      spinnerPlacement="end"
-                      colorScheme="blue"
-                    >
-                      random
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 512 512"
-                        fill={colorModeBg}
-                        width="20"
-                        className="ml-2"
-                      >
-                        <path d="M424.1 287c-15.13-15.12-40.1-4.426-40.1 16.97V352h-48L153.6 108.8c-6-8-15.5-12.8-25.6-12.8H32c-17.69 0-32 14.3-32 32s14.31 32 32 32h80l182.4 243.2c6 8.1 15.5 12.8 25.6 12.8h63.97v47.94c0 21.39 25.86 32.12 40.99 17l79.1-79.98c9.387-9.387 9.387-24.59 0-33.97L424.1 287zM336 160h47.97v48.03c0 21.39 25.87 32.09 40.1 16.97l79.1-79.98c9.387-9.391 9.385-24.59-.001-33.97l-79.1-79.98c-15.13-15.12-40.99-4.391-40.99 17V96H320c-10.06 0-19.56 4.75-25.59 12.81L254 162.7l39.1 53.3 42.9-56zM112 352H32c-17.69 0-32 14.31-32 32s14.31 32 32 32h96c10.06 0 19.56-4.75 25.59-12.81l40.4-53.87L154 296l-42 56z" />
-                      </svg>
                     </Button>
                   )}
                 </div>
@@ -618,60 +629,7 @@ export function Layout(props) {
                 onSubmit={handleSearch}
                 className="space-y-3 mx-auto text-center lg:w-1/2"
               >
-                {/*<div className="search-box">
-                  <TagsInput
-                    value={search}
-                    onChange={setSearch}
-                    name="search"
-                    className="search"
-                    placeHolder="Enter keywords"
-                  />
-                  </div>*/}
-                {/*<div className="flex items-center space-x-3">
-                  <ReactTagInput
-                    tags={tags}
-                    onChange={(newTags) => setTags(newTags)}
-                    placeholder="Enter keywords"
-                    removeOnBackspace="yes"
-                    maxTags={10}
-                  />
-                  <Box>
-                    <Menu
-                      closeOnSelect={false}
-                      isLazy
-                      lazyBehavior
-                      padding="50px"
-                    >
-                      <MenuButton
-                        as={IconButton}
-                        aria-label="Options"
-                        icon={<SettingsIcon />}
-                        padding="18px"
-                        paddingY="24px"
-                        //colorScheme="pink"
-                      />
-                      <MenuList minWidth="120px" className="p-3">
-                        <MenuOptionGroup
-                          defaultValue="5"
-                          title="Limit"
-                          type="radio"
-                          className="text-left"
-                          marginLeft="0"
-                        >
-                          <Select className="">
-                            <option value="5">5</option>
-                            <option value="10">10</option>
-                            <option value="25">25</option>
-                            <option value="50">50</option>
-                            <option value="100">100</option>
-                          </Select>
-                        </MenuOptionGroup>
-                      </MenuList>
-                    </Menu>
-                  </Box>
-                </div>*/}
-
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center space-x-5">
                   <Input
                     placeholder="Enter keywords"
                     value={search}
@@ -739,17 +697,34 @@ export function Layout(props) {
                 </div>
 
                 <div className="space-x-5">
-                  <Button
-                    type="submit"
-                    isLoading={loading}
-                    size="lg"
-                    loadingText="Loading"
-                    spinnerPlacement="end"
-                    colorScheme="blue"
-                    rightIcon={<Search2Icon />}
-                  >
-                    search
-                  </Button>
+                  {!loading && (
+                    <Button
+                      type="submit"
+                      isLoading={loading}
+                      size="lg"
+                      loadingText="Loading"
+                      spinnerPlacement="end"
+                      colorScheme="blue"
+                      rightIcon={<Search2Icon />}
+                    >
+                      search
+                    </Button>
+                  )}
+
+                  {loading && (
+                    <Button
+                      type="submit"
+                      size="lg"
+                      loadingText="Loading"
+                      spinnerPlacement="end"
+                      colorScheme="red"
+                      backgroundColor="red.400"
+                      rightIcon={<Spinner w={4} h={4} />}
+                      onClick={() => navigate('/')}
+                    >
+                      cancel
+                    </Button>
+                  )}
                 </div>
               </form>
             </TabPanel>
