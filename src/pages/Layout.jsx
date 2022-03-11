@@ -107,7 +107,7 @@ import '@pathofdev/react-tag-input/build/index.css';
 export function Layout(props) {
   const [address, setAddress] = useState('');
   const [walletConnected, setWalletConnected] = useState(false);
-  const [walletAddress, setWalletAddress] = useState(null);
+  const [walletAddress, setWalletAddress] = useState('');
   const [chain, setChain] = useState(null);
 
   const [search, setSearch] = useState(['']);
@@ -116,12 +116,12 @@ export function Layout(props) {
   const isFetching = useIsFetching();
 
   useEffect(() => {
-    if (isFetching != 0) {
+    if (isFetching > 0) {
       console.log('FETCHING');
     } else {
       console.log('STOPPED FETCHING');
     }
-  });
+  }, [isFetching]);
 
   // Modal
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -179,20 +179,7 @@ export function Layout(props) {
     };
   }, []);
 
-  useEffect(() => {
-    if (window.ethereum) {
-      window.ethereum.on('accountsChanged', (accounts) => {
-        if (accounts.length > 0) {
-          console.log('change');
-          //const accounts = await ethereum.request({ method: "eth_accounts" });
-        } else {
-          // setWallet("");
-          console.log('change');
-          // setStatus("🦊 Connect to Metamask using the top right button.");
-        }
-      });
-    }
-  }, []);
+  useEffect(() => {}, [ethereum]);
 
   // detect account change
   async function web3() {
@@ -289,6 +276,43 @@ export function Layout(props) {
     navigate(location.pathname);
   }
 
+  function ConnectWallet() {
+    if (!walletConnected)
+      return (
+        <Button
+          colorScheme="red"
+          backgroundColor="red.400"
+          rightIcon={<AccountBalanceWalletIcon />}
+          onClick={connectWallet}
+        >
+          connect
+        </Button>
+      );
+
+    return (
+      <>
+        <a
+          href={`https://${explorer(chain)}/address/${walletAddress}`}
+          target="_blank"
+          rel="noreferrer noopener nofollow"
+          title={`View on ${explorer(chain)}`}
+        >
+          {ellipseAddress(walletAddress)}
+        </a>
+
+        <Button onClick={() => navigate(`/${walletAddress}`)}>portfolio</Button>
+        <Button
+          colorScheme="red"
+          backgroundColor="red.400"
+          rightIcon={<AccountBalanceWalletIcon />}
+          onClick={disconnectWallet}
+        >
+          disconnect
+        </Button>
+      </>
+    );
+  }
+
   return (
     <div
       className={`p-5 space-y-3 flex flex-col min-h-screen ${colorModeBody}`}
@@ -333,40 +357,8 @@ export function Layout(props) {
             </Menu>
           </Box>
         )}
-        {walletAddress && (
-          <a
-            href={`https://${explorer(chain)}/address/${walletAddress}`}
-            target="_blank"
-            rel="noreferrer noopener nofollow"
-            title={`View on ${explorer(chain)}`}
-          >
-            {ellipseAddress(walletAddress)}
-          </a>
-        )}
-        {!walletConnected ? (
-          <Button
-            colorScheme="red"
-            backgroundColor="red.400"
-            rightIcon={<AccountBalanceWalletIcon />}
-            onClick={connectWallet}
-          >
-            connect
-          </Button>
-        ) : (
-          <>
-            <Button onClick={() => navigate(`/${walletAddress}`)}>
-              portfolio
-            </Button>
-            <Button
-              colorScheme="red"
-              backgroundColor="red.400"
-              rightIcon={<AccountBalanceWalletIcon />}
-              onClick={disconnectWallet}
-            >
-              disconnect
-            </Button>
-          </>
-        )}
+
+        <ConnectWallet />
 
         <Box>
           <Menu closeOnSelect={false}>
@@ -565,7 +557,6 @@ export function Layout(props) {
                   value={address}
                   onChange={(e) => setAddress(e.currentTarget.value)}
                   size="lg"
-                  autoFocus
                   isDisabled={loading}
                   backgroundColor={colorModeBg}
                   isRequired
@@ -635,7 +626,6 @@ export function Layout(props) {
                     value={search}
                     onChange={(e) => setSearch(e.currentTarget.value)}
                     size="lg"
-                    autoFocus
                     isDisabled={loading}
                     backgroundColor={colorModeBg}
                     isRequired
