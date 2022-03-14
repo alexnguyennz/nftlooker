@@ -27,8 +27,14 @@ import { changeTab, tabState } from '../state/tab/tabSlice';
 
 import { useIsFetching } from 'react-query';
 
-// Ethers
+// Wallet connectivity
 import { ethers } from 'ethers';
+import { sequence } from '0xsequence';
+import WalletModal from '../components/WalletModal/WalletModal';
+/* import WalletConnectProvider from '@walletconnect/web3-provider';
+import { Buffer } from 'buffer';
+if (!window.Buffer) window.Buffer = Buffer; */
+//import WalletConnectQRCodeModal from '@walletconnect-qrcode-modal';
 
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 
@@ -80,6 +86,16 @@ import {
   SmallCloseIcon,
 } from '@chakra-ui/icons';
 
+import {
+  AutoComplete,
+  AutoCompleteInput,
+  AutoCompleteItem,
+  AutoCompleteList,
+  AutoCompleteTag,
+  AutoCompleteCreatable,
+} from '@choc-ui/chakra-autocomplete';
+import { CUIAutoComplete } from 'chakra-ui-autocomplete';
+
 import { library, icon } from '@fortawesome/fontawesome-svg-core';
 
 import {
@@ -125,6 +141,11 @@ export function Layout(props) {
 
   // Modal
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const {
+    isOpen: walletModalIsOpen,
+    onOpen: walletModalOnOpen,
+    onClose: walletModalOnClose,
+  } = useDisclosure();
 
   // initialise Ethers
   const { ethereum } = window;
@@ -158,15 +179,17 @@ export function Layout(props) {
   useEffect(() => {
     // reset app state if you go to / route
     //console.log('params', location);
-    if (location.pathname == '/') {
+
+    if (params.walletAddress) {
+      setAddress(params.walletAddress);
+    } else {
       setAddress('');
     }
   }, [location]);
 
   // set the input field to the walletAddress param
   useEffect(() => {
-    web3();
-
+    console.log('params', params.walletAddress);
     if (params.walletAddress) {
       setAddress(params.walletAddress);
     } else if (params.q) {
@@ -181,24 +204,6 @@ export function Layout(props) {
 
   useEffect(() => {}, [ethereum]);
 
-  // detect account change
-  async function web3() {
-    if (ethereum) {
-      // persist connect state
-      if (localStorage.getItem('WEB3_CONNECTED')) {
-        connectWallet();
-      }
-
-      ethereum.on('accountsChanged', async (accounts) => {
-        if (accounts.length > 0) {
-          connectWallet();
-        } else {
-          disconnectWallet();
-        }
-      });
-    }
-  }
-
   async function getRandomWallet() {
     dispatch(viewIsLoading());
 
@@ -208,51 +213,6 @@ export function Layout(props) {
 
     setAddress(response.data);
     navigate(`/${response.data}`);
-  }
-
-  async function connectWallet() {
-    if (ethereum) {
-      try {
-        provider = new ethers.providers.Web3Provider(ethereum);
-        const account = await provider.send('eth_requestAccounts', []);
-
-        setWalletAddress(account[0]);
-        setWalletConnected(true);
-
-        // persist connect state
-        localStorage.setItem('WEB3_CONNECTED', true);
-
-        // manually get data for NFTs
-        setAddress(account[0]);
-        navigate(`/${account[0]}`);
-
-        setChain(ethereum.networkVersion);
-
-        console.log('Connected wallet:', account[0]);
-      } catch (err) {
-        console.log(err);
-      }
-    }
-  }
-
-  async function disconnectWallet() {
-    try {
-      // reset wallet connection
-      provider = null;
-      setWalletAddress('');
-      setWalletConnected(false);
-
-      // persist connect state
-      localStorage.removeItem('WEB3_CONNECTED');
-
-      // reset app state
-      setAddress('');
-      navigate('/');
-
-      console.log('Disconnected wallet.');
-    } catch (err) {
-      console.error(err);
-    }
   }
 
   function handleSubmit(e) {
@@ -274,43 +234,6 @@ export function Layout(props) {
   function handleTestnetsToggle() {
     dispatch(toggleTestnets());
     navigate(location.pathname);
-  }
-
-  function ConnectWallet() {
-    if (!walletConnected)
-      return (
-        <Button
-          colorScheme="red"
-          backgroundColor="red.400"
-          rightIcon={<AccountBalanceWalletIcon />}
-          onClick={connectWallet}
-        >
-          connect
-        </Button>
-      );
-
-    return (
-      <>
-        <a
-          href={`https://${explorer(chain)}/address/${walletAddress}`}
-          target="_blank"
-          rel="noreferrer noopener nofollow"
-          title={`View on ${explorer(chain)}`}
-        >
-          {ellipseAddress(walletAddress)}
-        </a>
-
-        <Button onClick={() => navigate(`/${walletAddress}`)}>portfolio</Button>
-        <Button
-          colorScheme="red"
-          backgroundColor="red.400"
-          rightIcon={<AccountBalanceWalletIcon />}
-          onClick={disconnectWallet}
-        >
-          disconnect
-        </Button>
-      </>
-    );
   }
 
   return (
@@ -358,7 +281,7 @@ export function Layout(props) {
           </Box>
         )}
 
-        <ConnectWallet />
+        <WalletModal />
 
         <Box>
           <Menu closeOnSelect={false}>
@@ -404,9 +327,8 @@ export function Layout(props) {
         </button>
 
         <Modal size="xl" onClose={onClose} isOpen={isOpen} isCentered>
-          <ModalOverlay overflowY="scroll" /> {/* force scrollbar */}
-          <ModalContent className="mx-5">
-            <ModalHeader></ModalHeader>
+          <ModalOverlay overflowY="scroll" />
+          <ModalContent className="ml-5 mr-10">
             <ModalCloseButton />
             <ModalBody className="">
               <p className="pb-5">
@@ -630,6 +552,7 @@ export function Layout(props) {
                     backgroundColor={colorModeBg}
                     isRequired
                   />
+
                   <Box>
                     <Menu
                       closeOnSelect={false}
@@ -725,10 +648,60 @@ export function Layout(props) {
       <main className="flex-auto">
         <div className="my-10">
           <Outlet />
+
+          <TagInput />
         </div>
       </main>
 
       <Footer colorMode={colorModeInverseBg} />
     </div>
+  );
+}
+
+function TagInput() {
+  const countries = [
+    { value: 'ghana', label: 'Ghana' },
+    { value: 'nigeria', label: 'Nigeria' },
+    { value: 'kenya', label: 'Kenya' },
+    { value: 'southAfrica', label: 'South Africa' },
+    { value: 'unitedStates', label: 'United States' },
+    { value: 'canada', label: 'Canada' },
+    { value: 'germany', label: 'Germany' },
+  ];
+
+  const [pickerItems, setPickerItems] = useState(countries);
+  const [selectedItems, setSelectedItems] = useState([]);
+
+  const handleCreateItem = (item) => {
+    setPickerItems((curr) => [...curr, item]);
+    setSelectedItems((curr) => [...curr, item]);
+  };
+
+  const handleSelectedItemsChange = (selectedItems) => {
+    if (selectedItems) {
+      setSelectedItems(selectedItems);
+    }
+  };
+
+  return (
+    <Box px={8} py={4} backgroundColor="white">
+      <CUIAutoComplete
+        placeholder="Add keywords"
+        hideToggleButton
+        onCreateItem={handleCreateItem}
+        items={pickerItems}
+        tagStyleProps={{
+          rounded: 'full',
+          pt: 1,
+          pb: 2,
+          px: 2,
+          fontSize: '1rem',
+        }}
+        selectedItems={selectedItems}
+        onSelectedItemsChange={(changes) =>
+          handleSelectedItemsChange(changes.selectedItems)
+        }
+      />
+    </Box>
   );
 }
