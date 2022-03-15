@@ -10,6 +10,8 @@ import { useNavigate } from 'react-router-dom';
 // Wallet Libraries
 import { ethers } from 'ethers';
 import { sequence } from '0xsequence';
+import WalletConnect from '@walletconnect/client';
+import QRCodeModal from '@walletconnect/qrcode-modal';
 
 // Components
 import {
@@ -48,12 +50,12 @@ export default function WalletModal() {
       if (window.ethereum) {
         // persist connect state
         if (localStorage.getItem('WEB3_CONNECTED')) {
-          connectWallet();
+          connectMetaMask();
         }
 
         window.ethereum.on('accountsChanged', async (accounts) => {
           if (accounts.length > 0) {
-            connectWallet();
+            connectMetaMask();
           } else {
             disconnectWallet();
           }
@@ -72,7 +74,7 @@ export default function WalletModal() {
     console.log('wallet state', wallet);
   }, [wallet]);
 
-  async function connectWallet() {
+  async function connectMetaMask() {
     if (window.ethereum) {
       //
       onClose();
@@ -127,16 +129,18 @@ export default function WalletModal() {
   }
 
   async function connectWalletConnect() {
-    //  Create WalletConnect Provider
-    /*const provider = new WalletConnectProvider({
-      infuraId: '27e484dcd9e3efcfd25a83a78777cdf1',
+    const connector = new WalletConnect({
+      bridge: 'https://bridge.walletconnect.org', // Required
+      qrcodeModal: QRCodeModal,
     });
 
-    //  Enable session (triggers QR Code modal)
-    await provider.enable(); */
+    if (!connector.connected) {
+      // create new session
+      connector.createSession();
+    }
   }
 
-  async function connectSequenceWallet() {
+  async function connectSequence() {
     const wallet = new sequence.Wallet('polygon');
 
     const connectDetails = await wallet.connect({
@@ -170,24 +174,27 @@ export default function WalletModal() {
         >
           {/* chakra-radii-md: 0.375rem; */}
           <ModalOverlay /> {/* force scrollbar */}
-          <ModalContent className="ml-5 mr-10">
+          <ModalContent className="mx-5">
             <ModalBody padding="0">
-              <div className="modal-wallets grid sm:grid-cols-2 ">
+              <div className="modal-wallets grid sm:grid-cols-3">
                 <div
                   className={`p-5 text-center cursor-pointer transition ${colorMode}`}
-                  onClick={connectWallet}
+                  onClick={connectMetaMask}
                 >
                   <img
                     src="/icons/metamask.svg"
-                    width="64"
-                    height="64"
+                    width="71"
+                    height="71"
                     className="mx-auto"
                   />
                   <h3 className="text-center font-bold text-xl">MetaMask</h3>
                   <p>Connect to your MetaMask Wallet</p>
                 </div>
-                {/*
-                  <div className={`p-5 text-center cursor-pointer transition hover:${colorMode}`}>
+                {
+                  <div
+                    className={`p-5 text-center cursor-pointer transition ${colorMode}`}
+                    onClick={connectWalletConnect}
+                  >
                     <img
                       src="/icons/walletconnect.svg"
                       width="64"
@@ -199,10 +206,10 @@ export default function WalletModal() {
                     </h3>
                     <p>Scan with WalletConnect</p>
                   </div>
-                */}
+                }
                 <div
                   className={`p-5 text-center cursor-pointer transition ${colorMode}`}
-                  onClick={connectSequenceWallet}
+                  onClick={connectSequence}
                 >
                   <img
                     src="/icons/sequence.svg"

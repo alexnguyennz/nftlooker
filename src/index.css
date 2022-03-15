@@ -12,7 +12,6 @@ body {
     Sans-Serif; */
   font-family: 'Kanit', 'Inter', BlinkMacSystemFont, 'Segoe UI', Roboto,
     Helvetica, Arial, Sans-Serif;
-  overflow-y: scroll; /* force vertical scrollbar to avoid app shift */
 }
 
 /* Chakra-UI Modification for <Tabs /> */
@@ -233,6 +232,7 @@ model-viewer#nft-model {
   scrollbar-width: none; /* Firefox */
 }
 
+/* MODALS */
 .modal-wallets div:first-child {
   border-top-left-radius: 0.375em;
   border-top-right-radius: 0.375em;

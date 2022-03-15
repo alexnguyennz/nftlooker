@@ -28,8 +28,6 @@ import { changeTab, tabState } from '../state/tab/tabSlice';
 import { useIsFetching } from 'react-query';
 
 // Wallet connectivity
-import { ethers } from 'ethers';
-import { sequence } from '0xsequence';
 import WalletModal from '../components/WalletModal/WalletModal';
 /* import WalletConnectProvider from '@walletconnect/web3-provider';
 import { Buffer } from 'buffer';
@@ -86,14 +84,6 @@ import {
   SmallCloseIcon,
 } from '@chakra-ui/icons';
 
-import {
-  AutoComplete,
-  AutoCompleteInput,
-  AutoCompleteItem,
-  AutoCompleteList,
-  AutoCompleteTag,
-  AutoCompleteCreatable,
-} from '@choc-ui/chakra-autocomplete';
 import { CUIAutoComplete } from 'chakra-ui-autocomplete';
 
 import { library, icon } from '@fortawesome/fontawesome-svg-core';
@@ -111,11 +101,6 @@ import ellipseAddress from '../utils/ellipseAddress';
 import { explorer } from '../utils/chainExplorer';
 
 import axios from 'axios';
-
-// Tags
-import { TagsInput } from 'react-tag-input-component';
-import ReactTagInput from '@pathofdev/react-tag-input';
-import '@pathofdev/react-tag-input/build/index.css';
 
 // testing address
 //const WALLET_ADDRESS = '0x2aea6d8220b61950f30674606faaa01c23465299';
@@ -332,9 +317,8 @@ export function Layout(props) {
         </button>
 
         <Modal size="xl" onClose={onClose} isOpen={isOpen} isCentered>
-          <ModalOverlay overflowY="scroll" />
-          <ModalContent className="ml-5 mr-10">
-            <ModalCloseButton />
+          <ModalOverlay />
+          <ModalContent className="mx-5">
             <ModalBody className="">
               <p className="pb-5">
                 NFT Looker is a simple way to view NFTs - by entering a wallet
@@ -362,7 +346,7 @@ export function Layout(props) {
                 .
               </p>
 
-              <Accordion allowMultiple>
+              <Accordion>
                 <AccordionItem>
                   <h2>
                     <AccordionButton>
