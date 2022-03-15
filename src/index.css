@@ -258,3 +258,21 @@ model-viewer#nft-model {
     border-bottom-left-radius: 0;
   }
 }
+
+/* Search Tag Input */
+/* hide disabled tags list dropdown */
+div.tag-input > div > label {
+  display: none;
+}
+
+div.tag-input > div > div:nth-child(2) {
+  margin-top: 0px;
+}
+
+div.tag-input > div > div:last-child {
+  display: none;
+}
+
+div.tag-input > div > div:nth-child(2) span {
+  margin-bottom: 0;
+}

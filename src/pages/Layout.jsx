@@ -189,7 +189,7 @@ export function Layout(props) {
 
   // set the input field to the walletAddress param
   useEffect(() => {
-    console.log('params', params.walletAddress);
+    //console.log('params', params.walletAddress);
     if (params.walletAddress) {
       setAddress(params.walletAddress);
     } else if (params.q) {
@@ -228,12 +228,17 @@ export function Layout(props) {
   function handleSearch(e) {
     e.preventDefault();
 
+    console.log('search', search);
     navigate(`/search/${search}`);
   }
 
   function handleTestnetsToggle() {
     dispatch(toggleTestnets());
     navigate(location.pathname);
+  }
+
+  function handleNewSearch() {
+    navigate(`/search/${search}`);
   }
 
   return (
@@ -537,88 +542,34 @@ export function Layout(props) {
               </form>
             </TabPanel>
             <TabPanel>
-              <form
+              <div
                 //onSubmit={handleSearch}
-                onSubmit={handleSearch}
+                onSubmit={null}
                 className="space-y-3 mx-auto text-center lg:w-1/2"
               >
-                <div className="flex items-center space-x-5">
-                  <Input
-                    placeholder="Enter keywords"
-                    value={search}
-                    onChange={(e) => setSearch(e.currentTarget.value)}
-                    size="lg"
-                    isDisabled={loading}
-                    backgroundColor={colorModeBg}
-                    isRequired
-                  />
+                {/*<Input
+                  placeholder="Enter keywords"
+                  value={search}
+                  onChange={(e) => setSearch(e.currentTarget.value)}
+                  size="lg"
+                  isDisabled={loading}
+                  backgroundColor={colorModeBg}
+                  isRequired
+                  />*/}
 
-                  <Box>
-                    <Menu
-                      closeOnSelect={false}
-                      isLazy
-                      lazyBehavior
-                      padding="50px"
-                    >
-                      <MenuButton
-                        as={IconButton}
-                        aria-label="Options"
-                        icon={<SettingsIcon />}
-                        padding="18px"
-                        paddingY="24px"
-                        //colorScheme="pink"
-                      />
-                      <MenuList minWidth="120px" className="p-3">
-                        <MenuOptionGroup
-                          title="Limit"
-                          className="text-left"
-                          marginLeft="0"
-                        >
-                          <Select
-                            defaultValue={searchLimit}
-                            onChange={(e) =>
-                              dispatch(changeLimit(e.currentTarget.value))
-                            }
-                          >
-                            <option value="5">5</option>
-                            <option value="10">10</option>
-                            <option value="25">25</option>
-                            <option value="50">50</option>
-                            <option value="100">100</option>
-                          </Select>
-                        </MenuOptionGroup>
-                        <MenuOptionGroup
-                          title="Filter"
-                          className="text-left"
-                          marginLeft="0"
-                        >
-                          <Select
-                            defaultValue={searchFilter}
-                            onChange={(e) =>
-                              dispatch(changeFilter(e.currentTarget.value))
-                            }
-                          >
-                            <option value="global">All</option>
-                            <option value="name">Name</option>
-                            <option value="description">Description</option>
-                            <option value="attributes">Attributes</option>
-                          </Select>
-                        </MenuOptionGroup>
-                      </MenuList>
-                    </Menu>
-                  </Box>
-                </div>
+                <KeywordInput />
 
-                <div className="space-x-5">
+                {/*<div className="space-x-5">
                   {!loading && (
                     <Button
-                      type="submit"
+                      //type="submit"
                       isLoading={loading}
                       size="lg"
                       loadingText="Loading"
                       spinnerPlacement="end"
                       colorScheme="blue"
                       rightIcon={<Search2Icon />}
+                      onClick={handleSearch}
                     >
                       search
                     </Button>
@@ -638,8 +589,55 @@ export function Layout(props) {
                       cancel
                     </Button>
                   )}
-                </div>
-              </form>
+                  <Menu closeOnSelect={false} isLazy lazyBehavior>
+                    <MenuButton
+                      as={IconButton}
+                      aria-label="Options"
+                      icon={<SettingsIcon />}
+                      padding="18px"
+                      paddingY="26px"
+                    />
+                    <MenuList minWidth="120px" className="p-3">
+                      <MenuOptionGroup
+                        title="Limit"
+                        className="text-left"
+                        marginLeft="0"
+                        marginTop="0"
+                      >
+                        <Select
+                          defaultValue={searchLimit}
+                          onChange={(e) =>
+                            dispatch(changeLimit(e.currentTarget.value))
+                          }
+                        >
+                          <option value="5">5</option>
+                          <option value="10">10</option>
+                          <option value="25">25</option>
+                          <option value="50">50</option>
+                          <option value="100">100</option>
+                        </Select>
+                      </MenuOptionGroup>
+                      <MenuOptionGroup
+                        title="Filter"
+                        className="text-left"
+                        marginLeft="0"
+                      >
+                        <Select
+                          defaultValue={searchFilter}
+                          onChange={(e) =>
+                            dispatch(changeFilter(e.currentTarget.value))
+                          }
+                        >
+                          <option value="global">All</option>
+                          <option value="name">Name</option>
+                          <option value="description">Description</option>
+                          <option value="attributes">Attributes</option>
+                        </Select>
+                      </MenuOptionGroup>
+                    </MenuList>
+                  </Menu>
+                        </div>*/}
+              </div>
             </TabPanel>
           </TabPanels>
         </Tabs>
@@ -648,8 +646,6 @@ export function Layout(props) {
       <main className="flex-auto">
         <div className="my-10">
           <Outlet />
-
-          <TagInput />
         </div>
       </main>
 
@@ -658,18 +654,24 @@ export function Layout(props) {
   );
 }
 
-function TagInput() {
-  const countries = [
-    { value: 'ghana', label: 'Ghana' },
-    { value: 'nigeria', label: 'Nigeria' },
-    { value: 'kenya', label: 'Kenya' },
-    { value: 'southAfrica', label: 'South Africa' },
-    { value: 'unitedStates', label: 'United States' },
-    { value: 'canada', label: 'Canada' },
-    { value: 'germany', label: 'Germany' },
-  ];
+function KeywordInput() {
+  // Redux
+  const loading = useSelector(loadingState);
+  const testnets = useSelector(testnetsState);
+  const searchLimit = useSelector(searchLimitState);
+  const searchFilter = useSelector(searchFilterState);
+  const tab = useSelector(tabState);
+  const dispatch = useDispatch();
 
-  const [pickerItems, setPickerItems] = useState(countries);
+  // React Router
+  const navigate = useNavigate();
+  const params = useParams();
+
+  // Chakra UI Autocomplete
+  let items = [];
+
+  const [pickerItems, setPickerItems] = useState(items);
+
   const [selectedItems, setSelectedItems] = useState([]);
 
   const handleCreateItem = (item) => {
@@ -683,25 +685,149 @@ function TagInput() {
     }
   };
 
+  useEffect(() => {
+    //console.log('params', params.q);
+
+    // add tags manually based on query
+    if (params.q) {
+      // convert params into array
+      const queries = params.q.split(' ');
+
+      // convert back into keywords to load into initial input state
+      const keywords = queries.map((query) => {
+        return {
+          label: query,
+          value: query,
+        };
+      });
+
+      //console.log();
+      items = keywords;
+      setSelectedItems(keywords);
+    }
+    //items =
+  }, []);
+
+  /* useEffect(() => {
+    const keywords = selectedItems.map((item) => {
+      return item.value;
+    });
+
+    console.log('Keywords', keywords);
+  }, [items]); */
+
+  function handleSearch() {
+    const keywords = selectedItems.map((item) => {
+      return item.value;
+    });
+
+    console.log('selectedItems', selectedItems);
+
+    const query = keywords.join(' ');
+    console.log('query', query);
+
+    navigate(`/search/${query}`);
+  }
+
   return (
-    <Box px={8} py={4} backgroundColor="white">
-      <CUIAutoComplete
-        placeholder="Add keywords"
-        hideToggleButton
-        onCreateItem={handleCreateItem}
-        items={pickerItems}
-        tagStyleProps={{
-          rounded: 'full',
-          pt: 1,
-          pb: 2,
-          px: 2,
-          fontSize: '1rem',
-        }}
-        selectedItems={selectedItems}
-        onSelectedItemsChange={(changes) =>
-          handleSelectedItemsChange(changes.selectedItems)
-        }
-      />
-    </Box>
+    <>
+      <div className="tag-input">
+        <CUIAutoComplete
+          placeholder="Enter keywords"
+          onCreateItem={handleCreateItem}
+          items={pickerItems}
+          selectedItems={selectedItems}
+          onSelectedItemsChange={(changes) =>
+            handleSelectedItemsChange(changes.selectedItems)
+          }
+          tagStyleProps={{
+            rounded: 'full',
+            px: 4,
+            py: 1,
+            fontSize: '1rem',
+          }}
+          inputStyleProps={{
+            backgroundColor: 'white',
+            size: 'lg',
+          }}
+          hideToggleButton
+          createItemRenderer={(value) => `Add "${value}"`}
+        />
+      </div>
+      <div className="space-x-5">
+        {!loading && (
+          <Button
+            //type="submit"
+            isLoading={loading}
+            size="lg"
+            loadingText="Loading"
+            spinnerPlacement="end"
+            colorScheme="blue"
+            rightIcon={<Search2Icon />}
+            onClick={handleSearch}
+          >
+            search
+          </Button>
+        )}
+
+        {loading && (
+          <Button
+            type="submit"
+            size="lg"
+            loadingText="Loading"
+            spinnerPlacement="end"
+            colorScheme="red"
+            backgroundColor="red.400"
+            rightIcon={<Spinner w={4} h={4} />}
+            onClick={() => navigate('/')}
+          >
+            cancel
+          </Button>
+        )}
+        <Menu closeOnSelect={false} isLazy lazyBehavior>
+          <MenuButton
+            as={IconButton}
+            aria-label="Options"
+            icon={<SettingsIcon />}
+            padding="18px"
+            paddingY="26px"
+          />
+          <MenuList minWidth="120px" className="p-3">
+            <MenuOptionGroup
+              title="Limit"
+              className="text-left"
+              marginLeft="0"
+              marginTop="0"
+            >
+              <Select
+                defaultValue={searchLimit}
+                onChange={(e) => dispatch(changeLimit(e.currentTarget.value))}
+              >
+                <option value="5">5</option>
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+              </Select>
+            </MenuOptionGroup>
+            <MenuOptionGroup
+              title="Filter"
+              className="text-left"
+              marginLeft="0"
+            >
+              <Select
+                defaultValue={searchFilter}
+                onChange={(e) => dispatch(changeFilter(e.currentTarget.value))}
+              >
+                <option value="global">All</option>
+                <option value="name">Name</option>
+                <option value="description">Description</option>
+                <option value="attributes">Attributes</option>
+              </Select>
+            </MenuOptionGroup>
+          </MenuList>
+        </Menu>
+      </div>
+    </>
   );
 }
