@@ -38,6 +38,7 @@ function NFTImage(props) {
   const nft = props.nft;
   const image = nft.metadata.image;
   const mimeType = mime.lookup(image);
+  console.log('mimeType', mimeType);
 
   switch (mimeType) {
     case 'image/gif':
@@ -76,6 +77,19 @@ function NFTImage(props) {
           width="100px"
           height="100px"
         ></model-viewer>
+      );
+    case 'audio/wave':
+    case 'audio/wav':
+    case 'audio/mpeg':
+    case 'audio/ogg':
+    case 'audio/webm':
+      return (
+        <audio
+          style={{ width: '100%' }}
+          src={image}
+          controls
+          preload="length"
+        ></audio>
       );
     default:
       return (
@@ -119,29 +133,9 @@ export function NFTCard(props) {
         <div
           className={`mt-auto overflow-hidden rounded-lg shadow-md  transition-all hover:-translate-y-2 ${colorModeBg}`}
         >
-          <div className="wrapper relative">
-            {nft.metadata.original_image && (
-              <div className="absolute right-0 m-3">
-                <Tooltip
-                  label="Open original NFT link"
-                  openDelay={750}
-                  hasArrow
-                >
-                  <a
-                    href={nft.metadata.original_image}
-                    target="_blank"
-                    rel="noreferrer noopener nofollow"
-                    className="z-0"
-                  >
-                    <ExternalLinkIcon color="gray.600" boxSize={5} />
-                  </a>
-                </Tooltip>
-              </div>
-            )}
-            {nft.metadata && (
-              <NFTImage collection={collection} nft={nft} chain={chain} />
-            )}
-          </div>
+          {nft.metadata && (
+            <NFTImage collection={collection} nft={nft} chain={chain} />
+          )}
 
           <div className="p-3 mt-auto space-y-2">
             <h3 className="text-center font-semibold">
@@ -151,7 +145,7 @@ export function NFTCard(props) {
                 {nft.metadata && nft.metadata.name}
               </Link>
             </h3>
-            <div className="flex justify-end">
+            <div className="flex justify-between items-center">
               <Button size="xs">
                 <Link
                   to={`/${chain}/collection/${nft.token_address}/nft/${nft.token_id}`}
@@ -159,6 +153,18 @@ export function NFTCard(props) {
                   View
                 </Link>
               </Button>
+              {nft.metadata.original_image && (
+                <Tooltip label="Open original link" openDelay={750} hasArrow>
+                  <a
+                    href={nft.metadata.original_image}
+                    target="_blank"
+                    rel="noreferrer noopener nofollow"
+                    className="z-0"
+                  >
+                    <ExternalLinkIcon color="gray.600" boxSize={4} />
+                  </a>
+                </Tooltip>
+              )}
             </div>
           </div>
         </div>

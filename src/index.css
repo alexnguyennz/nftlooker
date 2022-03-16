@@ -243,7 +243,8 @@ model-viewer#nft-model {
   border-bottom-right-radius: 0.375em;
 }
 
-@media screen(sm) {
+@media screen and (min-width: 640px) {
+  /* @media screen(sm) { */
   .modal-wallets div:first-child {
     border-top-left-radius: 0.375em;
     border-bottom-left-radius: 0.375em;
@@ -259,7 +260,7 @@ model-viewer#nft-model {
   }
 }
 
-/* Search Tag Input */
+/* *** Search Tag Input *** */
 /* hide disabled tags list dropdown */
 div.tag-input > div > label {
   display: none;
@@ -269,10 +270,15 @@ div.tag-input > div > div:nth-child(2) {
   margin-top: 0px;
 }
 
+div.tag-input > div > div:nth-child(3) {
+  margin-top: 0px;
+}
+
 div.tag-input > div > div:last-child {
   display: none;
 }
 
 div.tag-input > div > div:nth-child(2) span {
-  margin-bottom: 0;
+  margin-top: 3px;
+  margin-bottom: 5px;
 }

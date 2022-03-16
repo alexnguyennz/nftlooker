@@ -434,11 +434,11 @@ export function Layout(props) {
 
       <header className="text-center space-y-3">
         <h1 className="text-6xl font-bold tracking-tighter">
-          <Link to="/">nft looker.</Link>
+          <Link to="/">NFT Looker.</Link>
         </h1>
 
         <h2 className="text-xl font-semibold">
-          {tab == 0 ? `view NFTs for any wallet.` : `search for any NFT.`}
+          {tab == 0 ? `View NFTs for any wallet.` : `Search for any NFT.`}
         </h2>
 
         {/* Type
@@ -454,8 +454,8 @@ export function Layout(props) {
           //backgroundColor={colorModeBody}
         >
           <TabList>
-            <Tab>view</Tab>
-            <Tab>search</Tab>
+            <Tab>View</Tab>
+            <Tab>Search</Tab>
           </TabList>
           <TabPanels>
             <TabPanel>
@@ -485,7 +485,7 @@ export function Layout(props) {
                         colorScheme="blue"
                         rightIcon={<Search2Icon />}
                       >
-                        view
+                        View
                       </Button>
                       <Button
                         onClick={getRandomWallet}
@@ -494,7 +494,7 @@ export function Layout(props) {
                         spinnerPlacement="end"
                         colorScheme="blue"
                       >
-                        random
+                        Random
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           viewBox="0 0 512 512"
@@ -519,108 +519,15 @@ export function Layout(props) {
                       rightIcon={<Spinner w={4} h={4} />}
                       onClick={() => navigate('/')}
                     >
-                      cancel
+                      Cancel
                     </Button>
                   )}
                 </div>
               </form>
             </TabPanel>
             <TabPanel>
-              <div
-                //onSubmit={handleSearch}
-                onSubmit={null}
-                className="space-y-3 mx-auto text-center lg:w-1/2"
-              >
-                {/*<Input
-                  placeholder="Enter keywords"
-                  value={search}
-                  onChange={(e) => setSearch(e.currentTarget.value)}
-                  size="lg"
-                  isDisabled={loading}
-                  backgroundColor={colorModeBg}
-                  isRequired
-                  />*/}
-
+              <div className="space-y-3 mx-auto text-center lg:w-1/2">
                 <KeywordInput />
-
-                {/*<div className="space-x-5">
-                  {!loading && (
-                    <Button
-                      //type="submit"
-                      isLoading={loading}
-                      size="lg"
-                      loadingText="Loading"
-                      spinnerPlacement="end"
-                      colorScheme="blue"
-                      rightIcon={<Search2Icon />}
-                      onClick={handleSearch}
-                    >
-                      search
-                    </Button>
-                  )}
-
-                  {loading && (
-                    <Button
-                      type="submit"
-                      size="lg"
-                      loadingText="Loading"
-                      spinnerPlacement="end"
-                      colorScheme="red"
-                      backgroundColor="red.400"
-                      rightIcon={<Spinner w={4} h={4} />}
-                      onClick={() => navigate('/')}
-                    >
-                      cancel
-                    </Button>
-                  )}
-                  <Menu closeOnSelect={false} isLazy lazyBehavior>
-                    <MenuButton
-                      as={IconButton}
-                      aria-label="Options"
-                      icon={<SettingsIcon />}
-                      padding="18px"
-                      paddingY="26px"
-                    />
-                    <MenuList minWidth="120px" className="p-3">
-                      <MenuOptionGroup
-                        title="Limit"
-                        className="text-left"
-                        marginLeft="0"
-                        marginTop="0"
-                      >
-                        <Select
-                          defaultValue={searchLimit}
-                          onChange={(e) =>
-                            dispatch(changeLimit(e.currentTarget.value))
-                          }
-                        >
-                          <option value="5">5</option>
-                          <option value="10">10</option>
-                          <option value="25">25</option>
-                          <option value="50">50</option>
-                          <option value="100">100</option>
-                        </Select>
-                      </MenuOptionGroup>
-                      <MenuOptionGroup
-                        title="Filter"
-                        className="text-left"
-                        marginLeft="0"
-                      >
-                        <Select
-                          defaultValue={searchFilter}
-                          onChange={(e) =>
-                            dispatch(changeFilter(e.currentTarget.value))
-                          }
-                        >
-                          <option value="global">All</option>
-                          <option value="name">Name</option>
-                          <option value="description">Description</option>
-                          <option value="attributes">Attributes</option>
-                        </Select>
-                      </MenuOptionGroup>
-                    </MenuList>
-                  </Menu>
-                        </div>*/}
               </div>
             </TabPanel>
           </TabPanels>
@@ -750,7 +657,7 @@ function KeywordInput() {
             rightIcon={<Search2Icon />}
             onClick={handleSearch}
           >
-            search
+            Search
           </Button>
         )}
 
@@ -765,7 +672,7 @@ function KeywordInput() {
             rightIcon={<Spinner w={4} h={4} />}
             onClick={() => navigate('/')}
           >
-            cancel
+            Cancel
           </Button>
         )}
         <Menu closeOnSelect={false} isLazy lazyBehavior>

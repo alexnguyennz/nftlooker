@@ -170,6 +170,9 @@ const getWalletNfts = async (request, res) => {
               },
             ],
           });
+
+          // audio test
+          metadata.image = 'https://www.kozco.com/tech/piano2.wav';
         }
       }
 

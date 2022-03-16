@@ -163,7 +163,7 @@ export default function WalletModal() {
           rightIcon={<AccountBalanceWalletIcon />}
           onClick={onOpen}
         >
-          connect
+          Connect
         </Button>
         <Modal
           size="xl"
@@ -246,7 +246,7 @@ export default function WalletModal() {
         rightIcon={<AccountBalanceWalletIcon />}
         onClick={disconnectWallet}
       >
-        disconnect
+        Disconnect
       </Button>
     </>
   );

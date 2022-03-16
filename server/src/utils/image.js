@@ -17,7 +17,7 @@ var imagekit = new ImageKit({
   privateKey: process.env.IMAGEKIT_API_PRIVATE_KEY,
   urlEndpoint: process.env.IMAGEKIT_API_URL,
 });
-const DEFAULT_IMAGEKIT_IMG = 'no-image_70AD3Cs61xQ.png';
+const DEFAULT_IMAGEKIT_IMG = 'no-image_n1v9e1LpkGh.png';
 
 module.exports.cloudinary = cloudinary;
 module.exports.imagekit = imagekit;
