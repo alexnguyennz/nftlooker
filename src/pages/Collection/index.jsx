@@ -31,10 +31,12 @@ export function Collection() {
   const dispatch = useDispatch(); // React Redux
   const loading = useSelector(loadingState);
 
+  console.log('params', params);
+
   // React Query
   const queries = useQueries([
     {
-      queryKey: 'collectionMetadata',
+      queryKey: [params.chain, params.contractAddress, 'metadata'],
       queryFn: async () => {
         const { data } = await axios(
           `/api/collection/metadata?chain=${params.chain}&address=${params.contractAddress}`
@@ -43,7 +45,7 @@ export function Collection() {
       },
     },
     {
-      queryKey: 'collectionNfts',
+      queryKey: [params.chain, params.contractAddress, 'nfts'],
       queryFn: async () => {
         const { data } = await axios(
           `/api/collection/nfts?chain=${params.chain}&address=${params.contractAddress}&offset=0&limit=1`
@@ -195,8 +197,8 @@ export function CollectionNfts() {
     isFetchingNextPage,
     fetchNextPage,
     hasNextPage,
-  } = useInfiniteQuery('nftMetadata', fetchNfts, {
-    refetchOnWindowFocus: false,
+    // } = useInfiniteQuery('nftMetadata', fetchNfts, {
+  } = useInfiniteQuery([params.chain, params.contractAddress], fetchNfts, {
     getNextPageParam: (lastPage) => {
       if (lastPage.offset <= 500) return lastPage.offset; // only allow up to 100 pages / 500 offsets
     },

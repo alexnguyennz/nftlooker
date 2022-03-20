@@ -31,7 +31,7 @@ export function NFT() {
   const dispatch = useDispatch(); // React Redux
 
   // React Query
-  const { isLoading, error, data } = useQuery(
+  const { isLoading, error, data, isFetching, isStale } = useQuery(
     'nftMetadata',
     async () => {
       const { data } = await axios(
@@ -46,6 +46,14 @@ export function NFT() {
     if (data) dispatch(viewIsNotLoading());
     else dispatch(viewIsLoading());
   }, [data]);
+
+  useEffect(() => {
+    console.log('is fetching', isFetching);
+  }, [isFetching]);
+
+  useEffect(() => {
+    console.log('is stale', isStale);
+  }, [isStale]);
 
   if (isLoading) return null;
   if (error) return 'An error has occurred: ' + error.message;

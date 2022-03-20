@@ -17,6 +17,7 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       refetchOnWindowFocus: false,
+      staleTime: Infinity, // 60000, keep NFTs loaded in cache for at least a minute so user can navigate back to previous pages without refetching everything unless forced
     },
   },
 });

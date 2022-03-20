@@ -11,11 +11,7 @@ import {
 
 // Redux
 import { useSelector, useDispatch } from 'react-redux';
-import {
-  viewIsLoading,
-  viewIsNotLoading,
-  loadingState,
-} from '../state/loading/loadingSlice';
+import { viewIsLoading, viewIsNotLoading } from '../state/loading/loadingSlice';
 import { toggleTestnets, testnetsState } from '../state/testnets/testnetsSlice';
 import {
   changeLimit,
@@ -105,32 +101,23 @@ import axios from 'axios';
 // testing address
 //const WALLET_ADDRESS = '0x2aea6d8220b61950f30674606faaa01c23465299';
 
-export function Layout(props) {
+export function Layout() {
   const [address, setAddress] = useState('');
-  const [walletConnected, setWalletConnected] = useState(false);
-  const [walletAddress, setWalletAddress] = useState('');
-  const [chain, setChain] = useState(null);
 
   const [search, setSearch] = useState(['']);
-  const [tags, setTags] = useState([]);
 
   const isFetching = useIsFetching();
 
   useEffect(() => {
-    if (isFetching > 0) {
+    /*if (isFetching > 0) {
       console.log('FETCHING');
     } else {
       console.log('STOPPED FETCHING');
-    }
+    }*/
   }, [isFetching]);
 
   // Modal
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const {
-    isOpen: walletModalIsOpen,
-    onOpen: walletModalOnOpen,
-    onClose: walletModalOnClose,
-  } = useDisclosure();
 
   // initialise Ethers
   const { ethereum } = window;
@@ -143,7 +130,7 @@ export function Layout(props) {
   const fetchController = new AbortController();
 
   // Redux
-  const loading = useSelector(loadingState);
+  const loading = useSelector((state) => state.loading.value);
   const testnets = useSelector(testnetsState);
   const searchLimit = useSelector(searchLimitState);
   const searchFilter = useSelector(searchFilterState);
@@ -547,7 +534,7 @@ export function Layout(props) {
 
 function KeywordInput() {
   // Redux
-  const loading = useSelector(loadingState);
+  const loading = useSelector((state) => state.loading.value);
   const testnets = useSelector(testnetsState);
   const searchLimit = useSelector(searchLimitState);
   const searchFilter = useSelector(searchFilterState);

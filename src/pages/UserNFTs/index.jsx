@@ -31,26 +31,21 @@ import {
   Spinner,
 } from '@chakra-ui/react';
 
-import {
-  Ethereum,
-  Polygon,
-  Binance,
-  Avalanche,
-  Fantom,
-} from '../../components/ChainIcons';
+import ChainIcon from '../../components/ChainIcon/ChainIcon';
 
-import { ScrollMenu } from 'react-horizontal-scrolling-menu';
+/*import { ScrollMenu } from 'react-horizontal-scrolling-menu';
+
 import {
   onWheel,
   Arrow,
   LeftArrow,
   RightArrow,
-} from '../../components/ScrollableTab/ScrollableTab';
+} from '../../components/ScrollableTab/ScrollableTab'; */
 
 // UTILS
 import toast from '../../components/Toast/Toast';
 
-import { initialCollections } from '../../data';
+import chains from '../../data';
 
 export function UserNFTs() {
   // React Router
@@ -69,52 +64,29 @@ export function UserNFTs() {
   const [chainTab, setChainTab] = useState(null);
   let chainTabSet = false;
 
-  const [collections, setCollections] = useState(initialCollections);
-
-  // set address using address param
   useEffect(() => {
+    // document.title = `NFT Looker. ${params.walletAddress}`;
     return () => {
       dispatch(viewIsNotLoading());
     };
   }, []);
-
-  useEffect(() => {
-    document.title = `nft looker. ${params.walletAddress}`;
-
-    setCollections(initialCollections);
-  }, [params]);
 
   let chainQueries = [];
   // React Query
   if (!testnets) {
     chainQueries.push(
       useQueries(
-        Object.keys(collections.mainnets).map((chain) => {
+        Object.keys(chains).map((chain) => {
           return {
-            queryKey: [params.walletAddress, chain, location],
-            queryFn: ({ signal }) => fetchNfts(chain, true, signal),
+            queryKey: [params.walletAddress, chain], // location
+            queryFn: ({ signal }) => fetchNfts(chain, signal),
+            placeholderData: {
+              [chain]: chains[chain],
+            },
           };
         })
       )
     );
-  } else {
-    const mainnets = Object.keys(collections.mainnets).map((chain) => {
-      return {
-        queryKey: [params.walletAddress, chain, location],
-        queryFn: ({ signal }) => fetchNfts(chain, true, signal),
-      };
-    });
-
-    const testnets = Object.keys(collections.testnets).map((chain) => {
-      return {
-        queryKey: [params.walletAddress, chain, location],
-        queryFn: ({ signal }) => fetchNfts(chain, false, signal),
-      };
-    });
-
-    const merged = [...mainnets, ...testnets];
-
-    chainQueries.push(useQueries(merged));
   }
 
   useEffect(() => {
@@ -123,6 +95,8 @@ export function UserNFTs() {
     } else {
       dispatch(viewIsNotLoading());
     }
+
+    console.log('chain queries', chainQueries);
   }, [chainQueries]);
 
   useEffect(() => {
@@ -130,25 +104,23 @@ export function UserNFTs() {
     if (!loading) {
       if (testnets) {
         const noNfts =
-          Object.values(collections['mainnets']).every(
+          Object.values(chains['mainnets']).every(
             (collection) => collection.count == 0
           ) &&
-          Object.values(collections['testnets']).every(
+          Object.values(chains['testnets']).every(
             (collection) => collection.count == 0
           );
 
         setNoNfts(noNfts);
       } else {
         setNoNfts(
-          Object.values(collections['mainnets']).every(
-            (collection) => collection.count == 0
-          )
+          Object.values(chains).every((collection) => collection.count == 0)
         );
       }
     }
   }, [loading]);
 
-  async function fetchNfts(chain, isMainnet, signal) {
+  async function fetchNfts(chain, signal) {
     try {
       const { data } = await axios(
         `/api/nfts?chain=${chain}&address=${params.walletAddress}`,
@@ -174,139 +146,84 @@ export function UserNFTs() {
       });
 
       // set the chain tab to one that has NFTs and only set it once i.e. the first loaded tab
-      if (isMainnet) {
-        if (nftCount > 0 && !chainTabSet) {
-          setChainTab(collections['mainnets'][chain].order);
-          chainTabSet = true;
-        }
-
-        setCollections((prevState) => ({
-          ...prevState,
-          mainnets: {
-            ...prevState['mainnets'],
-            [chain]: {
-              ...prevState['mainnets'][chain],
-              data: data,
-              loaded: true,
-              count: nftCount,
-            },
-          },
-        }));
-      } else {
-        if (nftCount > 0 && !chainTabSet) {
-          setChainTab(collections['testnets'][chain].order);
-          chainTabSet = true;
-        }
-
-        setCollections((prevState) => ({
-          ...prevState,
-          testnets: {
-            ...prevState['testnets'],
-            [chain]: {
-              ...prevState['testnets'][chain],
-              data: data,
-              loaded: true,
-              count: nftCount,
-            },
-          },
-        }));
+      if (nftCount > 0 && !chainTabSet) {
+        setChainTab(chains[chain].order);
+        chainTabSet = true;
       }
 
-      return data;
+      return {
+        [chain]: {
+          name: chains[chain]['name'],
+          order: chains[chain]['order'],
+          data,
+          loaded: true,
+          count: nftCount,
+        },
+      };
     } catch (err) {
       //console.log(err);
     }
   }
 
-  const RenderData = React.memo(function RenderData(props) {
+  function RenderData(props) {
     const chain = props.chain;
-    const collections = props.collections;
+
+    // find relevant data in chainQueries array based on chain name
+    const query = chainQueries[0].find((query) => {
+      const queryChain = Object.keys(query.data)[0];
+      return queryChain == chain;
+    });
+
+    const queryData = query.data[chain];
+
+    // queryData.loaded && Object.keys(queryData.data).length !== 0 &&
 
     return (
-      <>
-        {collections[chain].loaded &&
-          Object.keys(collections[chain].data).length !== 0 && (
-            <div className="grid gap-5">
-              {Object.keys(collections[chain].data).map((collection) => (
-                <NFTCollection
-                  key={collection}
-                  collection={collections[chain].data[collection]}
-                  chain={chain}
-                />
-              ))}
-            </div>
-          )}
-      </>
+      <div className="grid gap-5">
+        {Object.keys(queryData.data).map((collection) => (
+          <NFTCollection
+            key={collection}
+            collection={queryData.data[collection]}
+            chain={chain}
+          />
+        ))}
+      </div>
     );
-  });
-
-  function ChainIcon(props) {
-    switch (props.chain) {
-      case 'eth':
-        return <Ethereum />;
-      case 'matic':
-        return <Polygon />;
-      case 'binance':
-        return <Binance />;
-      case 'avalanche':
-        return <Avalanche />;
-      case 'fantom':
-        return <Fantom />;
-      case 'ropsten':
-        return <Ethereum />;
-      case 'rinkeby':
-        return <Ethereum />;
-      case 'goerli':
-        return <Ethereum />;
-      case 'kovan':
-        return <Ethereum />;
-      case 'mumbai':
-        return <Polygon />;
-      case '0x61':
-        return <Binance />;
-      case '0xa869':
-        return <Avalanche />;
-      default:
-        return <Ethereum />;
-    }
   }
 
   function ChainTab(props) {
     const chain = props.chain;
-    const collections = props.collections;
-    const idx = props.index;
 
-    // bool state if count is 0 or not (no NFTs)
-    const disabled = !collections[chain].count;
+    // find relevant data in chainQueries array based on chain name
+    const query = chainQueries[0].find((query) => {
+      const queryChain = Object.keys(query.data)[0];
+      return queryChain == chain;
+    });
+
+    const queryData = query.data[chain];
+
+    //const noNftsFound = !collections[chain].count;
+    const noNftsFound = !queryData.count;
 
     return (
       <Tooltip
         label={
-          !collections[chain].count
-            ? 'No NFTs found.'
-            : `${collections[chain].count} NFTs found.`
+          noNftsFound ? 'No NFTs found.' : `${queryData.count} NFTs found.`
         }
         aria-label="NFT count tooltip"
         openDelay={750}
         shouldWrapChildren
       >
         <Tab
-          isDisabled={disabled}
-          value={idx}
-          className={disabled && `css-1ltezim`}
+          isDisabled={noNftsFound}
+          value={props.idx}
+          className={`items-center space-x-2 ${noNftsFound && `css-1ltezim`}`}
         >
-          <div className="flex flex-col md:flex-row items-center">
-            <span className="md:mr-2 text-center">
-              <ChainIcon chain={chain} />
-            </span>
-            <span className={`mb-1 ${!collections[chain].loaded && `mr-2`}`}>
-              {collections[chain].name}{' '}
-              {collections[chain].count > 0 && `(${collections[chain].count})`}
-            </span>
-            {!collections[chain].loaded && loading && (
-              <Spinner size="sm" label="loading" />
-            )}
-          </div>
+          <ChainIcon chain={chain} />
+          <span>
+            {queryData.name} {queryData.count > 0 && `(${queryData.count})`}
+          </span>
+          {!queryData.loaded && <Spinner size="sm" label="loading" />}
         </Tab>
       </Tooltip>
     );
@@ -314,87 +231,47 @@ export function UserNFTs() {
 
   return (
     <>
-      {/*loaded &&
-        chainQueries.map((chain) => (
-          //<>{Object.keys(chain.data).map((chain, idx) => console.log(chain))}</>
-          <></>
-        ))*/}
+      <Tabs
+        index={chainTab}
+        onChange={(index) => setChainTab(index)}
+        align="center"
+        variant="solid-rounded"
+        colorScheme="gray"
+        isLazy={true}
+        lazyBehavior={true}
+      >
+        <TabList>
+          {chainQueries[0].map((query, idx) => {
+            const chain = Object.keys(query.data)[0];
 
-      <>
-        <Tabs
-          index={chainTab}
-          onChange={(index) => setChainTab(index)}
-          align="center"
-          variant="solid-rounded" // variant="enclosed"
-          colorScheme="gray"
-          isLazy={true}
-          lazyBehavior={true}
-        >
-          <TabList>
-            {Object.keys(collections['mainnets']).map((chain, idx) => (
-              <ChainTab
-                chain={chain}
-                collections={collections['mainnets']}
-                index={idx}
-                key={idx}
-              />
-            ))}
-          </TabList>
+            return <ChainTab chain={chain} idx={idx} key={idx} />;
+          })}
+        </TabList>
 
-          {testnets && (
-            <TabList>
-              {Object.keys(collections['testnets']).map((chain, idx) => (
-                <ChainTab
-                  chain={chain}
-                  collections={collections['testnets']}
-                  index={idx}
-                  key={idx}
-                />
-              ))}
-            </TabList>
-          )}
+        <TabPanels>
+          {!noNfts &&
+            chainQueries[0].map((query, idx) => {
+              const chain = Object.keys(query.data)[0];
 
-          <TabPanels>
-            {
-              // !loading &&
-              !noNfts &&
-                Object.keys(collections['mainnets']).map((chain, idx) => (
-                  <TabPanel value={idx} key={chain}>
-                    {
-                      <RenderData
-                        chain={chain}
-                        collections={collections['mainnets']}
-                      />
-                    }
-                  </TabPanel>
-                ))
-            }
-
-            {testnets &&
-              !loading &&
-              !noNfts &&
-              Object.keys(collections['testnets']).map((chain, idx) => (
+              return (
                 <TabPanel value={idx} key={chain}>
-                  <RenderData
-                    chain={chain}
-                    collections={collections['testnets']}
-                  />
+                  <RenderData chain={chain} />
                 </TabPanel>
-              ))}
-          </TabPanels>
-        </Tabs>
-        {!loading && noNfts && (
-          <p className="mt-10 font-bold text-2xl text-center ">
-            No NFTs found :(
-            <img
-              src="/img/sad-chocobo.png"
-              alt="sad Moogle art"
-              className="mx-auto mt-10"
-              width="250"
-            />
-          </p>
-        )}
-      </>
+              );
+            })}
+        </TabPanels>
+      </Tabs>
+      {!loading && noNfts && (
+        <p className="mt-10 font-bold text-2xl text-center ">
+          No NFTs found :(
+          <img
+            src="/img/sad-chocobo.png"
+            alt="sad Moogle art"
+            className="mx-auto mt-10"
+            width="250"
+          />
+        </p>
+      )}
     </>
   );
 }

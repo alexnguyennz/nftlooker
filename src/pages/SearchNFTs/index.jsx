@@ -50,7 +50,7 @@ import { NFTCollection } from '../../components/NFTCollection/NFTCollection';
 import profilerCallback from '../../utils/profilerCallback';
 import toast from '../../components/Toast/Toast';
 
-import { initialCollections } from '../../data';
+import initialCollections from '../../data';
 
 export function SearchNFTs() {
   // React Router

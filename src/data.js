@@ -1,3 +1,34 @@
+const chains = {
+  eth: {
+    name: 'Ethereum',
+    order: 0,
+    data: [],
+  },
+  matic: {
+    name: 'Polygon',
+    order: 1,
+    data: [],
+  },
+  binance: {
+    name: 'Binance',
+    order: 2,
+    data: [],
+  },
+  avalanche: {
+    name: 'Avalanche',
+    order: 3,
+    data: [],
+  },
+  fantom: {
+    name: 'Fantom',
+    order: 4,
+    data: [],
+  },
+};
+
+export default chains;
+
+/* 
 export const initialCollections = {
   mainnets: {
     eth: {
@@ -52,3 +83,5 @@ export const initialCollections = {
     },
   },
 };
+
+*/
