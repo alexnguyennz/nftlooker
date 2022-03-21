@@ -281,6 +281,7 @@ export function Layout() {
                 </FormControl>
               </MenuItem>
 
+              {/*
               <MenuItem>
                 <FormControl className="flex justify-between items-center">
                   <FormLabel htmlFor="testnet" mb="0">
@@ -293,7 +294,7 @@ export function Layout() {
                     isDisabled={loading}
                   />
                 </FormControl>
-              </MenuItem>
+                </MenuItem>*/}
             </MenuList>
           </Menu>
         </Box>
@@ -445,7 +446,7 @@ export function Layout() {
             <Tab>Search</Tab>
           </TabList>
           <TabPanels>
-            <TabPanel>
+            <TabPanel paddingX="0">
               <form
                 onSubmit={handleSubmit}
                 className="space-y-3 mx-auto text-center lg:w-1/2"
@@ -512,7 +513,7 @@ export function Layout() {
                 </div>
               </form>
             </TabPanel>
-            <TabPanel>
+            <TabPanel paddingX="0">
               <div className="space-y-3 mx-auto text-center lg:w-1/2">
                 <KeywordInput />
               </div>
@@ -579,20 +580,10 @@ function KeywordInput() {
         };
       });
 
-      //console.log();
       items = keywords;
       setSelectedItems(keywords);
     }
-    //items =
   }, []);
-
-  /* useEffect(() => {
-    const keywords = selectedItems.map((item) => {
-      return item.value;
-    });
-
-    console.log('Keywords', keywords);
-  }, [items]); */
 
   function handleSearch() {
     const keywords = selectedItems.map((item) => {
@@ -627,12 +618,14 @@ function KeywordInput() {
           inputStyleProps={{
             backgroundColor: 'white',
             size: 'lg',
+            isDisabled: loading,
+            isRequired: true,
           }}
           hideToggleButton
           createItemRenderer={(value) => `Add "${value}"`}
         />
       </div>
-      <div className="space-x-5">
+      <div>
         {!loading && (
           <Button
             //type="submit"
@@ -664,11 +657,12 @@ function KeywordInput() {
         )}
         <Menu closeOnSelect={false} isLazy lazyBehavior>
           <MenuButton
+            marginLeft="1.25rem"
             as={IconButton}
             aria-label="Options"
             icon={<SettingsIcon />}
             padding="18px"
-            paddingY="26px"
+            paddingY="24px"
           />
           <MenuList minWidth="120px" className="p-3">
             <MenuOptionGroup
