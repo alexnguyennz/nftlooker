@@ -38,8 +38,7 @@ export function NFT() {
         `/api/nft?chain=${params.chain}&address=${params.contractAddress}&tokenId=${params.tokenId}`
       );
       return data;
-    },
-    { refetchOnWindowFocus: false }
+    }
   );
 
   useEffect(() => {

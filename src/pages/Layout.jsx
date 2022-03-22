@@ -21,16 +21,10 @@ import {
 } from '../state/search/searchSlice';
 import { changeTab, tabState } from '../state/tab/tabSlice';
 
-import { useIsFetching } from 'react-query';
+// React Query
+import { useQuery } from 'react-query';
 
-// Wallet connectivity
 import WalletModal from '../components/WalletModal/WalletModal';
-/* import WalletConnectProvider from '@walletconnect/web3-provider';
-import { Buffer } from 'buffer';
-if (!window.Buffer) window.Buffer = Buffer; */
-//import WalletConnectQRCodeModal from '@walletconnect-qrcode-modal';
-
-import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 
 import Footer from '../components/layouts/Footer';
 
@@ -82,20 +76,6 @@ import {
 
 import { CUIAutoComplete } from 'chakra-ui-autocomplete';
 
-import { library, icon } from '@fortawesome/fontawesome-svg-core';
-
-import {
-  Ethereum,
-  Polygon,
-  Binance,
-  Avalanche,
-  Fantom,
-} from '../components/ChainIcons';
-
-// UTILS
-import ellipseAddress from '../utils/ellipseAddress';
-import { explorer } from '../utils/chainExplorer';
-
 import axios from 'axios';
 
 // testing address
@@ -105,16 +85,6 @@ export function Layout() {
   const [address, setAddress] = useState('');
 
   const [search, setSearch] = useState(['']);
-
-  const isFetching = useIsFetching();
-
-  useEffect(() => {
-    /*if (isFetching > 0) {
-      console.log('FETCHING');
-    } else {
-      console.log('STOPPED FETCHING');
-    }*/
-  }, [isFetching]);
 
   // Modal
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -179,9 +149,9 @@ export function Layout() {
   async function getRandomWallet() {
     dispatch(viewIsLoading());
 
-    const response = await axios
-      .get(`/api/randomWallet`, { signal: fetchController.signal })
-      .catch((err) => console.log(err));
+    const response = await axios(`/api/randomWallet`, {
+      signal: fetchController.signal,
+    }).catch((err) => console.log(err));
 
     setAddress(response.data);
     navigate(`/${response.data}`);
@@ -192,25 +162,12 @@ export function Layout() {
 
     if (address) {
       navigate(`${address}`);
-    } else {
-      //alert('nivalid');
     }
-  }
-
-  function handleSearch(e) {
-    e.preventDefault();
-
-    console.log('search', search);
-    navigate(`/search/${search}`);
   }
 
   function handleTestnetsToggle() {
     dispatch(toggleTestnets());
     navigate(location.pathname);
-  }
-
-  function handleNewSearch() {
-    navigate(`/search/${search}`);
   }
 
   return (
@@ -595,7 +552,9 @@ function KeywordInput() {
     const query = keywords.join(' ');
     console.log('query', query);
 
-    navigate(`/search/${query}`);
+    if (query) {
+      navigate(`/search/${query}`);
+    }
   }
 
   return (

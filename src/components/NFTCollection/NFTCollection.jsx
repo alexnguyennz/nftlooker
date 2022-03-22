@@ -11,8 +11,8 @@ export function NFTCollection(props) {
   // console.log(collection);
 
   return (
-    <section className={`space-y-1`}>
-      <h3 className="tracking-wide text-left text-lg font-semibold">
+    <section className={`space-y-2`}>
+      <h3 className="text-left text-lg font-semibold">
         <Link to={`/${chain}/collection/${collection[0].token_address}`}>
           {collection[0].name ? collection[0].name : 'No Collection Name Found'}
           {/* {collection[0].name ? collection[0].name : 'Unnamed Collection'} */}
