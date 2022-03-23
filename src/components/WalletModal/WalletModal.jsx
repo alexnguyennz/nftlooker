@@ -239,7 +239,12 @@ export default function WalletModal() {
         {ellipseAddress(wallet.address)}
       </a>
 
-      <Button onClick={() => navigate(`/${wallet.address}`)}>portfolio</Button>
+      {/* 
+      
+      "whiteAlpha" | "blackAlpha" | "gray" | "red" | "orange" | "yellow" | "green" | "teal" | "blue" | "cyan" | "purple" | "pink" | "linkedin" | "facebook" | "messenger" | "whatsapp" | "twitter" | "telegram"
+      */}
+
+      <Button onClick={() => navigate(`/${wallet.address}`)}>Portfolio</Button>
       <Button
         colorScheme="red"
         backgroundColor="red.400"

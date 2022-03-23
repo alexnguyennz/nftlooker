@@ -123,6 +123,10 @@ export function NFTCard(props) {
   const chain = props.chain;
 
   const colorModeBg = useColorModeValue('bg-white', 'bg-gray-800');
+  const colorModeCard = useColorModeValue(
+    'bg-gray-50 border-gray-100',
+    'bg-gray-700 border-gray-800'
+  );
 
   //console.log('received nft', nft);
   //console.log('received collection', collection);
@@ -137,7 +141,8 @@ export function NFTCard(props) {
             <NFTImage collection={collection} nft={nft} chain={chain} />
           )}
 
-          <div className="p-3 mt-auto space-y-2">
+          {/* bg-gray-50 border-t border-gray-100 */}
+          <div className={`p-3 mt-auto space-y-2 border-t ${colorModeCard}`}>
             <h3 className="text-center font-semibold">
               <Link
                 to={`/${chain}/collection/${nft.token_address}/nft/${nft.token_id}`}

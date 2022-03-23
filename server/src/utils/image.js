@@ -7,7 +7,7 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
   secure: true,
 });
-const DEFAULT_CLOUDINARY_IMG = 'no-image_skjijq.png';
+const DEFAULT_CLOUDINARY_IMG = 'no-image_skjijq.png'; // change this like below
 
 // IMAGEKIT
 var ImageKit = require('imagekit');
@@ -17,7 +17,8 @@ var imagekit = new ImageKit({
   privateKey: process.env.IMAGEKIT_API_PRIVATE_KEY,
   urlEndpoint: process.env.IMAGEKIT_API_URL,
 });
-const DEFAULT_IMAGEKIT_IMG = 'no-image_n1v9e1LpkGh.png';
+//const DEFAULT_IMAGEKIT_IMG = 'no-image_n1v9e1LpkGh.png';
+const DEFAULT_IMAGEKIT_IMG = 'no-image_QdqJhXtxF.png';
 
 module.exports.cloudinary = cloudinary;
 module.exports.imagekit = imagekit;

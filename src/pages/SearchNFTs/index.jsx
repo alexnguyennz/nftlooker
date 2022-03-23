@@ -108,37 +108,58 @@ export function SearchNFTs() {
   }, [queries]);
 
   async function fetchNfts(chain, signal) {
-    const { data } = await axios(
+    // reset UI
+    dispatch(changeChainTab(-1));
+    setNoNfts('');
+
+    return await axios(
       `/api/search?chain=${chain}&q=${params.q}&filter=${searchFilter}&limit=${searchLimit}&offset=0`,
       {
         signal,
       }
-    ).catch((err) => {
-      console.log('err', err.message);
-      if (err.message == 'canceled') {
-        toast(toastInstance, 'error', 'Cancelled.');
-      } else {
-        toast(toastInstance, 'error', 'Server error', `${err.message}`);
-      }
-    });
+    )
+      .then(({ data }) => {
+        const nftCount = Object.values(data).flat().length;
 
-    const nftCount = Object.values(data).flat().length;
+        // set the chain tab to one that has NFTs and only set it once i.e. the first loaded tab
+        if (nftCount > 0 && !chainTabSet) {
+          dispatch(changeChainTab(chains[chain].order));
+          chainTabSet = true;
+        }
 
-    // set the chain tab to one that has NFTs and only set it once i.e. the first loaded tab
-    if (nftCount > 0 && !chainTabSet) {
-      dispatch(changeChainTab(chains[chain].order));
-      chainTabSet = true;
-    }
+        return {
+          [chain]: {
+            name: chains[chain]['name'],
+            order: chains[chain]['order'],
+            data,
+            loaded: true,
+            count: nftCount,
+          },
+        };
+      })
+      .catch((err) => {
+        if (err.message == 'canceled') {
+          toast(toastInstance, 'error', 'Cancelled.');
+        } else if (err.message == 'Request failed with status code 500') {
+          toast(
+            toastInstance,
+            'error',
+            'Error - likely invalid address or search.'
+          );
+        } else {
+          toast(toastInstance, 'error', 'Server error', `${err.message}`);
+        }
 
-    return {
-      [chain]: {
-        name: chains[chain]['name'],
-        order: chains[chain]['order'],
-        data,
-        loaded: true,
-        count: nftCount,
-      },
-    };
+        return {
+          [chain]: {
+            name: chains[chain]['name'],
+            order: chains[chain]['order'],
+            data: {},
+            loaded: true,
+            count: 0,
+          },
+        };
+      });
   }
 
   return (

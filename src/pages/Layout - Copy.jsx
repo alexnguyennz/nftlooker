@@ -101,6 +101,9 @@ export function Layout() {
 
   // Redux
   const loading = useSelector((state) => state.loading.value);
+  const testnets = useSelector(testnetsState);
+  const searchLimit = useSelector(searchLimitState);
+  const searchFilter = useSelector(searchFilterState);
   const tab = useSelector(tabState);
   const dispatch = useDispatch();
 
@@ -506,28 +509,17 @@ function KeywordInput() {
   const [selectedItems, setSelectedItems] = useState([]);
 
   const handleCreateItem = (item) => {
-    // don't allow empty items
-    if (item.value) {
-      setPickerItems((curr) => [...curr, item]);
-      setSelectedItems((curr) => [...curr, item]);
-    }
+    setPickerItems((curr) => [...curr, item]);
+    setSelectedItems((curr) => [...curr, item]);
   };
 
-  // removal of items
+  // deletion/backspace handler
   const handleSelectedItemsChange = (selectedItems) => {
-    console.log('selectedItems', selectedItems);
-    if (selectedItems) {
-      setSelectedItems(selectedItems);
-    }
+    setSelectedItems(selectedItems);
   };
 
-  // when a selected item is removed, also remove from picker list to allow re-entry
   useEffect(() => {
-    setPickerItems(selectedItems);
-  }, [selectedItems]);
-
-  // load in keywords manually from a search route visit
-  useEffect(() => {
+    // add tags manually based on query
     if (params.q) {
       // convert params into array
       const queries = params.q.split(' ');
@@ -540,7 +532,7 @@ function KeywordInput() {
         };
       });
 
-      //items = keywords;
+      items = keywords;
       setSelectedItems(keywords);
     }
   }, []);
@@ -553,6 +545,7 @@ function KeywordInput() {
     console.log('selectedItems', selectedItems);
 
     const query = keywords.join(' ');
+    console.log('query', query);
 
     if (query) {
       navigate(`/search/${query}`);
