@@ -19,7 +19,7 @@ import { Button, Alert, AlertIcon } from '@chakra-ui/react';
 import { ChevronDownIcon, AddIcon, ExternalLinkIcon } from '@chakra-ui/icons';
 
 // Components
-import { NFTCard } from '../../components/NFTCard/NFTCard';
+import NFTCard from '../../components/NFTCard/NFTCard';
 import NFTImage from '../../components/NFTImage/NFTImage';
 
 // UTILS

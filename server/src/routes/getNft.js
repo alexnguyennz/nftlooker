@@ -94,12 +94,21 @@ const getNft = async (req, res) => {
       }
     }
 
+    // some NFTs don't use array for attributes
+    if (!Array.isArray(metadata.attributes)) {
+      // convert into array of objects; only works for non separate key:key value:value
+      metadata.attributes = Object.entries(metadata.attributes).map(
+        ([key, value]) => ({
+          trait_type: key,
+          value: value,
+        })
+      );
+    }
+
     const nft = {
       ...response.data,
       metadata,
     };
-
-    //console.log('metadata', nft);
 
     res.send(nft);
   } else {

@@ -15,8 +15,7 @@ const resolveDomain = require('../utils/resolve.js');
 const getRandomWallet = async (req, res) => {
   const now = Math.floor(Date.now());
 
-  // Moralis getDateToBlock
-  // get latest Ethereum block
+  // Moralis getDateToBlock - get latest Ethereum block
   let response = await axios
     .get(`${process.env.MORALIS_API_URL}/dateToBlock?chain=eth&date=${now}`, {
       headers: {
@@ -30,34 +29,36 @@ const getRandomWallet = async (req, res) => {
 
   const latestBlock = response.data.block;
 
-  // get a list of NFT transactions
-  // Moralis GetNFTTransfersByBlock
-  response = await axios
-    .get(
-      `${process.env.MORALIS_API_URL}/block/${latestBlock}/nft/transfers?chain=eth&limit=250`,
-      {
-        headers: {
-          accept: 'application/json',
-          'X-API-KEY': process.env.MORALIS_API_KEY,
-        },
-      }
-    )
-    .catch((err) => {
-      console.log(err);
-    });
+  // Moralis GetNFTTransfersByBlock - get a list of NFT transactions
+  response = await axios(
+    `${process.env.MORALIS_API_URL}/block/${latestBlock}/nft/transfers?chain=eth&limit=250`,
+    {
+      headers: {
+        accept: 'application/json',
+        'X-API-KEY': process.env.MORALIS_API_KEY,
+      },
+    }
+  ).catch((err) => {
+    console.log(err);
+  });
 
   const transactions = response.data.result;
 
   const rand = Math.floor(Math.random() * transactions.length);
 
+  // to and from occasionally are null and/or empty
   try {
     if (
       transactions[rand].to_address &&
-      transactions[rand].to_address !=
+      transactions[rand].to_address !==
         '0x0000000000000000000000000000000000000000'
     ) {
       res.send(transactions[rand].to_address);
-    } else {
+    } else if (
+      transactions[rand].from_address &&
+      transactions[rand].from_address !==
+        '0x0000000000000000000000000000000000000000'
+    ) {
       res.send(transactions[rand].from_address);
     }
   } catch (err) {

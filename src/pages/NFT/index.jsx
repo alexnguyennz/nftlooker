@@ -42,17 +42,11 @@ export function NFT() {
   );
 
   useEffect(() => {
-    if (data) dispatch(viewIsNotLoading());
-    else dispatch(viewIsLoading());
+    if (data) {
+      dispatch(viewIsNotLoading());
+      console.log('data', data.metadata.attributes);
+    } else dispatch(viewIsLoading());
   }, [data]);
-
-  useEffect(() => {
-    console.log('is fetching', isFetching);
-  }, [isFetching]);
-
-  useEffect(() => {
-    console.log('is stale', isStale);
-  }, [isStale]);
 
   if (isLoading) return null;
   if (error) return 'An error has occurred: ' + error.message;
@@ -90,20 +84,19 @@ export function NFT() {
                 ATTRIBUTES
                 <br />
                 <div className="text-2xl">
-                  {data.metadata.attributes &&
-                    data.metadata.attributes.map((attribute, idx) => {
-                      const values = Object.values(attribute);
+                  {data.metadata.attributes.map((attribute, idx) => {
+                    const values = Object.values(attribute);
 
-                      return (
-                        <div
-                          className="grid grid-cols-2 xl:w-2/3 2xl:w-2/5"
-                          key={idx} // must use idx as there can be duplicate attribute keys and values
-                        >
-                          <span>{values[0]}:</span>
-                          <span>{values[1]}</span>
-                        </div>
-                      );
-                    })}
+                    return (
+                      <div
+                        className="grid grid-cols-2 "
+                        key={idx} // must use idx as there can be duplicate attribute keys and values
+                      >
+                        <span>{values[0]}:</span>
+                        <span>{values[1]}</span>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             )}

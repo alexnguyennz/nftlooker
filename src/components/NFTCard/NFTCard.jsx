@@ -1,5 +1,3 @@
-import { useState } from 'react';
-
 import { Link } from 'react-router-dom';
 
 import axios from 'axios';
@@ -116,7 +114,7 @@ function NFTImage(props) {
   }
 }
 
-export function NFTCard(props) {
+export default function NFTCard(props) {
   //const metadata = props.nft.external_data;
   const nft = props.nft;
   const collection = props.collection;

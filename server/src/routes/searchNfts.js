@@ -17,7 +17,7 @@ const searchNfts = async (req, res) => {
 
   const response = await axios
     .get(
-      `${process.env.MORALIS_API_URL}/nft/search?chain=${chain}&format=decimal&q=${q}&filter=${filter}&limit=${limit}`,
+      `${process.env.MORALIS_API_URL}/nft/search?chain=${chain}&format=decimal&q=${q}&filter=${filter}&limit=${limit}&offset=1`,
       {
         headers: {
           accept: 'application/json',

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 // Router
 import { useLocation, useParams } from 'react-router-dom';
@@ -62,6 +62,9 @@ import {
 
 import toast from '../../components/Toast/Toast';
 
+// windowing
+import { Virtuoso } from 'react-virtuoso';
+
 import { ScrollMenu } from 'react-horizontal-scrolling-menu';
 import {
   onWheel,
@@ -70,7 +73,7 @@ import {
   RightArrow,
 } from '../../components/ScrollableTab/ScrollableTab';
 
-export function UserNFTs() {
+export default function UserNFTs() {
   // Router
   const params = useParams();
   const location = useLocation();
@@ -83,6 +86,14 @@ export function UserNFTs() {
   const [noNfts, setNoNfts] = useState('');
 
   const toastInstance = useToast();
+
+  const [, setToggle] = useState(true);
+  useEffect(() => {
+    const id = setInterval(() => {
+      setToggle((toggle) => !toggle);
+    }, 3000);
+    return () => clearInterval(id);
+  }, []);
 
   useEffect(() => {
     document.title = `NFT Looker. ${params.walletAddress}`;
@@ -228,8 +239,8 @@ export function UserNFTs() {
         align="center"
         variant="solid-rounded"
         colorScheme="gray"
-        isLazy={true}
-        lazyBehavior={true}
+        isLazy={false}
+        lazyBehavior={false}
       >
         <TabList>
           <div className="flex items-center">

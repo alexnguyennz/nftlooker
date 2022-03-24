@@ -1,14 +1,14 @@
 import { Link } from 'react-router-dom';
 
-import { NFTCard } from '../NFTCard/NFTCard';
+import NFTCard from '../NFTCard/NFTCard';
 
-export function NFTCollection(props) {
+export default function NFTCollection(props) {
   const collection = props.collection;
   const chain = props.chain;
 
   //console.log('chain', props.chain);
 
-  // console.log(collection);
+  //console.log(collection);
 
   return (
     <section className={`space-y-2`}>

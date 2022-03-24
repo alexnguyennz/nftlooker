@@ -170,8 +170,8 @@ export function SearchNFTs() {
         align="center"
         variant="solid-rounded"
         colorScheme="gray"
-        isLazy={true}
-        lazyBehavior={true}
+        isLazy={false}
+        lazyBehavior={false}
       >
         <TabList>
           <div className="flex items-center">
