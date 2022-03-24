@@ -29,7 +29,10 @@ router.get('/api/search', searchNfts);
 // run Fastify server
 const main = async () => {
   try {
-    await router.listen(process.env.PORT || 7777, '0.0.0.0'); // 0.0.0.0 Heroku specific
+    await router.listen(
+      process.env.PORT || 7777,
+      process.env.HOST || '0.0.0.0'
+    ); // 0.0.0.0 Heroku specific
   } catch (err) {
     router.log.error(err);
     process.exit(1);
