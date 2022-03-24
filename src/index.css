@@ -12,7 +12,6 @@ body {
     Sans-Serif; */
   font-family: 'Kanit', 'Inter', BlinkMacSystemFont, 'Segoe UI', Roboto,
     Helvetica, Arial, Sans-Serif;
-  overflow-y: scroll; /* force vertical scrollbar to avoid app shift */
 }
 
 /* Chakra-UI Modification for <Tabs /> */
@@ -31,6 +30,11 @@ body {
 }
 
 model-viewer {
+  width: 250px;
+  height: 250px;
+}
+
+model-viewer#nft-model {
   width: 100%;
   height: 100%;
 }
@@ -226,4 +230,55 @@ model-viewer {
 .react-horizontal-scrolling-menu--scroll-container {
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox */
+}
+
+/* MODALS */
+.modal-wallets div:first-child {
+  border-top-left-radius: 0.375em;
+  border-top-right-radius: 0.375em;
+}
+
+.modal-wallets div:last-child {
+  border-bottom-left-radius: 0.375em;
+  border-bottom-right-radius: 0.375em;
+}
+
+@media screen and (min-width: 640px) {
+  /* @media screen(sm) { */
+  .modal-wallets div:first-child {
+    border-top-left-radius: 0.375em;
+    border-bottom-left-radius: 0.375em;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+
+  .modal-wallets div:last-child {
+    border-top-right-radius: 0.375em;
+    border-bottom-right-radius: 0.375em;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+  }
+}
+
+/* *** Search Tag Input *** */
+/* hide disabled tags list dropdown */
+div.tag-input > div > label {
+  display: none;
+}
+
+div.tag-input > div > div:nth-child(2) {
+  margin-top: 0px;
+}
+
+div.tag-input > div > div:nth-child(3) {
+  margin-top: 0px;
+}
+
+div.tag-input > div > div:last-child {
+  display: none;
+}
+
+div.tag-input > div > div:nth-child(2) span {
+  margin-top: 3px;
+  margin-bottom: 5px;
 }

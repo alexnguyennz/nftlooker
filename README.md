@@ -21,10 +21,11 @@ Supported testnet chains:
 Tools:
 
 - React - frontend
-- Moralis API - NFT data
 - Fastify - web framework
 - Redux - state management
 - React Query - API data management
+- Moralis API - NFT data
+- Infura - Ethereum API provider
 - Cloudinary API - media transformations
 - ImageKit API - media transformations
 - TailwindCSS - CSS framework

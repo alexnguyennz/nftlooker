@@ -2,11 +2,11 @@ const fs = require('fs');
 
 const router = require('fastify')({
   // local HTTPS
-  https: {
+  /* https: {
     allowHTTP1: true, // fallback support for HTTP1
     key: fs.readFileSync('cert/server.key'),
     cert: fs.readFileSync('cert/server.crt'),
-  },
+  }, */
   logger: true,
 });
 
@@ -27,11 +27,9 @@ router.get('/api/randomWallet', getRandomWallet);
 router.get('/api/search', searchNfts);
 
 // run Fastify server
-const PORT = process.env.PORT || 7777;
-
 const main = async () => {
   try {
-    await router.listen(PORT);
+    await router.listen(process.env.PORT || 7777, '0.0.0.0'); // 0.0.0.0 Heroku specific
   } catch (err) {
     router.log.error(err);
     process.exit(1);

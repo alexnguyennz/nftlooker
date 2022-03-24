@@ -1,22 +1,21 @@
 import { Link } from 'react-router-dom';
 
-import { NFTCard } from '../NFTCard/NFTCard';
+import NFTCard from '../NFTCard/NFTCard';
 
-import s from './NFTCollection.module.css';
-
-export function NFTCollection(props) {
+export default function NFTCollection(props) {
   const collection = props.collection;
   const chain = props.chain;
 
   //console.log('chain', props.chain);
 
-  // console.log(collection);
+  //console.log(collection);
 
   return (
-    <section className={`space-y-1`}>
-      <h3 className="tracking-wide text-left text-lg font-semibold">
+    <section className={`space-y-2`}>
+      <h3 className="text-left text-lg font-semibold">
         <Link to={`/${chain}/collection/${collection[0].token_address}`}>
-          {collection[0].name ? collection[0].name : 'Unnamed Collection'}
+          {collection[0].name ? collection[0].name : 'No Collection Name Found'}
+          {/* {collection[0].name ? collection[0].name : 'Unnamed Collection'} */}
         </Link>
       </h3>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 3xl:grid-cols-7 4xl:grid-cols-8 gap-10">

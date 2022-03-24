@@ -64,7 +64,7 @@ export default function NFTImage(props) {
           <model-viewer
             id="nft-model"
             bounds="tight"
-            src="/img/membership.glb"
+            src={image}
             ar
             ar-modes="webxr scene-viewer quick-look"
             camera-controls

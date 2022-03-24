@@ -13,8 +13,8 @@ const changeIpfsUrl = require('../utils/changeIpfsUrl.js');
 const resolveDomain = require('../utils/resolve.js');
 
 // Moralis GetNFTs
-const getWalletNfts = async (req, res) => {
-  const { chain, address } = req.query;
+const getWalletNfts = async (request, res) => {
+  const { chain, address } = request.query;
 
   let resolvedAddress = address;
 
@@ -170,6 +170,9 @@ const getWalletNfts = async (req, res) => {
               },
             ],
           });
+
+          // audio test
+          //metadata.image = 'https://www.kozco.com/tech/piano2.wav';
         }
       }
 

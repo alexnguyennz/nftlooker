@@ -1,5 +1,3 @@
-import { useState } from 'react';
-
 import { Link } from 'react-router-dom';
 
 import axios from 'axios';
@@ -14,6 +12,9 @@ import { Tooltip } from '@chakra-ui/react';
 import { ExternalLinkIcon } from '@chakra-ui/icons';
 
 import ModelViewer from '@google/model-viewer';
+
+// Components
+//import NFTImage from '../../components/NFTImage/NFTImage';
 
 const mime = require('mime-types');
 
@@ -30,18 +31,12 @@ async function getContentType(image) {
 }
 
 function NFTImage(props) {
-  const collection = props.collection;
   const chain = props.chain;
 
   const nft = props.nft;
   const image = nft.metadata.image;
   const mimeType = mime.lookup(image);
-
-  let type;
-
-  //getContentType(image).then((response) => (type = response));
-
-  //console.log('mime', mimeType);
+  console.log('mimeType', mimeType);
 
   switch (mimeType) {
     case 'image/gif':
@@ -69,15 +64,30 @@ function NFTImage(props) {
       return (
         <model-viewer
           bounds="tight"
-          src="/img/membership.glb"
+          src={image}
           ar
           ar-modes="webxr scene-viewer quick-look"
           camera-controls
           environment-image="neutral"
-          poster="poster.webp"
+          //poster="poster.webp"
           shadow-intensity="1"
           autoplay
+          width="100px"
+          height="100px"
         ></model-viewer>
+      );
+    case 'audio/wave':
+    case 'audio/wav':
+    case 'audio/mpeg':
+    case 'audio/ogg':
+    case 'audio/webm':
+      return (
+        <audio
+          style={{ width: '100%' }}
+          src={image}
+          controls
+          preload="length"
+        ></audio>
       );
     default:
       return (
@@ -104,13 +114,17 @@ function NFTImage(props) {
   }
 }
 
-export function NFTCard(props) {
+export default function NFTCard(props) {
   //const metadata = props.nft.external_data;
   const nft = props.nft;
   const collection = props.collection;
   const chain = props.chain;
 
   const colorModeBg = useColorModeValue('bg-white', 'bg-gray-800');
+  const colorModeCard = useColorModeValue(
+    'bg-gray-50 border-gray-100',
+    'bg-gray-700 border-gray-800'
+  );
 
   //console.log('received nft', nft);
   //console.log('received collection', collection);
@@ -121,31 +135,12 @@ export function NFTCard(props) {
         <div
           className={`mt-auto overflow-hidden rounded-lg shadow-md  transition-all hover:-translate-y-2 ${colorModeBg}`}
         >
-          <div className="wrapper relative">
-            {nft.metadata.original_image && (
-              <div className="absolute right-0 m-3">
-                <Tooltip
-                  label="Open original NFT link"
-                  openDelay={750}
-                  hasArrow
-                >
-                  <a
-                    href={nft.metadata.original_image}
-                    target="_blank"
-                    rel="noreferrer noopener nofollow"
-                    className="z-0"
-                  >
-                    <ExternalLinkIcon color="gray.600" boxSize={5} />
-                  </a>
-                </Tooltip>
-              </div>
-            )}
-            {nft.metadata && (
-              <NFTImage collection={collection} nft={nft} chain={chain} />
-            )}
-          </div>
+          {nft.metadata && (
+            <NFTImage collection={collection} nft={nft} chain={chain} />
+          )}
 
-          <div className="p-3 mt-auto space-y-2">
+          {/* bg-gray-50 border-t border-gray-100 */}
+          <div className={`p-3 mt-auto space-y-2 border-t ${colorModeCard}`}>
             <h3 className="text-center font-semibold">
               <Link
                 to={`/${chain}/collection/${nft.token_address}/nft/${nft.token_id}`}
@@ -153,7 +148,7 @@ export function NFTCard(props) {
                 {nft.metadata && nft.metadata.name}
               </Link>
             </h3>
-            <div className="flex justify-end">
+            <div className="flex justify-between items-center">
               <Button size="xs">
                 <Link
                   to={`/${chain}/collection/${nft.token_address}/nft/${nft.token_id}`}
@@ -161,6 +156,18 @@ export function NFTCard(props) {
                   View
                 </Link>
               </Button>
+              {nft.metadata.original_image && (
+                <Tooltip label="Open original link" openDelay={750} hasArrow>
+                  <a
+                    href={nft.metadata.original_image}
+                    target="_blank"
+                    rel="noreferrer noopener nofollow"
+                    className="z-0"
+                  >
+                    <ExternalLinkIcon color="gray.600" boxSize={4} />
+                  </a>
+                </Tooltip>
+              )}
             </div>
           </div>
         </div>

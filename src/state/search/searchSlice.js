@@ -3,7 +3,7 @@ import { createSlice } from '@reduxjs/toolkit';
 export const searchSlice = createSlice({
   name: 'search',
   initialState: {
-    limit: 25,
+    limit: 10,
     filter: 'global',
   },
   reducers: {

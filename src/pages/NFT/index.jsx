@@ -31,20 +31,21 @@ export function NFT() {
   const dispatch = useDispatch(); // React Redux
 
   // React Query
-  const { isLoading, error, data } = useQuery(
+  const { isLoading, error, data, isFetching, isStale } = useQuery(
     'nftMetadata',
     async () => {
       const { data } = await axios(
         `/api/nft?chain=${params.chain}&address=${params.contractAddress}&tokenId=${params.tokenId}`
       );
       return data;
-    },
-    { refetchOnWindowFocus: false }
+    }
   );
 
   useEffect(() => {
-    if (data) dispatch(viewIsNotLoading());
-    else dispatch(viewIsLoading());
+    if (data) {
+      dispatch(viewIsNotLoading());
+      console.log('data', data.metadata.attributes);
+    } else dispatch(viewIsLoading());
   }, [data]);
 
   if (isLoading) return null;
@@ -83,20 +84,19 @@ export function NFT() {
                 ATTRIBUTES
                 <br />
                 <div className="text-2xl">
-                  {data.metadata.attributes &&
-                    data.metadata.attributes.map((attribute, idx) => {
-                      const values = Object.values(attribute);
+                  {data.metadata.attributes.map((attribute, idx) => {
+                    const values = Object.values(attribute);
 
-                      return (
-                        <div
-                          className="grid grid-cols-2 xl:w-2/3 2xl:w-2/5"
-                          key={idx} // must use idx as there can be duplicate attribute keys and values
-                        >
-                          <span>{values[0]}:</span>
-                          <span>{values[1]}</span>
-                        </div>
-                      );
-                    })}
+                    return (
+                      <div
+                        className="grid grid-cols-2 "
+                        key={idx} // must use idx as there can be duplicate attribute keys and values
+                      >
+                        <span>{values[0]}:</span>
+                        <span>{values[1]}</span>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -129,6 +129,14 @@ export function NFT() {
                   rel="noopener noreferrer nofollow"
                 >
                   {truncateAddress(data.owner_of)}
+                </a>{' '}
+                -{' '}
+                <a
+                  href={`/${data.owner_of}`}
+                  target="_blank"
+                  rel="noopener noreferrer nofollow"
+                >
+                  View NFTs
                 </a>
               </span>
             </div>

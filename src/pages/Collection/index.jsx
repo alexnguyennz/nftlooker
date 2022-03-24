@@ -3,10 +3,11 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
 // Redux
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import {
   viewIsLoading,
   viewIsNotLoading,
+  loadingState,
 } from '../../state/loading/loadingSlice';
 
 // React Query
@@ -18,65 +19,80 @@ import { Button, Alert, AlertIcon } from '@chakra-ui/react';
 import { ChevronDownIcon, AddIcon, ExternalLinkIcon } from '@chakra-ui/icons';
 
 // Components
-import { NFTCard } from '../../components/NFTCard/NFTCard';
+import NFTCard from '../../components/NFTCard/NFTCard';
 import NFTImage from '../../components/NFTImage/NFTImage';
 
 // UTILS
 import truncateAddress from '../../utils/ellipseAddress';
 import { explorer, chainName } from '../../utils/chainExplorer';
 
-async function fetchData(call) {
-  const { data } = await axios(call);
-  return data;
-}
-
 export function Collection() {
   const params = useParams(); // React Router
   const dispatch = useDispatch(); // React Redux
+  const loading = useSelector(loadingState);
+
+  console.log('params', params);
 
   // React Query
-  const results = useQueries([
+  const queries = useQueries([
     {
-      queryKey: 'collectionMetadata',
+      queryKey: [params.chain, params.contractAddress, 'metadata'],
       queryFn: async () => {
         const { data } = await axios(
           `/api/collection/metadata?chain=${params.chain}&address=${params.contractAddress}`
         );
         return data;
       },
-      refetchOnWindowFocus: false,
     },
     {
-      queryKey: 'collectionNfts',
+      queryKey: [params.chain, params.contractAddress, 'nfts'],
       queryFn: async () => {
         const { data } = await axios(
           `/api/collection/nfts?chain=${params.chain}&address=${params.contractAddress}&offset=0&limit=1`
         );
         return data;
       },
-      refetchOnWindowFocus: false,
     },
   ]);
 
   //console.log('results', results[2].data[0]);
-  const loaded = results.every((result) => result.isSuccess);
+  const loaded = queries.every((query) => query.isSuccess);
+
+  console.log('queries', queries);
 
   useEffect(() => {
-    if (loaded) dispatch(viewIsNotLoading());
-    else dispatch(viewIsLoading());
-  }, [loaded]);
+    if (queries.some((query) => query.isFetching)) {
+      dispatch(viewIsLoading());
+    } else {
+      dispatch(viewIsNotLoading());
+    }
+  }, [queries]);
 
   return (
     <>
-      {loaded && (
-        <div className="space-y-10">
-          <section className="grid grid-cols 1 md:grid-cols-2 gap-5">
-            <CollectionThumbnail result={results[1].data[0]} />{' '}
-            <CollectionMetadata result={results[0]} />
-          </section>
-          <CollectionNfts />
-        </div>
-      )}
+      <div className="space-y-10">
+        <section className="grid grid-cols 1 md:grid-cols-2 gap-5">
+          <div className="mx-auto w-full md:w-3/4">
+            {!queries[1].isFetching ? (
+              <CollectionThumbnail result={queries[1].data[0]} />
+            ) : (
+              <div className="flex items-center justify-center">
+                <img src="/img/loading.svg" />
+              </div>
+            )}
+          </div>
+          <div className="space-y-2">
+            {!queries[0].isFetching ? (
+              <CollectionMetadata result={queries[0]} />
+            ) : (
+              <div className="flex items-center justify-center">
+                <img src="/img/loading.svg" />
+              </div>
+            )}
+          </div>
+        </section>
+        <CollectionNfts />
+      </div>
     </>
   );
 }
@@ -88,6 +104,73 @@ async function fetchNfts({ pageParam = 0 }) {
     `/api/collection/nfts?chain=${params.chain}&address=${params.contractAddress}&offset=${pageParam}&limit=5`
   );
   return { data, nextPage: pageParam + 1, totalOffset: 100 };
+}
+
+export function CollectionThumbnail(props) {
+  const params = useParams(); // React Router
+
+  const data = props.result;
+
+  /* if (isLoading) return null;
+  if (error) return 'An error has occurred: ' + error.message; */
+
+  // hacky solution
+  const image = data.metadata.image
+    .replace('h-250', 'h-1000')
+    .replace('w-250', 'h-1000');
+
+  return (
+    <NFTImage nft={data} chain={params.chain} image={data.metadata && image} />
+  );
+}
+
+export function CollectionMetadata(props) {
+  const params = useParams(); // React Router
+
+  const data = props.result.data;
+
+  /* if (isLoading) return null;
+  if (error) return 'An error has occurred: ' + error.message; */
+
+  return (
+    <>
+      <h3 className="pb-2 border-b border-gray-500 text-4xl font-bold ">
+        {data.name}
+      </h3>
+
+      <div className="space-y-5">
+        <p>
+          CHAIN
+          <br />
+          <span className="text-2xl">{chainName(params.chain)}</span>
+        </p>
+
+        <p>
+          CONTRACT
+          <br />
+          <span className="text-2xl">
+            <a
+              href={`https://${explorer(params.chain)}/address/${
+                data.token_address
+              }`}
+              target="_blank"
+              rel="noreferrer noopener nofollow"
+            >
+              {truncateAddress(data.token_address)}
+              {` `}
+              <ExternalLinkIcon />
+            </a>
+          </span>
+        </p>
+
+        <p>
+          SYMBOL / TICKER
+          <br />
+          <span className="text-2xl">{data.symbol}</span>
+        </p>
+      </div>
+    </>
+  );
 }
 
 export function CollectionNfts() {
@@ -114,8 +197,8 @@ export function CollectionNfts() {
     isFetchingNextPage,
     fetchNextPage,
     hasNextPage,
-  } = useInfiniteQuery('nftMetadata', fetchNfts, {
-    refetchOnWindowFocus: false,
+    // } = useInfiniteQuery('nftMetadata', fetchNfts, {
+  } = useInfiniteQuery([params.chain, params.contractAddress], fetchNfts, {
     getNextPageParam: (lastPage) => {
       if (lastPage.offset <= 500) return lastPage.offset; // only allow up to 100 pages / 500 offsets
     },
@@ -124,7 +207,9 @@ export function CollectionNfts() {
   return (
     <div>
       {isLoading ? (
-        <></>
+        <div className="flex items-center justify-center">
+          <img src="/img/loading.svg" />
+        </div>
       ) : isError ? (
         <Alert status="error" justifyContent="center">
           <AlertIcon />
@@ -170,79 +255,6 @@ export function CollectionNfts() {
           </div>
         </>
       )}
-    </div>
-  );
-}
-
-function CollectionThumbnail(props) {
-  const params = useParams(); // React Router
-
-  const data = props.result;
-
-  /* if (isLoading) return null;
-  if (error) return 'An error has occurred: ' + error.message; */
-
-  // hacky solution
-  const image = data.metadata.image
-    .replace('h-250', 'h-1000')
-    .replace('w-250', 'h-1000');
-
-  return (
-    <div className="mx-auto w-full md:w-3/4">
-      <NFTImage
-        nft={data}
-        chain={params.chain}
-        image={data.metadata && image}
-      />
-    </div>
-  );
-}
-
-export function CollectionMetadata(props) {
-  const params = useParams(); // React Router
-
-  const data = props.result.data;
-
-  /* if (isLoading) return null;
-  if (error) return 'An error has occurred: ' + error.message; */
-
-  return (
-    <div className="space-y-2">
-      <h3 className="pb-2 border-b border-gray-500 text-4xl font-bold ">
-        {data.name}
-      </h3>
-
-      <div className="space-y-5">
-        <p>
-          CHAIN
-          <br />
-          <span className="text-2xl">{chainName(params.chain)}</span>
-        </p>
-
-        <p>
-          CONTRACT
-          <br />
-          <span className="text-2xl">
-            <a
-              href={`https://${explorer(params.chain)}/address/${
-                data.token_address
-              }`}
-              target="_blank"
-              rel="noreferrer noopener nofollow"
-            >
-              {truncateAddress(data.token_address)}
-              {` `}
-              <ExternalLinkIcon />
-            </a>
-          </span>
-        </p>
-
-        <p>
-          SYMBOL / TICKER
-          <br />
-          <span className="text-2xl">{data.symbol}</span>
-        </p>
-      </div>
     </div>
   );
 }
