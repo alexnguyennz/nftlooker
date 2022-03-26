@@ -7,7 +7,7 @@ function ChainData(props) {
 
   const chain = Object.keys(props.chain)[0];
 
-  console.log(`${props.memo ? '<MemoizedChainData>' : '<ChainData>'} rendered`);
+  //console.log(`${props.memo ? '<MemoizedChainData>' : '<ChainData>'} rendered`);
 
   return (
     <div className="grid gap-5">

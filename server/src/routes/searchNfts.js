@@ -13,11 +13,13 @@ const changeIpfsUrl = require('../utils/changeIpfsUrl.js');
 
 // Moralis SearchNFTs
 const searchNfts = async (req, res) => {
-  const { chain, q, filter, limit } = req.query;
+  const { chain, q, filter, limit, offset } = req.query;
+
+  console.log('offset', offset);
 
   const response = await axios
     .get(
-      `${process.env.MORALIS_API_URL}/nft/search?chain=${chain}&format=decimal&q=${q}&filter=${filter}&limit=${limit}&offset=1`,
+      `${process.env.MORALIS_API_URL}/nft/search?chain=${chain}&format=decimal&q=${q}&filter=${filter}&limit=${limit}&offset=${offset}`,
       {
         headers: {
           accept: 'application/json',
@@ -34,7 +36,7 @@ const searchNfts = async (req, res) => {
   const nfts = response.data.result.map(async (item) => {
     // get missing name property that is missing from this endpoint
     // GetTokenIdMetadata
-    /* let nameResponse = await axios
+    let nameResponse = await axios
       .get(
         `${process.env.MORALIS_API_URL}/nft/${item.token_address}/${item.token_id}?chain=${chain}&format=decimal`,
         {
@@ -48,7 +50,7 @@ const searchNfts = async (req, res) => {
         console.log(err);
       });
 
-    item.name = nameResponse.data.name; */
+    item.name = nameResponse.data.name;
 
     const response = await axios.get(item.token_uri).catch((err) => {
       if (err.code == 'ENOTFOUND') console.log(err);

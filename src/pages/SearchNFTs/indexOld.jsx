@@ -19,15 +19,13 @@ import {
 
 // Data
 import axios from 'axios';
-import { useQueries, useInfiniteQuery, useQuery } from 'react-query';
+import { useQueries } from 'react-query';
 import chains from '../../data';
 
 // Components
 import NoNFTs from '../../components/NoNFTs/NoNFTs';
 import ChainTab from '../../components/ChainTab/ChainTab';
 import ChainData from '../../components/ChainTab/ChainData/ChainData';
-
-import ChainDataTest from '../../components/ChainTab/ChainData/ChainDataTest';
 
 import {
   useToast,
@@ -61,8 +59,7 @@ export function SearchNFTs() {
   // State
   const dispatch = useDispatch();
   const chainTab = useSelector(chainTabState);
-  //let chainTabSet = false;
-  const [chainTabSet, setChainTabSet] = useState(false);
+  let chainTabSet = false;
   const searchLimit = useSelector(searchLimitState);
   const searchFilter = useSelector(searchFilterState);
 
@@ -127,7 +124,7 @@ export function SearchNFTs() {
         // set the chain tab to one that has NFTs and only set it once i.e. the first loaded tab
         if (nftCount > 0 && !chainTabSet) {
           dispatch(changeChainTab(chains[chain].order));
-          setChainTabSet(true);
+          chainTabSet = true;
         }
 
         return {
@@ -190,13 +187,6 @@ export function SearchNFTs() {
               <ChainData chain={query.data} />
             </TabPanel>
           ))}
-
-          <ChainDataTest
-            chain="eth"
-            q={params.q}
-            chainTabSet={chainTabSet}
-            onChainTabSet={() => setChainTabSet(true)}
-          />
         </TabPanels>
       </Tabs>
 

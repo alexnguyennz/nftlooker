@@ -33,6 +33,25 @@ export function Collection() {
 
   console.log('params', params);
 
+  /* useEffect(() => {
+    test();
+  }, []);
+
+  async function test() {
+    const { data } = await axios.get(
+      `https://deep-index.moralis.io/api/v2/nft/0xbc4ca0eda7647a8ab7c2061c2e118a18a936f13d/owners?offset=1000&limit=500`,
+      {
+        headers: {
+          accept: 'application/json',
+          'X-API-KEY':
+            'xf4Tfp3RHFT92gIv1tjnTs0GR6nzd734ZgKK3MqGFGSWYA4fKdrfhk8dMr9vFlkB',
+        },
+      }
+    );
+
+    console.log('test data', data);
+  } */
+
   // React Query
   const queries = useQueries([
     {
@@ -95,15 +114,6 @@ export function Collection() {
       </div>
     </>
   );
-}
-
-async function fetchNfts({ pageParam = 0 }) {
-  const params = useParams();
-
-  const { data } = await axios(
-    `/api/collection/nfts?chain=${params.chain}&address=${params.contractAddress}&offset=${pageParam}&limit=5`
-  );
-  return { data, nextPage: pageParam + 1, totalOffset: 100 };
 }
 
 export function CollectionThumbnail(props) {

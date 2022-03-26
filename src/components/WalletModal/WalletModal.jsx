@@ -81,12 +81,15 @@ export default function WalletModal() {
 
       try {
         provider = new ethers.providers.Web3Provider(window.ethereum);
-        const account = await provider.send('eth_requestAccounts', []);
+        const accounts = await provider.send('eth_requestAccounts', []);
+        // const accounts = await window.ethereum.request({
+        //   method: 'eth_requestAccounts',
+        //  });
 
-        console.log('connect wallet');
+        console.log('Connecting wallet');
         dispatch(
           setWallet({
-            address: account[0],
+            address: accounts[0],
             chain: window.ethereum.networkVersion,
           })
         );
@@ -98,7 +101,7 @@ export default function WalletModal() {
         //setAddress(account[0]);
         //navigate(`/${account[0]}`);
 
-        console.log('Connected wallet:', account[0]);
+        console.log('Connected wallet:', accounts[0]);
       } catch (err) {
         console.log(err);
       }
