@@ -1,28 +1,43 @@
 const chains = {
   eth: {
     name: 'Ethereum',
+    abbr: 'eth',
     order: 0,
     data: [],
+    loaded: false,
+    count: 0,
   },
   matic: {
     name: 'Polygon',
+    abbr: 'matic',
     order: 1,
     data: [],
+    loaded: false,
+    count: 0,
   },
   binance: {
     name: 'Binance',
+    abbr: 'binance',
     order: 2,
     data: [],
+    loaded: false,
+    count: 0,
   },
   avalanche: {
     name: 'Avalanche',
+    abbr: 'avalanche',
     order: 3,
     data: [],
+    loaded: false,
+    count: 0,
   },
   fantom: {
     name: 'Fantom',
+    abbr: 'fantom',
     order: 4,
     data: [],
+    loaded: false,
+    count: 0,
   },
 };
 

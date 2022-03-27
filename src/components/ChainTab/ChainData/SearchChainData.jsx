@@ -21,7 +21,7 @@ import { ChevronDownIcon, AddIcon, ExternalLinkIcon } from '@chakra-ui/icons';
 import NFTCollection from '../../NFTCollection/NFTCollection';
 import ChainData from './ChainData';
 
-function ChainDataTest(props) {
+function SearchChainData(props) {
   // State
   const dispatch = useDispatch();
 
@@ -29,6 +29,8 @@ function ChainDataTest(props) {
   const searchFilter = useSelector(searchFilterState);
 
   const chain = props.chain;
+
+  //console.log('props test', props.chains[chain].loaded);
 
   const fetchNfts = async ({ pageParam = 0 }) => {
     const { data } = await axios(
@@ -39,6 +41,7 @@ function ChainDataTest(props) {
     const nftCount = Object.values(data).flat().length;
 
     // set the chain tab to one that has NFTs and only set it once i.e. the first loaded tab
+    // buggy this is needed for some reason
     if (nftCount > 0 && !props.chainTabSet) {
       dispatch(changeChainTab(chains[chain].order));
       props.onChainTabSet(true);
@@ -51,6 +54,7 @@ function ChainDataTest(props) {
     return {
       [chain]: {
         name: chains[chain]['name'],
+        abbr: chain,
         order: chains[chain]['order'],
         data,
         loaded: true,
@@ -79,7 +83,22 @@ function ChainDataTest(props) {
   });
 
   useEffect(() => {
-    console.log('data', data);
+    // console.log('data', data);
+    if (data) {
+      //props.onChains({...props.chains, props. })
+
+      let copy = props.chains;
+
+      // work on flattening to get updated page count
+      copy[chain].count = data.pages[0][chain].count;
+
+      copy[chain].loaded = true;
+
+      props.onChains(copy);
+
+      //console.log('data', data);
+      console.log('updated states for', chain);
+    }
   }, [data]);
 
   if (!isSuccess) {
@@ -137,4 +156,4 @@ function ChainDataTest(props) {
   );
 }
 
-export default React.memo(ChainDataTest);
+export default React.memo(SearchChainData);
