@@ -69,7 +69,13 @@ export function SearchNFTs() {
   const [noNfts, setNoNfts] = useState('');
 
   useEffect(() => {
+    console.log('chain tab set', chainTabSet);
+  }, [chainTabSet]);
+
+  useEffect(() => {
     dispatch(changeTab(1)); // manually set to Search tab on search routes
+
+    dispatch(viewIsLoading());
 
     // reset UI
     dispatch(changeChainTab(-1));
@@ -84,38 +90,17 @@ export function SearchNFTs() {
   }, []);
 
   useEffect(() => {
-    /*if (queries.some((query) => query.isFetching)) {
-      dispatch(viewIsLoading());
-    } else {
-      dispatch(viewIsNotLoading());
-    }*/
-
-    // console.log('chain state useEffect');
-
     console.log('chains state', chainsState);
+  }, [chainsState]);
 
-    Object.values(chainsState).every((chain) => {
-      console.log('chain loaded every', chain.loaded);
-      console.log('chain', chain);
-      return chain.loaded;
-    });
+  function handleChainsState(data) {
+    console.log('handleChainsState', data);
+    setChainsState(data);
 
     if (Object.values(chainsState).every((chain) => chain.loaded)) {
-      console.log('everything loaded');
       dispatch(viewIsNotLoading());
-    } else {
-      dispatch(viewIsLoading());
     }
-
-    // this needs testing
-    /*setNoNfts(
-        Object.values(queries).every((collection) => {
-          const chain = Object.values(collection.data)[0];
-          return chain.count === 0;
-        })
-      ); */
-    //console.log('chain queries', queries);
-  }, [chainsState]);
+  }
 
   return (
     <>
@@ -130,9 +115,9 @@ export function SearchNFTs() {
       >
         <TabList>
           <div className="flex items-center">
-            {Object.keys(chains).map((chain, idx) => (
+            {Object.keys(chainsState).map((chain, idx) => (
               <SearchChainTab
-                chain={chains[chain]}
+                chain={chainsState[chain]}
                 idx={idx}
                 key={idx}
                 chains={chainsState}
@@ -142,15 +127,15 @@ export function SearchNFTs() {
         </TabList>
 
         <TabPanels>
-          {Object.keys(chains).map((chain, idx) => (
+          {Object.keys(chainsState).map((chain, idx) => (
             <TabPanel key={chain} value={idx}>
               <SearchChainData
                 chain={chain}
                 q={params.q}
                 chainTabSet={chainTabSet}
-                onChainTabSet={() => setChainTabSet(true)}
+                onChainTabSet={(bool) => setChainTabSet(bool)}
                 chains={chainsState}
-                onChains={(data) => setChainsState(data)}
+                onChains={handleChainsState}
               />
             </TabPanel>
           ))}

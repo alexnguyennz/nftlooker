@@ -30,8 +30,6 @@ function SearchChainData(props) {
 
   const chain = props.chain;
 
-  //console.log('props test', props.chains[chain].loaded);
-
   const fetchNfts = async ({ pageParam = 0 }) => {
     const { data } = await axios(
       `/api/search?chain=${chain}&q=${props.q}&filter=${searchFilter}&limit=${searchLimit}&offset=` +
@@ -40,15 +38,7 @@ function SearchChainData(props) {
 
     const nftCount = Object.values(data).flat().length;
 
-    // set the chain tab to one that has NFTs and only set it once i.e. the first loaded tab
-    // buggy this is needed for some reason
-    if (nftCount > 0 && !props.chainTabSet) {
-      dispatch(changeChainTab(chains[chain].order));
-      props.onChainTabSet(true);
-    }
-
     // React Query
-    console.log('searchLimit', searchLimit);
     let offset = pageParam + searchLimit; // manually increase each "page" by the limit
 
     return {
@@ -91,13 +81,16 @@ function SearchChainData(props) {
 
       // work on flattening to get updated page count
       copy[chain].count = data.pages[0][chain].count;
-
       copy[chain].loaded = true;
 
       props.onChains(copy);
 
-      //console.log('data', data);
-      console.log('updated states for', chain);
+      // set the chain tab to one that has NFTs and only set it once i.e. the first loaded tab
+      if (data.pages[0][chain].count > 0 && !props.chainTabSet) {
+        //console.log('setting chain tab', chains[chain].order);
+        dispatch(changeChainTab(chains[chain].order));
+        props.onChainTabSet(true);
+      }
     }
   }, [data]);
 
@@ -107,16 +100,6 @@ function SearchChainData(props) {
 
   return (
     <>
-      {/* <div className="grid gap-5">
-        {Object.keys(data.pages[0][chain].data).map((collection) => (
-          <NFTCollection
-            key={collection}
-            collection={data.pages[0][chain].data[collection]}
-            chain={chain}
-          />
-        ))}
-      </div> */}
-
       <div className="grid gap-5">
         {data.pages.map((page) => (
           <React.Fragment key={page.offset}>

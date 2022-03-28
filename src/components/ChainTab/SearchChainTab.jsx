@@ -1,3 +1,5 @@
+import { useEffect, useState } from 'react';
+
 import { Tab, Tooltip, Spinner } from '@chakra-ui/react';
 
 import { NFTCollection } from '../NFTCollection/NFTCollection';
@@ -6,13 +8,16 @@ import ChainIcon from '../ChainIcon/ChainIcon';
 export default function SearchChainTab(props) {
   const chain = props.chain;
 
-  const chains = props.chains;
-
   const abbr = chain.abbr;
 
-  const noNftsFound = !chains[abbr].count;
+  console.log('props, chains', props.chains);
+  console.log('count', props.chains[abbr].count);
 
-  console.log('props in tab', props.chains);
+  const noNftsFound = !props.chains[abbr].count;
+
+  const [nfts, setNfts] = useState(props.chains);
+
+  //console.log('chain', abbr, 'is disabled', noNftsFound);
 
   return (
     <Tooltip
@@ -28,9 +33,10 @@ export default function SearchChainTab(props) {
       >
         <ChainIcon chain={abbr} />
         <span>
-          {chain.name} {chains[abbr].count > 0 && `(${chains[abbr].count})`}
+          {chain.name}{' '}
+          {props.chains[abbr].count > 0 && `(${props.chains[abbr].count})`}
         </span>
-        {!chains[abbr].loaded && <Spinner size="sm" />}
+        {!props.chains[abbr].loaded && <Spinner size="sm" />}
       </Tab>
     </Tooltip>
   );
