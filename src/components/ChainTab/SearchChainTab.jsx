@@ -8,35 +8,25 @@ import ChainIcon from '../ChainIcon/ChainIcon';
 export default function SearchChainTab(props) {
   const chain = props.chain;
 
-  const abbr = chain.abbr;
-
-  console.log('props, chains', props.chains);
-  console.log('count', props.chains[abbr].count);
-
-  const noNftsFound = !props.chains[abbr].count;
-
-  const [nfts, setNfts] = useState(props.chains);
-
-  //console.log('chain', abbr, 'is disabled', noNftsFound);
+  const nftCount = chain.total;
 
   return (
     <Tooltip
-      label={noNftsFound && 'No NFTs found.'}
+      label={!nftCount && 'No NFTs found.'}
       aria-label="NFT count tooltip"
       openDelay={750}
       shouldWrapChildren
     >
       <Tab
-        isDisabled={noNftsFound}
+        isDisabled={!nftCount}
         value={props.idx}
-        className={`items-center space-x-2 ${noNftsFound && `css-1ltezim`}`}
+        className={`items-center space-x-2 ${!nftCount && `css-1ltezim`}`}
       >
-        <ChainIcon chain={abbr} />
+        <ChainIcon chain={chain.abbr} />
         <span>
-          {chain.name}{' '}
-          {props.chains[abbr].count > 0 && `(${props.chains[abbr].count})`}
+          {chain.name} {nftCount > 0 && `(${nftCount})`}
         </span>
-        {!props.chains[abbr].loaded && <Spinner size="sm" />}
+        {!chain.loaded && <Spinner size="sm" />}
       </Tab>
     </Tooltip>
   );

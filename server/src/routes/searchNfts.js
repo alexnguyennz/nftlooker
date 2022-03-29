@@ -36,7 +36,7 @@ const searchNfts = async (req, res) => {
   const nfts = response.data.result.map(async (item) => {
     // get missing name property that is missing from this endpoint
     // GetTokenIdMetadata
-    let nameResponse = await axios
+    /*let nameResponse = await axios
       .get(
         `${process.env.MORALIS_API_URL}/nft/${item.token_address}/${item.token_id}?chain=${chain}&format=decimal`,
         {
@@ -50,7 +50,7 @@ const searchNfts = async (req, res) => {
         console.log(err);
       });
 
-    item.name = nameResponse.data.name;
+    item.name = nameResponse.data.name; */
 
     const response = await axios.get(item.token_uri).catch((err) => {
       if (err.code == 'ENOTFOUND') console.log(err);

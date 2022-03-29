@@ -72,6 +72,8 @@ export function SearchNFTs() {
     console.log('chain tab set', chainTabSet);
   }, [chainTabSet]);
 
+  const [test, setTest] = useState(1);
+
   useEffect(() => {
     dispatch(changeTab(1)); // manually set to Search tab on search routes
 
@@ -94,12 +96,18 @@ export function SearchNFTs() {
   }, [chainsState]);
 
   function handleChainsState(data) {
-    console.log('handleChainsState', data);
-    setChainsState(data);
+    console.log('data handle', data);
+
+    setChainsState({ ...chainsState, [data.abbr]: data });
 
     if (Object.values(chainsState).every((chain) => chain.loaded)) {
       dispatch(viewIsNotLoading());
     }
+
+    Object.values(chainsState).every((chain) => {
+      console.log('chain every', chain);
+      return chain.loaded;
+    });
   }
 
   return (
@@ -116,12 +124,7 @@ export function SearchNFTs() {
         <TabList>
           <div className="flex items-center">
             {Object.keys(chainsState).map((chain, idx) => (
-              <SearchChainTab
-                chain={chainsState[chain]}
-                idx={idx}
-                key={idx}
-                chains={chainsState}
-              />
+              <SearchChainTab chain={chainsState[chain]} idx={idx} key={idx} />
             ))}
           </div>
         </TabList>

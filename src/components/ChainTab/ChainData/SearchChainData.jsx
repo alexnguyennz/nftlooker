@@ -73,17 +73,16 @@ function SearchChainData(props) {
   });
 
   useEffect(() => {
-    // console.log('data', data);
     if (data) {
-      //props.onChains({...props.chains, props. })
+      const nftTotals = data.pages.reduce((acc, element) => {
+        const nftCount = Object.values(element)[0].count;
 
-      let copy = props.chains;
+        return acc + nftCount;
+      }, 0);
 
-      // work on flattening to get updated page count
-      copy[chain].count = data.pages[0][chain].count;
-      copy[chain].loaded = true;
+      data.pages[0][chain].total = nftTotals;
 
-      props.onChains(copy);
+      props.onChains(data.pages[0][chain]);
 
       // set the chain tab to one that has NFTs and only set it once i.e. the first loaded tab
       if (data.pages[0][chain].count > 0 && !props.chainTabSet) {
