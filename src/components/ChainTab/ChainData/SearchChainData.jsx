@@ -29,6 +29,22 @@ function SearchChainData(props) {
   const chain = props.chain;
 
   const fetchNfts = async ({ pageParam = 0 }) => {
+    console.log('param', pageParam);
+    // reset UI state
+    // only reset chain states when it's a fresh query, not more NFTs loaded to each tab
+    if (pageParam == 0) {
+      dispatch(changeChainTab(-1));
+      props.onChainTabSet(false);
+    }
+
+    props.onChains({
+      name: chains[chain]['name'],
+      abbr: chain,
+      order: chains[chain]['order'],
+      loaded: false,
+      count: 0,
+    });
+
     const { data } = await axios(
       `/api/search?chain=${chain}&q=${props.q}&filter=${searchFilter}&limit=${searchLimit}&offset=` +
         pageParam
@@ -66,11 +82,16 @@ function SearchChainData(props) {
     fetchNextPage,
     hasNextPage,
     // } = useInfiniteQuery('nftMetadata', fetchNfts, {
-  } = useInfiniteQuery(['search', props.q, props.chain], fetchNfts, {
-    getNextPageParam: (lastPage) => {
-      if (lastPage.offset <= 500) return lastPage.offset; // only allow up to 100 pages / 500 offsets
-    },
-  });
+    //} = useInfiniteQuery(['search', props.q, props.chain], fetchNfts, {
+  } = useInfiniteQuery(
+    ['search', props.location, props.q, props.chain],
+    fetchNfts,
+    {
+      getNextPageParam: (lastPage) => {
+        if (lastPage.offset <= 500) return lastPage.offset; // only allow up to 100 pages / 500 offsets
+      },
+    }
+  );
 
   useEffect(() => {
     if (data) {
@@ -86,11 +107,12 @@ function SearchChainData(props) {
       props.onChains(data.pages[0][chain]);
 
       // set the chain tab to one that has NFTs and only set it once i.e. the first loaded tab
-      if (data.pages[0][chain].count > 0 && !props.chainTabSet) {
+      /*if (data.pages[0][chain].count > 0 && !props.chainTabSet) {
         //console.log('setting chain tab', chains[chain].order);
-        dispatch(changeChainTab(chains[chain].order));
-        props.onChainTabSet(true);
-      }
+        console.log('current tab setting');
+        //dispatch(changeChainTab(chains[chain].order));
+        //props.onChainTabSet(true);
+      } */
     }
   }, [data]);
 
@@ -124,9 +146,9 @@ function SearchChainData(props) {
             loadingText="Loading"
             spinnerPlacement="end"
             colorScheme="blue"
-            rightIcon={<ChevronDownIcon />}
+            lineHeight="1"
           >
-            More
+            Load More (+{searchLimit})
           </Button>
         ) : (
           <Alert status="error">

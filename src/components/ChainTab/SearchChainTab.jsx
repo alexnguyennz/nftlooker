@@ -1,8 +1,5 @@
-import { useEffect, useState } from 'react';
-
 import { Tab, Tooltip, Spinner } from '@chakra-ui/react';
 
-import { NFTCollection } from '../NFTCollection/NFTCollection';
 import ChainIcon from '../ChainIcon/ChainIcon';
 
 export default function SearchChainTab(props) {

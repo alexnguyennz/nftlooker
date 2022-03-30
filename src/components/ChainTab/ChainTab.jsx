@@ -1,6 +1,5 @@
 import { Tab, Tooltip, Spinner } from '@chakra-ui/react';
 
-import { NFTCollection } from '../NFTCollection/NFTCollection';
 import ChainIcon from '../ChainIcon/ChainIcon';
 
 export default function ChainTab(props) {

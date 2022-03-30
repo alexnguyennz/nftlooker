@@ -30,6 +30,14 @@ async function getContentType(image) {
   return type.type;
 }
 
+function LoadingSpinner() {
+  return (
+    <div className="p-10">
+      <Spinner w={24} h={24} thickness="8px" speed="0.9s" color="blue.500" />
+    </div>
+  );
+}
+
 function NFTImage(props) {
   const chain = props.chain;
 
@@ -38,7 +46,12 @@ function NFTImage(props) {
   const mimeType = mime.lookup(image);
   console.log('mimeType', mimeType);
 
-  switch (mimeType) {
+  // getContentType(nft.metadata.original_image);
+
+  console.log('NFTImage', nft);
+
+  //switch (mimeType) {
+  switch (nft.metadata.content_type) {
     case 'image/gif':
       return (
         <video width="100%" controls autoPlay muted loop>
@@ -100,7 +113,8 @@ function NFTImage(props) {
               currentTarget.onerror = null; // prevents looping
               currentTarget.src = '/img/404.webp';
             }}*/
-            fallbackSrc={'/img/loading.svg'}
+            fallback={<LoadingSpinner />}
+            //fallbackSrc={'/img/loading.svg'}
             className="mx-auto w-full"
           />
 

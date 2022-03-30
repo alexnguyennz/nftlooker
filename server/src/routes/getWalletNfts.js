@@ -12,6 +12,8 @@ const {
 const changeIpfsUrl = require('../utils/changeIpfsUrl.js');
 const resolveDomain = require('../utils/resolve.js');
 
+var contentType = require('content-type');
+
 // Moralis GetNFTs
 const getWalletNfts = async (request, res) => {
   const { chain, address } = request.query;
@@ -71,12 +73,6 @@ const getWalletNfts = async (request, res) => {
       if (!metadata.image.startsWith('data:image')) {
         changeIpfsUrl(metadata);
       }
-
-      //getContentType(metadata.image).then((response) => console.log(response));
-      //console.log('contenType', contentType);
-
-      //const mimeType = mime.lookup(metadata.image);
-      //console.log('mime', mimeType);
 
       if (metadata.image) {
         if (metadata.image.startsWith('data:image')) {
@@ -170,6 +166,16 @@ const getWalletNfts = async (request, res) => {
               },
             ],
           });
+
+          // Get Content Type
+          const metadataImage = await axios(metadata.image).catch((err) =>
+            console.log(err)
+          );
+
+          const type = contentType.parse(metadataImage);
+          console.log('contentType', type.type);
+
+          metadata.content_type = type.type;
 
           // audio test
           //metadata.image = 'https://www.kozco.com/tech/piano2.wav';

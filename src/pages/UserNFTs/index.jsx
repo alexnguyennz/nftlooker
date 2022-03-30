@@ -253,7 +253,7 @@ export default function UserNFTs() {
 
         <TabPanels>
           {queries.map((query, idx) => (
-            <TabPanel key={Object.keys(query.data)[0]} value={idx}>
+            <TabPanel key={Object.keys(query.data)[0]} value={idx} paddingX="0">
               <ChainData chain={query.data} />
             </TabPanel>
           ))}

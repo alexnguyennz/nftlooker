@@ -75,7 +75,8 @@ export function SearchNFTs() {
     // need this
 
     // reset UI
-    // dispatch(changeChainTab(-1));
+    //setChainsState(chains);
+    //dispatch(changeChainTab(-1));
     //setNoNfts(false);
 
     document.title = `NFT Looker. Search for ${params.q}`;
@@ -85,6 +86,10 @@ export function SearchNFTs() {
       document.title = `NFT Looker. A simple NFT viewer.`;
     };
   }, []);
+
+  useEffect(() => {
+    console.log('current chainTab', chainTab);
+  }, [chainTab]);
 
   useEffect(() => {
     console.log('chains state', chainsState);
@@ -102,9 +107,12 @@ export function SearchNFTs() {
   }, [chainsState]);
 
   function handleChainState(data) {
-    setChainsState({ ...chainsState, [data.abbr]: data });
+    setChainsState((prevState) => ({ ...prevState, [data.abbr]: data }));
 
-    console.log('updating chain state', data);
+    if (data.total > 0 && !chainTabSet) {
+      dispatch(changeChainTab(data.order));
+      setChainTabSet(true);
+    }
   }
 
   return (
@@ -128,7 +136,7 @@ export function SearchNFTs() {
 
         <TabPanels>
           {Object.keys(chainsState).map((chain, idx) => (
-            <TabPanel key={chain} value={idx}>
+            <TabPanel key={chain} value={idx} paddingX="0">
               <SearchChainData
                 chain={chain}
                 q={params.q}
@@ -136,6 +144,7 @@ export function SearchNFTs() {
                 onChainTabSet={(bool) => setChainTabSet(bool)}
                 chains={chainsState}
                 onChains={(data) => handleChainState(data)}
+                location={location}
               />
             </TabPanel>
           ))}
