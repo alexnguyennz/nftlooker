@@ -83,7 +83,7 @@ export default function UserNFTs() {
   const chainTab = useSelector(chainTabState);
   let chainTabSet = false;
 
-  const [noNfts, setNoNfts] = useState('');
+  const [noNfts, setNoNfts] = useState(false);
 
   const toastInstance = useToast();
 
@@ -107,7 +107,7 @@ export default function UserNFTs() {
   let queries = useQueries(
     Object.keys(chains).map((chain) => {
       return {
-        queryKey: [location, chain], // location
+        queryKey: [location, params.walletAddress, chain], // location
         queryFn: ({ signal }) => fetchNfts(chain, signal),
         placeholderData: {
           [chain]: chains[chain],
@@ -122,6 +122,7 @@ export default function UserNFTs() {
     } else {
       dispatch(viewIsNotLoading());
 
+      // check for any NFTs
       setNoNfts(
         Object.values(queries).every((collection) => {
           const chain = Object.values(collection.data)[0];
@@ -134,7 +135,7 @@ export default function UserNFTs() {
   async function fetchNfts(chain, signal) {
     // reset UI
     dispatch(changeChainTab(-1));
-    setNoNfts('');
+    setNoNfts(false);
 
     return await axios(
       `/api/nfts?chain=${chain}&address=${params.walletAddress}`,

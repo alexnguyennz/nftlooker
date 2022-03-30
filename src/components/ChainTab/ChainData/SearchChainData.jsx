@@ -18,13 +18,11 @@ import { Button, Alert, AlertIcon } from '@chakra-ui/react';
 import { ChevronDownIcon, AddIcon, ExternalLinkIcon } from '@chakra-ui/icons';
 
 // Components
-import NFTCollection from '../../NFTCollection/NFTCollection';
-import ChainData from './ChainData';
+import NFTCard from '../../NFTCard/NFTCard';
 
 function SearchChainData(props) {
   // State
   const dispatch = useDispatch();
-
   const searchLimit = useSelector(searchLimitState);
   const searchFilter = useSelector(searchFilterState);
 
@@ -35,6 +33,8 @@ function SearchChainData(props) {
       `/api/search?chain=${chain}&q=${props.q}&filter=${searchFilter}&limit=${searchLimit}&offset=` +
         pageParam
     );
+
+    console.log('response', data);
 
     const nftCount = Object.values(data).flat().length;
 
@@ -74,6 +74,7 @@ function SearchChainData(props) {
 
   useEffect(() => {
     if (data) {
+      console.log('data exists for', chain);
       const nftTotals = data.pages.reduce((acc, element) => {
         const nftCount = Object.values(element)[0].count;
 
@@ -100,17 +101,17 @@ function SearchChainData(props) {
   return (
     <>
       <div className="grid gap-5">
-        {data.pages.map((page) => (
-          <React.Fragment key={page.offset}>
-            {Object.keys(page[chain].data).map((collection) => (
-              <NFTCollection
-                key={collection}
-                collection={page[chain].data[collection]}
-                chain={chain}
-              />
+        <section className={`space-y-2`}>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 3xl:grid-cols-7 4xl:grid-cols-8 gap-10">
+            {data.pages.map((page) => (
+              <React.Fragment key={page.offset}>
+                {page[chain].data.map((nft, idx) => (
+                  <NFTCard key={idx} nft={nft} chain={chain} />
+                ))}
+              </React.Fragment>
             ))}
-          </React.Fragment>
-        ))}
+          </div>
+        </section>
       </div>
 
       <div className="text-center mt-5">

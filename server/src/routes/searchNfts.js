@@ -15,8 +15,6 @@ const changeIpfsUrl = require('../utils/changeIpfsUrl.js');
 const searchNfts = async (req, res) => {
   const { chain, q, filter, limit, offset } = req.query;
 
-  console.log('offset', offset);
-
   const response = await axios
     .get(
       `${process.env.MORALIS_API_URL}/nft/search?chain=${chain}&format=decimal&q=${q}&filter=${filter}&limit=${limit}&offset=${offset}`,
@@ -34,24 +32,6 @@ const searchNfts = async (req, res) => {
   //console.log('search', response.data.result);
 
   const nfts = response.data.result.map(async (item) => {
-    // get missing name property that is missing from this endpoint
-    // GetTokenIdMetadata
-    /*let nameResponse = await axios
-      .get(
-        `${process.env.MORALIS_API_URL}/nft/${item.token_address}/${item.token_id}?chain=${chain}&format=decimal`,
-        {
-          headers: {
-            accept: 'application/json',
-            'X-API-KEY': process.env.MORALIS_API_KEY,
-          },
-        }
-      )
-      .catch((err) => {
-        console.log(err);
-      });
-
-    item.name = nameResponse.data.name; */
-
     const response = await axios.get(item.token_uri).catch((err) => {
       if (err.code == 'ENOTFOUND') console.log(err);
       //console.log(err.code);
@@ -166,7 +146,7 @@ const searchNfts = async (req, res) => {
 
     console.log(`${chain} nfts`, data);
 
-    // group NFTs by collection
+    /* group NFTs by collection
     const grouped = data.reduce((acc, element) => {
       // make array if key value doesn't already exist
       try {
@@ -181,11 +161,9 @@ const searchNfts = async (req, res) => {
       }
 
       return acc;
-    }, Object.create(null));
+    }, Object.create(null)); */
 
-    //console.log(grouped);
-
-    res.send(grouped);
+    res.send(data);
   });
 };
 

@@ -117,7 +117,7 @@ function NFTImage(props) {
 export default function NFTCard(props) {
   //const metadata = props.nft.external_data;
   const nft = props.nft;
-  const collection = props.collection;
+  //const collection = props.collection;
   const chain = props.chain;
 
   const colorModeBg = useColorModeValue('bg-white', 'bg-gray-800');
@@ -136,7 +136,8 @@ export default function NFTCard(props) {
           className={`mt-auto overflow-hidden rounded-lg shadow-md  transition-all hover:-translate-y-2 ${colorModeBg}`}
         >
           {nft.metadata && (
-            <NFTImage collection={collection} nft={nft} chain={chain} />
+            // <NFTImage collection={collection} nft={nft} chain={chain} />
+            <NFTImage nft={nft} chain={chain} />
           )}
 
           {/* bg-gray-50 border-t border-gray-100 */}

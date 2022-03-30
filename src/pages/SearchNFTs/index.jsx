@@ -58,6 +58,7 @@ import toast from '../../components/Toast/Toast';
 export function SearchNFTs() {
   // React Router
   const params = useParams();
+  const location = useLocation();
 
   // State
   const dispatch = useDispatch();
@@ -66,22 +67,16 @@ export function SearchNFTs() {
 
   const [chainsState, setChainsState] = useState(chains);
 
-  const [noNfts, setNoNfts] = useState('');
-
-  useEffect(() => {
-    console.log('chain tab set', chainTabSet);
-  }, [chainTabSet]);
-
-  const [test, setTest] = useState(1);
+  const [noNfts, setNoNfts] = useState(false);
 
   useEffect(() => {
     dispatch(changeTab(1)); // manually set to Search tab on search routes
 
-    dispatch(viewIsLoading());
+    // need this
 
     // reset UI
-    dispatch(changeChainTab(-1));
-    setNoNfts('');
+    // dispatch(changeChainTab(-1));
+    //setNoNfts(false);
 
     document.title = `NFT Looker. Search for ${params.q}`;
 
@@ -93,21 +88,23 @@ export function SearchNFTs() {
 
   useEffect(() => {
     console.log('chains state', chainsState);
-  }, [chainsState]);
-
-  function handleChainsState(data) {
-    console.log('data handle', data);
-
-    setChainsState({ ...chainsState, [data.abbr]: data });
 
     if (Object.values(chainsState).every((chain) => chain.loaded)) {
       dispatch(viewIsNotLoading());
-    }
 
-    Object.values(chainsState).every((chain) => {
-      console.log('chain every', chain);
-      return chain.loaded;
-    });
+      // check for any NFTs
+      if (Object.values(chainsState).every((chain) => !chain.total)) {
+        setNoNfts(true);
+      }
+    } else {
+      dispatch(viewIsLoading());
+    }
+  }, [chainsState]);
+
+  function handleChainState(data) {
+    setChainsState({ ...chainsState, [data.abbr]: data });
+
+    console.log('updating chain state', data);
   }
 
   return (
@@ -138,7 +135,7 @@ export function SearchNFTs() {
                 chainTabSet={chainTabSet}
                 onChainTabSet={(bool) => setChainTabSet(bool)}
                 chains={chainsState}
-                onChains={handleChainsState}
+                onChains={(data) => handleChainState(data)}
               />
             </TabPanel>
           ))}
