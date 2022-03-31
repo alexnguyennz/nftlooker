@@ -110,6 +110,7 @@ export function Layout() {
   const colorModeBody = useColorModeValue('bg-rose-50', 'bg-gray-900'); // chakra gray-800 #1A202C
   const colorModeBodyHex = useColorModeValue('#fff1f2', '#111827');
   const colorModeView = useColorModeValue('pink', 'gray');
+
   // bg-rose-50 background-color: rgb(255 241 242); #fff1f2
   // bg-gray-900 	background-color: rgb(17 24 39); #111827
 
@@ -261,8 +262,8 @@ export function Layout() {
         <Modal size="xl" onClose={onClose} isOpen={isOpen} isCentered>
           <ModalOverlay />
           <ModalContent className="mx-5">
-            <ModalBody className="">
-              <p className="pb-5">
+            <ModalBody>
+              <p className="pt-3 pb-5">
                 NFT Looker is a simple way to view NFTs - by entering a wallet
                 address or searching using keywords. You can view an individual
                 NFT or collection for more info.
@@ -368,7 +369,9 @@ export function Layout() {
               </ul>
             </ModalBody>
             <ModalFooter>
-              <Button onClick={onClose}>Close</Button>
+              <Button onClick={onClose} className="mb-1">
+                Close
+              </Button>
             </ModalFooter>
           </ModalContent>
         </Modal>
@@ -498,6 +501,8 @@ function KeywordInput() {
   const navigate = useNavigate();
   const params = useParams();
 
+  const colorModeSearch = useColorModeValue('white', '#1f2937');
+
   // Chakra UI Autocomplete
   let items = [];
 
@@ -577,7 +582,7 @@ function KeywordInput() {
             fontSize: '1rem',
           }}
           inputStyleProps={{
-            backgroundColor: 'white',
+            backgroundColor: `${colorModeSearch}`,
             size: 'lg',
             isDisabled: loading,
             isRequired: true,
@@ -616,7 +621,7 @@ function KeywordInput() {
             Cancel
           </Button>
         )}
-        <Menu closeOnSelect={false} isLazy lazyBehavior>
+        <Menu closeOnSelect={false} isLazy lazyBehavior padding="0">
           <MenuButton
             marginLeft="1.25rem"
             as={IconButton}
@@ -625,7 +630,7 @@ function KeywordInput() {
             padding="18px"
             paddingY="24px"
           />
-          <MenuList minWidth="120px" className="p-3">
+          <MenuList minWidth="120px" padding="0.75em">
             <MenuOptionGroup
               title="Limit"
               className="text-left"

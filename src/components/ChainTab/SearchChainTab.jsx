@@ -17,13 +17,16 @@ export default function SearchChainTab(props) {
       <Tab
         isDisabled={!nftCount}
         value={props.idx}
-        className={`items-center space-x-2 ${!nftCount && `css-1ltezim`}`}
+        className={`space-x-1 ${!nftCount && `css-1ltezim`}`}
       >
         <ChainIcon chain={chain.abbr} />
-        <span>
-          {chain.name} {nftCount > 0 && `(${nftCount})`}
-        </span>
-        {!chain.loaded && <Spinner size="sm" />}
+        <span className="tab-name">{chain.name}</span>
+        <span className="tab-count">{nftCount > 0 && `(${nftCount})`}</span>
+        {!chain.loaded && (
+          <span className="mt-2">
+            <Spinner size="sm" />
+          </span>
+        )}
       </Tab>
     </Tooltip>
   );

@@ -61,14 +61,14 @@ function NFTImage(props) {
       );
     case 'video/mp4':
       return (
-        <video width="100%" controls autoPlay muted loop className="z-20">
+        <video width="100%" controls autoPlay muted loop>
           <source src={`${image}`} type="video/mp4" />
           Your browser does not support the video tag.
         </video>
       );
     case 'video/webm':
       return (
-        <video width="100%" controls autoPlay muted loop className="z-20">
+        <video width="100%" controls autoPlay muted loop>
           <source src={`${image}`} type="video/webm" />
           Your browser does not support the video tag.
         </video>
@@ -109,20 +109,13 @@ function NFTImage(props) {
         >
           <Image
             src={image}
-            /*onError={({ currentTarget }) => {
-              currentTarget.onerror = null; // prevents looping
-              currentTarget.src = '/img/404.webp';
-            }}*/
+            // onError={({ currentTarget }) => {
+            //   currentTarget.onerror = null; // prevents looping
+            //   currentTarget.src = '/img/no-image.png';
+            // }}
             fallback={<LoadingSpinner />}
-            //fallbackSrc={'/img/loading.svg'}
             className="mx-auto w-full"
           />
-
-          {/*<img
-            src={image}
-            
-            className="mx-auto w-full"
-          />*/}
         </Link>
       );
   }
@@ -145,9 +138,10 @@ export default function NFTCard(props) {
 
   return (
     <>
-      <div className="flex flex-col max-w-sm">
+      <div className="flex flex-col max-w-sm ">
         <div
-          className={`mt-auto overflow-hidden rounded-lg shadow-md  transition-all hover:-translate-y-2 ${colorModeBg}`}
+          // className={`mt-auto overflow-hidden rounded-lg shadow-md transition-all hover:-translate-y-2 ${colorModeBg}`}
+          className={` mt-auto rounded-b-lg shadow-md transition-all hover:-translate-y-2 ${colorModeBg}`}
         >
           {nft.metadata && (
             // <NFTImage collection={collection} nft={nft} chain={chain} />
@@ -155,7 +149,9 @@ export default function NFTCard(props) {
           )}
 
           {/* bg-gray-50 border-t border-gray-100 */}
-          <div className={`p-3 mt-auto space-y-2 border-t ${colorModeCard}`}>
+          <div
+            className={`p-3 mt-auto space-y-2 border-t rounded-b-lg ${colorModeCard}`}
+          >
             <h3 className="text-center font-semibold">
               <Link
                 to={`/${chain}/collection/${nft.token_address}/nft/${nft.token_id}`}
@@ -179,7 +175,7 @@ export default function NFTCard(props) {
                     rel="noreferrer noopener nofollow"
                     className="z-0"
                   >
-                    <ExternalLinkIcon color="gray.600" boxSize={4} />
+                    <ExternalLinkIcon boxSize={4} />
                   </a>
                 </Tooltip>
               )}

@@ -19,13 +19,16 @@ export default function ChainTab(props) {
       <Tab
         isDisabled={noNftsFound}
         value={props.idx}
-        className={`items-center space-x-2 ${noNftsFound && `css-1ltezim`}`}
+        className={`space-x-1 ${noNftsFound && `css-1ltezim`}`}
       >
         <ChainIcon chain={chain} />
-        <span>
-          {data.name} {data.count > 0 && `(${data.count})`}
-        </span>
-        {!data.loaded && <Spinner size="sm" />}
+        <span className="tab-name">{data.name}</span>{' '}
+        <span className="tab-count">{data.count > 0 && `(${data.count})`}</span>
+        {!data.loaded && (
+          <span className="mt-2">
+            <Spinner size="sm" />
+          </span>
+        )}
       </Tab>
     </Tooltip>
   );

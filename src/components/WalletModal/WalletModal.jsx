@@ -182,7 +182,7 @@ export default function WalletModal() {
               <div className="modal-wallets grid sm:grid-cols-3">
                 <div
                   className={`p-5 text-center cursor-pointer transition ${colorMode}`}
-                  onClick={connectMetaMask}
+                  onClick={window.ethereum && connectMetaMask}
                 >
                   <img
                     src="/icons/metamask.svg"
@@ -191,7 +191,21 @@ export default function WalletModal() {
                     className="mx-auto"
                   />
                   <h3 className="text-center font-bold text-xl">MetaMask</h3>
-                  <p>Connect to your MetaMask Wallet</p>
+                  {window.ethereum ? (
+                    <p>Connect to your MetaMask Wallet</p>
+                  ) : (
+                    <p className="mt-3">
+                      <a
+                        href="https://metamask.io/download/"
+                        target="_blank"
+                        rel="noreferrer noopener nofollow"
+                      >
+                        <Button colorScheme="red" backgroundColor="red.400">
+                          Install MetaMask
+                        </Button>
+                      </a>
+                    </p>
+                  )}
                 </div>
                 {
                   <div

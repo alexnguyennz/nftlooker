@@ -179,6 +179,7 @@ export default function UserNFTs() {
           [chain]: {
             name: chains[chain]['name'],
             order: chains[chain]['order'],
+            abbr: chains[chain]['abbr'],
             data: {},
             loaded: true,
             count: 0,
