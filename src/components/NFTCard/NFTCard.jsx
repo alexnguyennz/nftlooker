@@ -47,18 +47,19 @@ function NFTImage(props) {
   console.log('mimeType', mimeType);
 
   // getContentType(nft.metadata.original_image);
+  console.log('content type:', nft.metadata.content_type);
 
   console.log('NFTImage', nft);
 
   //switch (mimeType) {
   switch (nft.metadata.content_type) {
-    case 'image/gif':
+    /* case 'image/gif':
       return (
         <video width="100%" controls autoPlay muted loop>
           <source src={`${image}`} type="video/mp4" />
           Your browser does not support the video tag.
         </video>
-      );
+      ); */
     case 'video/mp4':
       return (
         <video width="100%" controls autoPlay muted loop>
@@ -113,7 +114,7 @@ function NFTImage(props) {
             //   currentTarget.onerror = null; // prevents looping
             //   currentTarget.src = '/img/no-image.png';
             // }}
-            fallback={<LoadingSpinner />}
+            //fallback={<LoadingSpinner />}
             className="mx-auto w-full"
           />
         </Link>
