@@ -1,3 +1,5 @@
+import { useEffect, useState } from 'react';
+
 import { Link } from 'react-router-dom';
 
 import axios from 'axios';
@@ -20,15 +22,8 @@ const mime = require('mime-types');
 
 const contentType = require('content-type');
 
-async function getContentType(image) {
-  const response = await axios.get(image);
-
-  const type = contentType.parse(response);
-
-  console.log(type.type);
-
-  return type.type;
-}
+// change this
+import { imagekit, DEFAULT_IMAGEKIT_IMG } from '../../utils/image';
 
 function LoadingSpinner() {
   return (
@@ -42,17 +37,79 @@ function NFTImage(props) {
   const chain = props.chain;
 
   const nft = props.nft;
-  const image = nft.metadata.image;
-  const mimeType = mime.lookup(image);
-  console.log('mimeType', mimeType);
+  let image = nft.metadata.image;
 
-  // getContentType(nft.metadata.original_image);
-  console.log('content type:', nft.metadata.content_type);
+  //console.log('content type:', nft.metadata.content_type);
 
-  console.log('NFTImage', nft);
+  const [nftContentType, setNftContentType] = useState('');
+
+  useEffect(() => {
+    async function getContentType(image) {
+      const response = await axios.head(image).catch((err) => console.log(err));
+
+      const type = contentType.parse(response);
+
+      console.log('contentType', type.type);
+
+      //setNftContentType(type.type);
+
+      generateUrl(type.type);
+
+      return type.type;
+    }
+
+    getContentType(image);
+  }, []);
+
+  function generateUrl(type) {
+    if (type === 'image/gif') {
+      // ImageKit
+      image = imagekit.url({
+        src: `${process.env.REACT_APP_IMAGEKIT_API_URL}/${image}`,
+        transformation: [
+          {
+            height: '250',
+            width: '250',
+            defaultImage: DEFAULT_IMAGEKIT_IMG,
+          },
+        ],
+      });
+
+      console.log('image test', image);
+    } else if (type === 'video/mp4' || type === 'video/webm') {
+      // ImageKit
+      image = imagekit.url({
+        src: `${process.env.REACT_APP_IMAGEKIT_API_URL}/${image}`,
+        transformation: [
+          {
+            height: '250',
+            width: '250',
+            defaultImage: DEFAULT_IMAGEKIT_IMG,
+          },
+        ],
+      });
+    } else if (type !== 'model/gltf-binary') {
+      // ImageKit
+      image = imagekit.url({
+        src: `${process.env.REACT_APP_IMAGEKIT_API_URL}/${image}`,
+        transformation: [
+          {
+            height: '250',
+            width: '250',
+            defaultImage: DEFAULT_IMAGEKIT_IMG,
+          },
+        ],
+      });
+    }
+
+    setNftContentType(type);
+  }
+
+  if (!nftContentType) return null;
 
   //switch (mimeType) {
-  switch (nft.metadata.content_type) {
+  switch (nftContentType) {
+    //switch (nft.metadata.content_type) {
     /* case 'image/gif':
       return (
         <video width="100%" controls autoPlay muted loop>
@@ -60,17 +117,12 @@ function NFTImage(props) {
           Your browser does not support the video tag.
         </video>
       ); */
+    //case 'image/gif':
     case 'video/mp4':
-      return (
-        <video width="100%" controls autoPlay muted loop>
-          <source src={`${image}`} type="video/mp4" />
-          Your browser does not support the video tag.
-        </video>
-      );
     case 'video/webm':
       return (
         <video width="100%" controls autoPlay muted loop>
-          <source src={`${image}`} type="video/webm" />
+          <source src={`${image}`} type={nft.metadata.content_type} />
           Your browser does not support the video tag.
         </video>
       );
@@ -114,7 +166,7 @@ function NFTImage(props) {
             //   currentTarget.onerror = null; // prevents looping
             //   currentTarget.src = '/img/no-image.png';
             // }}
-            //fallback={<LoadingSpinner />}
+            fallback={<LoadingSpinner />}
             className="mx-auto w-full"
           />
         </Link>

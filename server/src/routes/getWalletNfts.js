@@ -74,7 +74,7 @@ const getWalletNfts = async (request, res) => {
       }
 
       if (metadata.image) {
-        metadata.content_type = await getContentType(metadata.image);
+        //metadata.content_type = await getContentType(metadata.image);
 
         if (metadata.image.startsWith('data:image')) {
           //console.log('data:image');
@@ -102,8 +102,8 @@ const getWalletNfts = async (request, res) => {
             }
           ); */
           //console.log('encoded', metadata.image);
-        } else if (metadata.content_type === 'image/gif') {
-          // } else if (metadata.image.endsWith('.gif')) {
+          //} else if (metadata.content_type === 'image/gif') {
+        } else if (metadata.image.endsWith('.gif')) {
           // Cloudinary
           metadata.backup = cloudinary.url(metadata.image, {
             type: 'fetch',
@@ -125,14 +125,14 @@ const getWalletNfts = async (request, res) => {
               },
             ],
           });
-        } else if (
+          /* } else if (
           metadata.content_type === 'video/mp4' ||
           metadata.content_type === 'video/webm'
-        ) {
-          /*} else if (
+        ) { */
+        } else if (
           metadata.image.endsWith('.mp4') ||
           metadata.image.endsWith('.webm')
-        ) { */
+        ) {
           const stripped = metadata.image.replace(/^.*:\/\//i, '');
           // Cloudinary
           metadata.image = cloudinary.url(`remote_https_media/${stripped}`, {
@@ -155,11 +155,11 @@ const getWalletNfts = async (request, res) => {
             ],
           });
           //metadata.image = `https://ik.imagekit.io/glad/tr:w-400,h-300/${metadata.image}`
-        } else if (metadata.content_type !== 'model/gltf-binary') {
-          // } else if (
-          //   !metadata.image.endsWith('.glb') &&
-          //   !metadata.image.endsWith('.gltf')
-          // ) {
+          //} else if (metadata.content_type !== 'model/gltf-binary') {
+        } else if (
+          !metadata.image.endsWith('.glb') &&
+          !metadata.image.endsWith('.gltf')
+        ) {
           // Cloudinary
           metadata.backup = cloudinary.url(metadata.image, {
             type: 'fetch',
