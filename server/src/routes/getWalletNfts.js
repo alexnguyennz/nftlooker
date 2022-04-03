@@ -105,7 +105,7 @@ const getWalletNfts = async (request, res) => {
           //} else if (metadata.content_type === 'image/gif') {
         } else if (metadata.image.endsWith('.gif')) {
           // Cloudinary
-          metadata.backup = cloudinary.url(metadata.image, {
+          /* metadata.backup = cloudinary.url(metadata.image, {
             type: 'fetch',
             transformation: [
               { width: 250, height: 250 },
@@ -114,6 +114,8 @@ const getWalletNfts = async (request, res) => {
             default_image: DEFAULT_CLOUDINARY_IMG,
           });
 
+          console.log('cloudinary', metadata.backup);
+
           // ImageKit
           metadata.image = imagekit.url({
             src: `${process.env.IMAGEKIT_API_URL}/${metadata.image}`,
@@ -124,7 +126,7 @@ const getWalletNfts = async (request, res) => {
                 defaultImage: DEFAULT_IMAGEKIT_IMG,
               },
             ],
-          });
+          }); */
           /* } else if (
           metadata.content_type === 'video/mp4' ||
           metadata.content_type === 'video/webm'
@@ -133,7 +135,7 @@ const getWalletNfts = async (request, res) => {
           metadata.image.endsWith('.mp4') ||
           metadata.image.endsWith('.webm')
         ) {
-          const stripped = metadata.image.replace(/^.*:\/\//i, '');
+          /* const stripped = metadata.image.replace(/^.*:\/\//i, '');
           // Cloudinary
           metadata.image = cloudinary.url(`remote_https_media/${stripped}`, {
             resource_type: 'video',
@@ -141,8 +143,9 @@ const getWalletNfts = async (request, res) => {
             default_image: DEFAULT_CLOUDINARY_IMG,
           });
 
+          console.log('Cloudinary', metadata.image); */
           // ImageKit
-          metadata.backup = imagekit.url({
+          /* metadata.backup = imagekit.url({
             src: `${process.env.IMAGEKIT_API_URL}/${metadata.image}`,
             transformation: [
               {
@@ -153,7 +156,7 @@ const getWalletNfts = async (request, res) => {
                 // blur: '6', // low size placeholder
               },
             ],
-          });
+          }); */
           //metadata.image = `https://ik.imagekit.io/glad/tr:w-400,h-300/${metadata.image}`
           //} else if (metadata.content_type !== 'model/gltf-binary') {
         } else if (
@@ -161,7 +164,7 @@ const getWalletNfts = async (request, res) => {
           !metadata.image.endsWith('.gltf')
         ) {
           // Cloudinary
-          metadata.backup = cloudinary.url(metadata.image, {
+          /* metadata.backup = cloudinary.url(metadata.image, {
             type: 'fetch',
             transformation: [
               { width: 250, height: 250 },
@@ -169,10 +172,9 @@ const getWalletNfts = async (request, res) => {
             ],
             quality: 'auto',
             default_image: DEFAULT_CLOUDINARY_IMG,
-          });
-
+          }); */
           // ImageKit
-          metadata.image = imagekit.url({
+          /* metadata.image = imagekit.url({
             src: `${process.env.IMAGEKIT_API_URL}/${metadata.image}`,
             transformation: [
               {
@@ -183,11 +185,9 @@ const getWalletNfts = async (request, res) => {
                 // blur: '6', // low size placeholder
               },
             ],
-          });
-
+          }); */
           // Get Content Type
           //metadata.content_type = await getContentType(metadata.image);
-
           // audio test
           //metadata.image = 'https://www.kozco.com/tech/piano2.wav';
         }

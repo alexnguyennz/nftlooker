@@ -23,7 +23,14 @@ const mime = require('mime-types');
 const contentType = require('content-type');
 
 // change this
-import { imagekit, DEFAULT_IMAGEKIT_IMG } from '../../utils/image';
+import {
+  imagekit,
+  DEFAULT_IMAGEKIT_IMG,
+  cloudinary,
+  DEFAULT_CLOUDINARY_IMG,
+} from '../../utils/image';
+
+import { Resize } from '@cloudinary/url-gen/actions/resize';
 
 function LoadingSpinner() {
   return (
@@ -37,48 +44,96 @@ function NFTImage(props) {
   const chain = props.chain;
 
   const nft = props.nft;
-  let image = nft.metadata.image;
+  //let image = nft.metadata.image;
 
   //console.log('content type:', nft.metadata.content_type);
 
+  const [image, setImage] = useState('');
   const [nftContentType, setNftContentType] = useState('');
 
   useEffect(() => {
     async function getContentType(image) {
-      const response = await axios.head(image).catch((err) => console.log(err));
+      // fetch head only to get Content-Type to render NFT appropriately
 
-      const type = contentType.parse(response);
+      try {
+        const response = await axios
+          .head(image)
+          .catch((err) => console.log(err));
 
-      console.log('contentType', type.type);
+        const type = contentType.parse(response);
+        console.log('contentType', type.type);
 
-      //setNftContentType(type.type);
+        //setNftContentType(type.type);
 
-      generateUrl(type.type);
+        generateUrl(type.type);
 
-      return type.type;
+        return type.type;
+      } catch (err) {
+        console.log('err', err);
+      }
     }
 
-    getContentType(image);
+    getContentType(nft.metadata.image);
   }, []);
 
   function generateUrl(type) {
     if (type === 'image/gif') {
-      // ImageKit
-      image = imagekit.url({
-        src: `${process.env.REACT_APP_IMAGEKIT_API_URL}/${image}`,
-        transformation: [
-          {
-            height: '250',
-            width: '250',
-            defaultImage: DEFAULT_IMAGEKIT_IMG,
-          },
-        ],
-      });
+      // Cloudinary
+      // https://res.cloudinary.com/gladius/image/fetch/h_250,w_250/f_mp4/d_no-image_lmfa1g.png/https://www.thehighapesclub.com/assets/nft/invite/THCInvite.gif
+      setImage(
+        `https://res.cloudinary.com/gladius/image/fetch/h_250,w_250/f_mp4/d_no-image_lmfa1g.png/${nft.metadata.image}`
+      );
 
-      console.log('image test', image);
-    } else if (type === 'video/mp4' || type === 'video/webm') {
+      console.log(
+        'THC test',
+        `https://res.cloudinary.com/gladius/image/fetch/h_250,w_250/f_mp4/d_no-image_lmfa1g.png/${nft.metadata.image}`
+      );
+
+      // Cloudinary
+      /* const stripped = image.replace(/^.*:\/\//i, '');
+
+      const cloudinaryImage = cloudinary.image(
+        `remote_https_media/${stripped}`
+      );
+      cloudinaryImage.resize(Resize.fit().width(250).height(250));
+
+      let cloudinaryLink = cloudinaryImage.toURL();
+      cloudinaryLink = cloudinaryLink + '/d_no-image_lmfa1g.png';
+
+      console.log('gif', cloudinaryLink);
+
+      setImage(cloudinaryLink); */
+
       // ImageKit
-      image = imagekit.url({
+      /* setImage(
+        imagekit.url({
+          src: `${process.env.REACT_APP_IMAGEKIT_API_URL}/${image}`,
+          transformation: [
+            {
+              height: '250',
+              width: '250',
+              defaultImage: DEFAULT_IMAGEKIT_IMG,
+            },
+          ],
+        })
+      ); */
+    } else if (type === 'video/mp4' || type === 'video/webm') {
+      const stripped = nft.metadata.image.replace(/^.*:\/\//i, '');
+
+      const cloudinaryImage = cloudinary.video(
+        `remote_https_media/${stripped}`
+      );
+      cloudinaryImage.resize(Resize.fit().width(250).height(250));
+
+      let cloudinaryLink = cloudinaryImage.toURL();
+      cloudinaryLink = cloudinaryLink + '/d_no-image_lmfa1g.png';
+
+      setImage(cloudinaryLink);
+
+      //console.log('cloudinary test', cloudinaryLink);
+
+      // ImageKit
+      /* image = imagekit.url({
         src: `${process.env.REACT_APP_IMAGEKIT_API_URL}/${image}`,
         transformation: [
           {
@@ -87,25 +142,45 @@ function NFTImage(props) {
             defaultImage: DEFAULT_IMAGEKIT_IMG,
           },
         ],
-      });
+      }); */
     } else if (type !== 'model/gltf-binary') {
       // ImageKit
-      image = imagekit.url({
-        src: `${process.env.REACT_APP_IMAGEKIT_API_URL}/${image}`,
-        transformation: [
-          {
-            height: '250',
-            width: '250',
-            defaultImage: DEFAULT_IMAGEKIT_IMG,
-          },
-        ],
-      });
+      setImage(
+        imagekit.url({
+          src: `${process.env.REACT_APP_IMAGEKIT_API_URL}/${nft.metadata.image}`,
+          transformation: [
+            {
+              height: '250',
+              width: '250',
+              defaultImage: DEFAULT_IMAGEKIT_IMG,
+            },
+          ],
+        })
+      );
+    } else {
+      // ImageKit
+      setImage(
+        imagekit.url({
+          src: `${process.env.REACT_APP_IMAGEKIT_API_URL}/${nft.metadata.image}`,
+          transformation: [
+            {
+              height: '250',
+              width: '250',
+              defaultImage: DEFAULT_IMAGEKIT_IMG,
+            },
+          ],
+        })
+      );
     }
 
     setNftContentType(type);
   }
 
-  if (!nftContentType) return null;
+  useEffect(() => {
+    console.log('image', image);
+  }, [image]);
+
+  if (!image) return null;
 
   //switch (mimeType) {
   switch (nftContentType) {
@@ -117,7 +192,7 @@ function NFTImage(props) {
           Your browser does not support the video tag.
         </video>
       ); */
-    //case 'image/gif':
+    case 'image/gif':
     case 'video/mp4':
     case 'video/webm':
       return (
@@ -166,7 +241,7 @@ function NFTImage(props) {
             //   currentTarget.onerror = null; // prevents looping
             //   currentTarget.src = '/img/no-image.png';
             // }}
-            fallback={<LoadingSpinner />}
+            //fallback={<LoadingSpinner />}
             className="mx-auto w-full"
           />
         </Link>

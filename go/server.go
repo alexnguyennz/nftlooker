@@ -4,10 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"sync"
-
 	"log"
 	"net/http"
+	"net/url"
+	"strings"
+	"sync"
 
 	"github.com/gorilla/mux"
 )
@@ -37,7 +38,7 @@ func getWalletNfts(w http.ResponseWriter, r *http.Request) {
 	}
 
 	req.Header.Set("accept", "application/json")
-	req.Header.Set("X-API-KEY", "")
+	req.Header.Set("X-API-KEY", "apikeyyhere")
 
 	// make request
 	resp, err := http.DefaultClient.Do(req)
@@ -77,10 +78,6 @@ func getWalletNfts(w http.ResponseWriter, r *http.Request) {
 
 	json.Unmarshal([]byte(response), &result)
 	
-
-	type Metadata struct {
-		Image string
-	}
 	
 	for _, nft := range result.Result {
 		//fmt.Fprintf(w, "%s\n", nft.Token_Uri)
@@ -90,8 +87,10 @@ func getWalletNfts(w http.ResponseWriter, r *http.Request) {
 
 		// var metadata string
 
-		var metadata Metadata
+		//var metadata Metadata
+		var metadata map[string]interface{}
 
+		// fetch token_uri in parallel
 		go func() {
 			response := Request(nft.Token_Uri)
 			json.Unmarshal([]byte(response), &metadata)
@@ -103,13 +102,62 @@ func getWalletNfts(w http.ResponseWriter, r *http.Request) {
 		// block until waitgroup becomes 0 or all goroutines are done
 		waitgroup.Wait()
 
-		fmt.Fprintf(w, "%s", metadata.Image)
 
-		// if metadata != "" {
-		// 	fmt.Println("empty")
-		// }
+		// changeIpfsUrl
+		if metadata["Image"] != "" {
+			
+			
+			if strings.HasPrefix(metadata["image"].(string), "ipfs://ipfs/") {
 
+				u, _ := url.Parse(metadata["image"].(string))
+				u.Scheme = "https"
+				u.Path = "/ipfs" + u.Path // prepend /ipfs/ path to CID
+				u.Host = "ipfs.io"
+
+				//metadata["Image"] = u.String()
+				
+			} else if strings.HasPrefix(metadata["image"].(string), "ipfs://") {
+
+				u, _ := url.Parse(metadata["image"].(string))
+				u.Scheme = "https"
+				u.Path = "/ipfs/" + u.Host // prepend /ipfs/ path to CID
+				u.Host = "ipfs.io"
+
+				metadata["image"] = u.String()
+
+			} else if strings.HasPrefix(metadata["image"].(string), "https://gateway.pinata.cloud/") {
+
+				u, _ := url.Parse(metadata["image"].(string))
+				u.Host = "ipfs.io"
+
+				metadata["image"] = u.String()
+				// TESTING
+			} else {
+				u, _ := url.Parse(metadata["image"].(string))
+				u.Host = "test.io"
+
+				metadata["image"] = u.String()
+			}
+
+			// marshalled JSON data after updating the metadata
+			updatedData, _ := json.Marshal(metadata)
+
+			// update existing metadata with new
+			nft.Metadata = string(updatedData);
+			
+			fmt.Fprintf(w, "%s\n\n", nft.Metadata)
+
+
+			//updatedResponse  
+			
+
+		}
+
+		
 	}
+
+	fmt.Fprintf(w, "%v", result.Result)
+
 
 }
 
@@ -165,3 +213,42 @@ func main() {
 		log.Fatal(err)
 	}
 } */
+
+
+		/* get the image's Content-Type
+		resp, _ := http.Head(metadata.Image)
+		contentType := resp.Header.Get("Content-Type")
+		fmt.Fprintf(w, "%s", contentType) */
+
+		//fmt.Fprintf(w, "%s", metadata.Image)
+
+
+					/*
+				// ipfs://ipfs/
+				u, _ := url.Parse("ipfs://ipfs/QmbkBdEkU9WX9fiZwjp4A3JuXrA5XazgdF29ioJcQJxzmz")
+				u.Scheme = "https"
+				u.Path = "/ipfs" + u.Path // prepend /ipfs/ path to CID
+				u.Host = "ipfs.io"
+
+				metadata.Image = u.String()
+
+				fmt.Fprintf(w, "ipfs://ipfs %s\n", metadata.Image)
+
+				// ipfs://
+				u, _ = url.Parse("ipfs://QmbkBdEkU9WX9fiZwjp4A3JuXrA5XazgdF29ioJcQJxzmz")
+				u.Scheme = "https"
+				u.Path = "/ipfs/" + u.Host // prepend /ipfs/ path to CID
+				u.Host = "ipfs.io"
+
+				metadata.Image = u.String()
+
+				fmt.Fprintf(w, "ipfs:// %s\n", metadata.Image)
+
+				// https://gateway.pinata.cloud/
+				u, _ = url.Parse("https://gateway.pinata.cloud/ipfs/QmbkBdEkU9WX9fiZwjp4A3JuXrA5XazgdF29ioJcQJxzmz")
+				u.Host = "ipfs.io"
+
+				metadata.Image = u.String()
+				fmt.Fprintf(w, "https://gateway.pinata.cloud/ %s\n", metadata.Image) */
+
+		
