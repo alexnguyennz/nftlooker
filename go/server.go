@@ -2,13 +2,14 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
 	"strings"
-	"sync"
+	"sync" // return errors to the caller
 
 	"github.com/gorilla/mux"
 )
@@ -38,7 +39,7 @@ func getWalletNfts(w http.ResponseWriter, r *http.Request) {
 	}
 
 	req.Header.Set("accept", "application/json")
-	req.Header.Set("X-API-KEY", "apikeyyhere")
+	req.Header.Set("X-API-KEY", "")
 
 	// make request
 	resp, err := http.DefaultClient.Do(req)
@@ -76,14 +77,39 @@ func getWalletNfts(w http.ResponseWriter, r *http.Request) {
 
 	var result Response
 
-	json.Unmarshal([]byte(response), &result)
+	err = json.Unmarshal([]byte(response), &result)
+
+	if err != nil {
+		fmt.Println("Couldn't unmarshal result", err)
+		
+	}
 	
+	// LOOP
+	// data := &Data{ManyItems: make([]Item, len(resp))}
+	//list := &Response{Result: make([]Result, len(resBody))}
+	//list := make([]Result, len(resp))
+
+	//fmt.Fprintf(w, "List: %v", list)
+
+	//fmt.Fprintf(w, "%v\n\n", result)
+
+	fmt.Fprintf(w, "Unmarshalled: \n%v\n\n", response)
+
+	fmt.Fprintf(w, "Original Metadata: \n%v\n\n", result)
+
+	updatedResult := result
 	
-	for _, nft := range result.Result {
+	//fmt.Fprintf(w, "test %v", updatedResult.Result[0].Metadata)
+
+	for i, nft := range result.Result {
 		//fmt.Fprintf(w, "%s\n", nft.Token_Uri)
+
+		//fmt.Fprintf(w, "Index: %v \n%v\n\n", i, nft)
 
 		var waitgroup sync.WaitGroup
 		waitgroup.Add(1)
+
+
 
 		// var metadata string
 
@@ -92,8 +118,22 @@ func getWalletNfts(w http.ResponseWriter, r *http.Request) {
 
 		// fetch token_uri in parallel
 		go func() {
-			response := Request(nft.Token_Uri)
-			json.Unmarshal([]byte(response), &metadata)
+			response, err := Request(nft.Token_Uri)
+
+			if err != nil {
+				fmt.Println("Error -", err)
+				//w.WriteHeader(http.StatusInternalServerError)
+				// waitgroup.Done()
+				// return
+			}
+
+			fmt.Fprintf(w, "Token Uri Response: \n%s\n\n", response)
+			
+			errs := json.Unmarshal([]byte(response), &metadata)
+
+			if errs != nil {
+				fmt.Println("error test")
+			}
 			
 			//fmt.Fprintf(w, "%s", metadata)
 			waitgroup.Done() // decrease waitgroup once goroutine has finished
@@ -102,10 +142,14 @@ func getWalletNfts(w http.ResponseWriter, r *http.Request) {
 		// block until waitgroup becomes 0 or all goroutines are done
 		waitgroup.Wait()
 
+		//fmt.Println("test", )
+
+		fmt.Println("Metadata", metadata)
+
 
 		// changeIpfsUrl
-		if metadata["Image"] != "" {
-			
+		//if metadata["Image"] != "" {
+		if metadata != nil {	
 			
 			if strings.HasPrefix(metadata["image"].(string), "ipfs://ipfs/") {
 
@@ -133,46 +177,61 @@ func getWalletNfts(w http.ResponseWriter, r *http.Request) {
 				metadata["image"] = u.String()
 				// TESTING
 			} else {
-				u, _ := url.Parse(metadata["image"].(string))
+
+				
+				u, err := url.Parse(metadata["image"].(string))
+
+				if err != nil {
+					fmt.Println("test", err)
+				}
 				u.Host = "test.io"
 
 				metadata["image"] = u.String()
 			}
 
 			// marshalled JSON data after updating the metadata
+			//fmt.Fprintf(w, "Unmarshalled: %v\n\n", metadata)
 			updatedData, _ := json.Marshal(metadata)
 
 			// update existing metadata with new
 			nft.Metadata = string(updatedData);
-			
-			fmt.Fprintf(w, "%s\n\n", nft.Metadata)
 
+			//fmt.Fprintf(w, "Marshalled: %v\n\n", nft.Metadata)
 
-			//updatedResponse  
+			updatedResult.Result[i].Metadata = nft.Metadata
 			
+			// fmt.Fprintf(w, "%s\n\n", nft.Metadata)
 
 		}
 
 		
 	}
 
-	fmt.Fprintf(w, "%v", result.Result)
+	// updated
+	fmt.Fprintf(w, "Updated Metadata:\n%v\n\n", updatedResult)
+
+	// marshalled
+	sendData, _ := json.Marshal(updatedResult.Result)
+
+	marshalled := string(sendData)
+
+	fmt.Fprintf(w, "Marshalled: %v", marshalled)
 
 
 }
 
-func Request(token_uri string) string {
+func Request(token_uri string) (string, error) {
 	//start := time.Now()
 	resp, err := http.Get(token_uri)
 	if err != nil {
-		fmt.Println("Err is", err)
-		return ""
+		fmt.Println("Response Error", err)
+		return "", errors.New("couldn't fetch Token URI")
 	}
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		fmt.Println("Err is", err)
-		return ""
+		fmt.Println("Body Error", err)
+		return "", errors.New("couldn't read body")
 	}
 
 
@@ -180,7 +239,7 @@ func Request(token_uri string) string {
 
 	// fmt.Printf("%v", response)
 
-	return response
+	return response, nil
 
 }
 

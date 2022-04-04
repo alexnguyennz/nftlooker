@@ -6,6 +6,7 @@ import loadingReducer from './loading/loadingSlice';
 import testnetsReducer from './testnets/testnetsSlice';
 import searchReducer from './search/searchSlice';
 import tabReducer from './tab/tabSlice';
+import settingsReducer from './settings/settingsSlice';
 
 export default configureStore({
   reducer: {
@@ -14,5 +15,6 @@ export default configureStore({
     testnets: testnetsReducer,
     search: searchReducer,
     tab: tabReducer,
+    settings: settingsReducer,
   },
 });

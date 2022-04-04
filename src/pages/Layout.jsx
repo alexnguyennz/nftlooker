@@ -20,6 +20,7 @@ import {
   searchFilterState,
 } from '../state/search/searchSlice';
 import { changeTab, tabState } from '../state/tab/tabSlice';
+import { settingsState, toggleAutoplay } from '../state/settings/settingsSlice';
 
 // React Query
 import { useQuery } from 'react-query';
@@ -102,6 +103,7 @@ export function Layout() {
   // Redux
   const loading = useSelector((state) => state.loading.value);
   const tab = useSelector(tabState);
+  const settings = useSelector(settingsState);
   const dispatch = useDispatch();
 
   // Color Mode
@@ -136,6 +138,8 @@ export function Layout() {
       setSearch(params.q);
     }
 
+    //dispatch(toggleAutoplay(Boolean(localStorage.getItem('autoplay'))));
+
     return () => {
       fetchController.abort();
       dispatch(viewIsNotLoading());
@@ -167,6 +171,12 @@ export function Layout() {
     dispatch(toggleTestnets());
     navigate(location.pathname);
   }
+
+  useEffect(() => {
+    console.log('settings', settings);
+
+    console.log('local', localStorage.getItem('autoplay'));
+  }, [settings]);
 
   return (
     <div
@@ -226,12 +236,25 @@ export function Layout() {
               <MenuItem>
                 <FormControl className="flex justify-between">
                   <FormLabel htmlFor="dark-mode" mb="0">
-                    dark mode
+                    Dark mode
                   </FormLabel>
                   <Switch
                     id="dark-mode"
                     isChecked={colorMode === 'light' ? false : true}
                     onChange={toggleColorMode}
+                  />
+                </FormControl>
+              </MenuItem>
+
+              <MenuItem>
+                <FormControl className="flex justify-between">
+                  <FormLabel htmlFor="autoplay-mode" mb="0">
+                    Autoplay videos
+                  </FormLabel>
+                  <Switch
+                    id="autoplay"
+                    isChecked={settings.autoplay}
+                    onChange={() => dispatch(toggleAutoplay())}
                   />
                 </FormControl>
               </MenuItem>

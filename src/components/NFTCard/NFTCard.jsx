@@ -1,5 +1,9 @@
 import { useEffect, useState } from 'react';
 
+// Redux
+import { useSelector } from 'react-redux';
+import { settingsState } from '../../state/settings/settingsSlice';
+
 import { Link } from 'react-router-dom';
 
 import axios from 'axios';
@@ -17,10 +21,6 @@ import ModelViewer from '@google/model-viewer';
 
 // Components
 //import NFTImage from '../../components/NFTImage/NFTImage';
-
-const mime = require('mime-types');
-
-const contentType = require('content-type');
 
 // change this
 import {
@@ -41,10 +41,16 @@ function LoadingSpinner() {
 }
 
 function NFTImage(props) {
-  const chain = props.chain;
+  //const chain = props.chain;
 
-  const nft = props.nft;
+  //const nft = props.nft;
+
+  const settings = useSelector(settingsState);
+
+  const { chain, nft } = props;
   //let image = nft.metadata.image;
+
+  // console.log('nft', nft.metadata.name, nft.metadata.image);
 
   //console.log('content type:', nft.metadata.content_type);
 
@@ -52,57 +58,41 @@ function NFTImage(props) {
   const [nftContentType, setNftContentType] = useState('');
 
   useEffect(() => {
-    async function getContentType(image) {
-      // fetch head only to get Content-Type to render NFT appropriately
-
-      try {
-        const response = await axios
-          .head(image)
-          .catch((err) => console.log(err));
-
-        const type = contentType.parse(response);
-        console.log('contentType', type.type);
-
-        //setNftContentType(type.type);
-
-        generateUrl(type.type);
-
-        return type.type;
-      } catch (err) {
-        console.log('err', err);
-      }
-    }
-
     getContentType(nft.metadata.image);
   }, []);
 
-  function generateUrl(type) {
+  async function getContentType(image) {
+    // fetch head only to get Content-Type to render NFT appropriately
+    await axios
+      .head(image)
+      .then((response) => {
+        // get contentType
+        const contentType = response.headers['content-type'];
+        const contentLength = response.headers['content-length'];
+
+        // console.log(nft.metadata.name, response.headers['content-length']);
+
+        generateUrl(contentType, contentLength);
+      })
+      .catch((err) => console.log(err));
+  }
+
+  function generateUrl(type, contentLength) {
     if (type === 'image/gif') {
       // Cloudinary
       // https://res.cloudinary.com/gladius/image/fetch/h_250,w_250/f_mp4/d_no-image_lmfa1g.png/https://www.thehighapesclub.com/assets/nft/invite/THCInvite.gif
-      setImage(
-        `https://res.cloudinary.com/gladius/image/fetch/h_250,w_250/f_mp4/d_no-image_lmfa1g.png/${nft.metadata.image}`
-      );
+      // Cloudinary 10MB Limit
+      if (contentLength < 10250000) {
+        setImage(
+          `https://res.cloudinary.com/gladius/image/fetch/h_250,w_250/f_mp4/d_no-image_lmfa1g.png/${nft.metadata.image}`
+        );
 
-      console.log(
-        'THC test',
-        `https://res.cloudinary.com/gladius/image/fetch/h_250,w_250/f_mp4/d_no-image_lmfa1g.png/${nft.metadata.image}`
-      );
+        type = 'video/mp4'; // gifs will be outputted as video/mp4
+      } else {
+        type = 'image/png';
 
-      // Cloudinary
-      /* const stripped = image.replace(/^.*:\/\//i, '');
-
-      const cloudinaryImage = cloudinary.image(
-        `remote_https_media/${stripped}`
-      );
-      cloudinaryImage.resize(Resize.fit().width(250).height(250));
-
-      let cloudinaryLink = cloudinaryImage.toURL();
-      cloudinaryLink = cloudinaryLink + '/d_no-image_lmfa1g.png';
-
-      console.log('gif', cloudinaryLink);
-
-      setImage(cloudinaryLink); */
+        setImage('/img/no-video.png');
+      }
 
       // ImageKit
       /* setImage(
@@ -118,31 +108,38 @@ function NFTImage(props) {
         })
       ); */
     } else if (type === 'video/mp4' || type === 'video/webm') {
-      const stripped = nft.metadata.image.replace(/^.*:\/\//i, '');
+      if (contentLength < 10250000) {
+        const stripped = nft.metadata.image.replace(/^.*:\/\//i, '');
 
-      const cloudinaryImage = cloudinary.video(
-        `remote_https_media/${stripped}`
-      );
-      cloudinaryImage.resize(Resize.fit().width(250).height(250));
+        const cloudinaryImage = cloudinary.video(
+          `remote_https_media/${stripped}`
+        );
+        cloudinaryImage.resize(Resize.fit().width(250).height(250));
 
-      let cloudinaryLink = cloudinaryImage.toURL();
-      cloudinaryLink = cloudinaryLink + '/d_no-image_lmfa1g.png';
+        let cloudinaryLink = cloudinaryImage.toURL();
+        cloudinaryLink = cloudinaryLink + '/d_no-image_lmfa1g.png';
 
-      setImage(cloudinaryLink);
+        setImage(cloudinaryLink);
+      } else {
+        type = 'image/png';
 
-      //console.log('cloudinary test', cloudinaryLink);
+        setImage('/img/no-video.png');
+      }
 
       // ImageKit
-      /* image = imagekit.url({
-        src: `${process.env.REACT_APP_IMAGEKIT_API_URL}/${image}`,
-        transformation: [
-          {
-            height: '250',
-            width: '250',
-            defaultImage: DEFAULT_IMAGEKIT_IMG,
-          },
-        ],
-      }); */
+
+      /* setImage(
+        imagekit.url({
+          src: `${process.env.REACT_APP_IMAGEKIT_API_URL}/${nft.metadata.image}`,
+          transformation: [
+            {
+              height: '250',
+              width: '250',
+              defaultImage: DEFAULT_IMAGEKIT_IMG,
+            },
+          ],
+        })
+      ); */
     } else if (type !== 'model/gltf-binary') {
       // ImageKit
       setImage(
@@ -158,7 +155,6 @@ function NFTImage(props) {
         })
       );
     } else {
-      // ImageKit
       setImage(
         imagekit.url({
           src: `${process.env.REACT_APP_IMAGEKIT_API_URL}/${nft.metadata.image}`,
@@ -176,11 +172,7 @@ function NFTImage(props) {
     setNftContentType(type);
   }
 
-  useEffect(() => {
-    console.log('image', image);
-  }, [image]);
-
-  if (!image) return null;
+  //if (!image) return <LoadingSpinner />;
 
   //switch (mimeType) {
   switch (nftContentType) {
@@ -196,10 +188,20 @@ function NFTImage(props) {
     case 'video/mp4':
     case 'video/webm':
       return (
-        <video width="100%" controls autoPlay muted loop>
-          <source src={`${image}`} type={nft.metadata.content_type} />
-          Your browser does not support the video tag.
-        </video>
+        // <video width="100%" controls autoPlay muted loop>
+        <>
+          {settings.autoplay ? (
+            <video width="100%" controls muted loop autoPlay>
+              <source src={`${image}`} type={nftContentType} />
+              Your browser does not support the video tag.
+            </video>
+          ) : (
+            <video width="100%" controls muted loop>
+              <source src={`${image}`} type={nftContentType} />
+              Your browser does not support the video tag.
+            </video>
+          )}
+        </>
       );
     case 'model/gltf-binary':
       return (
@@ -237,11 +239,11 @@ function NFTImage(props) {
         >
           <Image
             src={image}
-            // onError={({ currentTarget }) => {
-            //   currentTarget.onerror = null; // prevents looping
-            //   currentTarget.src = '/img/no-image.png';
-            // }}
-            //fallback={<LoadingSpinner />}
+            /*onError={({ currentTarget }) => {
+               currentTarget.onerror = null; // prevents looping
+               currentTarget.src = '/img/no-image.png';
+            }} */
+            fallback={<LoadingSpinner />}
             className="mx-auto w-full"
           />
         </Link>
