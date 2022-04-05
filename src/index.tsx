@@ -25,10 +25,10 @@ const queryClient = new QueryClient({
 });
 
 // PAGES
-import { Layout } from './pages/Layout';
+import Layout from './pages/Layout';
 import UserNFTs from './pages/UserNFTs';
 import { Collection } from './pages/Collection';
-import { NFT } from './pages/NFT';
+import NFT from './pages/NFT';
 import { SearchNFTs } from './pages/SearchNFTs';
 
 ReactDOM.render(

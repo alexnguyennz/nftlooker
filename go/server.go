@@ -54,25 +54,25 @@ func getWalletNfts(w http.ResponseWriter, r *http.Request) {
 
 
 	type Result struct {
-		Token_Address string
-		Token_Id string
-		Block_Number_Minted string
-		Owner_Of string
-		Block_Number string
-		Amount string
-		Contract_Type string
-		Name string
-		Symbol string
-		Token_Uri string
-		Metadata string
-		Synced_At string
-		Is_Valid int
-		Syncing int
-		Frozen int
+		Token_Address string `json:"token_address"`
+		Token_Id string `json:"token_id"`
+		Block_Number_Minted string `json:"block_number_minted"`
+		Owner_Of string `json:"owner_of"`
+		Block_Number string `json:"block_number"`
+		Amount string `json:"amount"`
+		Contract_Type string `json:"contract_type"`
+		Name string `json:"name"`
+		Symbol string `json:"symbol"`
+		Token_Uri string `json:"token_uri"`
+		Metadata string `json:"metadata"`
+		Synced_At string `json:"synced_at"`
+		Is_Valid int `json:"is_valid"`
+		Syncing int `json:"syncing"`
+		Frozen int `json:"frozen"`
 	}
 
 	type Response struct {
-		Result []Result
+		Result []Result `json:"result"`
 	}
 
 	var result Response
@@ -93,15 +93,15 @@ func getWalletNfts(w http.ResponseWriter, r *http.Request) {
 
 	//fmt.Fprintf(w, "%v\n\n", result)
 
-	fmt.Fprintf(w, "Unmarshalled: \n%v\n\n", response)
+	//fmt.Fprintf(w, "Unmarshalled: \n%v\n\n", response)
 
-	fmt.Fprintf(w, "Original Metadata: \n%v\n\n", result)
+	//fmt.Fprintf(w, "Original Metadata: \n%v\n\n", result)
 
 	updatedResult := result
 	
 	//fmt.Fprintf(w, "test %v", updatedResult.Result[0].Metadata)
 
-	for i, nft := range result.Result {
+	for _, nft := range result.Result {
 		//fmt.Fprintf(w, "%s\n", nft.Token_Uri)
 
 		//fmt.Fprintf(w, "Index: %v \n%v\n\n", i, nft)
@@ -127,7 +127,7 @@ func getWalletNfts(w http.ResponseWriter, r *http.Request) {
 				// return
 			}
 
-			fmt.Fprintf(w, "Token Uri Response: \n%s\n\n", response)
+			//fmt.Fprintf(w, "Token Uri Response: \n%s\n\n", response)
 			
 			errs := json.Unmarshal([]byte(response), &metadata)
 
@@ -144,63 +144,77 @@ func getWalletNfts(w http.ResponseWriter, r *http.Request) {
 
 		//fmt.Println("test", )
 
-		fmt.Println("Metadata", metadata)
+		
 
 
 		// changeIpfsUrl
 		//if metadata["Image"] != "" {
-		if metadata != nil {	
-			
-			if strings.HasPrefix(metadata["image"].(string), "ipfs://ipfs/") {
+		if metadata != nil {	// metadata must exist 
+			//fmt.Println("metadata", metadata)
 
-				u, _ := url.Parse(metadata["image"].(string))
-				u.Scheme = "https"
-				u.Path = "/ipfs" + u.Path // prepend /ipfs/ path to CID
-				u.Host = "ipfs.io"
-
-				//metadata["Image"] = u.String()
-				
-			} else if strings.HasPrefix(metadata["image"].(string), "ipfs://") {
-
-				u, _ := url.Parse(metadata["image"].(string))
-				u.Scheme = "https"
-				u.Path = "/ipfs/" + u.Host // prepend /ipfs/ path to CID
-				u.Host = "ipfs.io"
-
-				metadata["image"] = u.String()
-
-			} else if strings.HasPrefix(metadata["image"].(string), "https://gateway.pinata.cloud/") {
-
-				u, _ := url.Parse(metadata["image"].(string))
-				u.Host = "ipfs.io"
-
-				metadata["image"] = u.String()
-				// TESTING
-			} else {
-
-				
-				u, err := url.Parse(metadata["image"].(string))
-
-				if err != nil {
-					fmt.Println("test", err)
-				}
-				u.Host = "test.io"
-
-				metadata["image"] = u.String()
+			// some NFTs use image_url, set it back to image
+			if metadata["image_url"] != nil {
+				metadata["image"] = metadata["image_url"]
 			}
 
-			// marshalled JSON data after updating the metadata
-			//fmt.Fprintf(w, "Unmarshalled: %v\n\n", metadata)
-			updatedData, _ := json.Marshal(metadata)
+			if metadata["image"] != nil {
+				if strings.HasPrefix(metadata["image"].(string), "ipfs://ipfs/") {
 
-			// update existing metadata with new
-			nft.Metadata = string(updatedData);
+					u, _ := url.Parse(metadata["image"].(string))
+					u.Scheme = "https"
+					u.Path = "/ipfs" + u.Path // prepend /ipfs/ path to CID
+					u.Host = "ipfs.io"
+	
+					//metadata["Image"] = u.String()
+					
+				} else if strings.HasPrefix(metadata["image"].(string), "ipfs://") {
+	
+					u, _ := url.Parse(metadata["image"].(string))
+					u.Scheme = "https"
+					u.Path = "/ipfs/" + u.Host // prepend /ipfs/ path to CID
+					u.Host = "ipfs.io"
+	
+					metadata["image"] = u.String()
+	
+				} else if strings.HasPrefix(metadata["image"].(string), "https://gateway.pinata.cloud/") {
+	
+					u, _ := url.Parse(metadata["image"].(string))
+					u.Host = "ipfs.io"
+	
+					metadata["image"] = u.String()
+					// TESTING
+				} else {
+	
+					
+					u, err := url.Parse(metadata["image"].(string))
+	
+					if err != nil {
+						fmt.Println("test", err)
+					}
+					u.Host = "test.io"
+	
+					metadata["image"] = u.String()
+				}
+	
+				// marshalled JSON data after updating the metadata
+				//fmt.Fprintf(w, "Unmarshalled: %v\n\n", metadata)
+				updatedData, _ := json.Marshal(metadata)
+	
+				// update existing metadata with new
+				nft.Metadata = string(updatedData)
 
-			//fmt.Fprintf(w, "Marshalled: %v\n\n", nft.Metadata)
+				//fmt.Fprintf(w, "Updated metadata %v", metadata)
+	
+				// old method
+				//updatedResult.Result[i].Metadata = nft.Metadata
+				
+				// new method
+				//updatedResult.Result[i].Metadata = metadata
 
-			updatedResult.Result[i].Metadata = nft.Metadata
+				// fmt.Fprintf(w, "%s\n\n", nft.Metadata)
+			}
+
 			
-			// fmt.Fprintf(w, "%s\n\n", nft.Metadata)
 
 		}
 
@@ -208,14 +222,38 @@ func getWalletNfts(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// updated
-	fmt.Fprintf(w, "Updated Metadata:\n%v\n\n", updatedResult)
+	//fmt.Fprintf(w, "Updated Metadata:\n%v\n\n", updatedResult)
 
-	// marshalled
-	sendData, _ := json.Marshal(updatedResult.Result)
 
+	/* for i, collection := range updatedResult.Result {
+		fmt.Fprintf(w, "COLLECTION %v\n%v\n\n", i, collection)
+	} */
+
+	// make slice with array index of token_address string and rest of token data
+	grouped := make(map[string][]Result)
+
+	for _, collection := range updatedResult.Result {
+		//fmt.Fprintf(w, "test %v\n\n", collection.Token_Address)
+		grouped[collection.Token_Address] = append(grouped[collection.Token_Address], collection)
+	}
+
+	
+
+	/* for _, collection := range grouped {
+		for i, v := range collection {
+			fmt.Fprintf(w, "COLLECTION %v\n%v\n\n", i, v)
+		}
+		
+	} */
+
+	//fmt.Fprintf(w, "Grouped %v\n\n", grouped)
+
+	// MARSHALLED
+	sendData, _ := json.Marshal(grouped)
 	marshalled := string(sendData)
 
-	fmt.Fprintf(w, "Marshalled: %v", marshalled)
+	fmt.Fprintf(w, "%v", marshalled)
+
 
 
 }

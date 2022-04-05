@@ -137,6 +137,15 @@ export default function UserNFTs() {
     dispatch(changeChainTab(-1));
     setNoNfts(false);
 
+    // Go test
+    /* const { data } = await axios(
+      `http://localhost:9999/nfts/chain/eth/address/0xcd2E72aEBe2A203b84f46DEEC948E6465dB51c75`
+    );
+
+    console.log('Go Response:', Object.values(data)[0][0]); */
+
+    //console.log('Go', JSON.parse(Object.values(data)[0][0].Metadata));
+
     return await axios(
       `/api/nfts?chain=${chain}&address=${params.walletAddress}`,
       {
@@ -144,6 +153,7 @@ export default function UserNFTs() {
       }
     )
       .then(({ data }) => {
+        //console.log('Original Response', data);
         const nftCount = Object.values(data).flat().length;
 
         // set the chain tab to one that has NFTs and only set it once i.e. the first loaded tab

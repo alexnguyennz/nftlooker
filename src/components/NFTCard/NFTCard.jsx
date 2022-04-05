@@ -108,7 +108,8 @@ function NFTImage(props) {
         })
       ); */
     } else if (type === 'video/mp4' || type === 'video/webm') {
-      if (contentLength < 10250000) {
+      // if (contentLength < 10250000) {
+      if (contentLength < 100000000) {
         const stripped = nft.metadata.image.replace(/^.*:\/\//i, '');
 
         const cloudinaryImage = cloudinary.video(

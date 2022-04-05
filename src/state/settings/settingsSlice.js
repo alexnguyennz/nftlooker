@@ -7,10 +7,9 @@ export const settingsSlice = createSlice({
   },
   reducers: {
     toggleAutoplay(state, action) {
-      state.autoplay = !state.autoplay;
+      state.autoplay = action.payload;
 
-      localStorage.setItem('autoplay', state.autoplay);
-      console.log('local', localStorage.getItem('autoplay'));
+      localStorage.setItem('autoplay', action.payload);
     },
   },
 });

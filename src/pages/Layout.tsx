@@ -11,7 +11,11 @@ import {
 
 // Redux
 import { useSelector, useDispatch } from 'react-redux';
-import { viewIsLoading, viewIsNotLoading } from '../state/loading/loadingSlice';
+import {
+  viewIsLoading,
+  viewIsNotLoading,
+  loadingState,
+} from '../state/loading/loadingSlice';
 import { toggleTestnets, testnetsState } from '../state/testnets/testnetsSlice';
 import {
   changeLimit,
@@ -82,7 +86,10 @@ import axios from 'axios';
 // testing address
 //const WALLET_ADDRESS = '0x2aea6d8220b61950f30674606faaa01c23465299';
 
-export function Layout() {
+// declare that window obj already exists
+declare let window: any;
+
+export default function Layout() {
   const [address, setAddress] = useState('');
 
   const [search, setSearch] = useState(['']);
@@ -91,7 +98,11 @@ export function Layout() {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   // initialise Ethers
+  if (typeof window.ethereum !== 'undefined') {
+    console.log('ethereum exists');
+  }
   const { ethereum } = window;
+
   let provider;
 
   let navigate = useNavigate();
@@ -101,7 +112,7 @@ export function Layout() {
   const fetchController = new AbortController();
 
   // Redux
-  const loading = useSelector((state) => state.loading.value);
+  const loading = useSelector(loadingState);
   const tab = useSelector(tabState);
   const settings = useSelector(settingsState);
   const dispatch = useDispatch();
@@ -135,10 +146,8 @@ export function Layout() {
     if (params.walletAddress) {
       setAddress(params.walletAddress);
     } else if (params.q) {
-      setSearch(params.q);
+      setSearch([params.q]);
     }
-
-    //dispatch(toggleAutoplay(Boolean(localStorage.getItem('autoplay'))));
 
     return () => {
       fetchController.abort();
@@ -151,15 +160,17 @@ export function Layout() {
   async function getRandomWallet() {
     dispatch(viewIsLoading());
 
-    const response = await axios(`/api/randomWallet`, {
+    axios(`/api/randomWallet`, {
       signal: fetchController.signal,
-    }).catch((err) => console.log(err));
-
-    setAddress(response.data);
-    navigate(`/${response.data}`);
+    })
+      .then((response) => {
+        setAddress(response.data);
+        navigate(`/${response.data}`);
+      })
+      .catch((err) => console.log(err));
   }
 
-  function handleSubmit(e) {
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
     if (address) {
@@ -171,12 +182,6 @@ export function Layout() {
     dispatch(toggleTestnets());
     navigate(location.pathname);
   }
-
-  useEffect(() => {
-    console.log('settings', settings);
-
-    console.log('local', localStorage.getItem('autoplay'));
-  }, [settings]);
 
   return (
     <div
@@ -254,7 +259,9 @@ export function Layout() {
                   <Switch
                     id="autoplay"
                     isChecked={settings.autoplay}
-                    onChange={() => dispatch(toggleAutoplay())}
+                    onChange={() =>
+                      dispatch(toggleAutoplay(!settings.autoplay))
+                    }
                   />
                 </FormControl>
               </MenuItem>
@@ -515,7 +522,7 @@ export function Layout() {
 
 function KeywordInput() {
   // Redux
-  const loading = useSelector((state) => state.loading.value);
+  const loading = useSelector(loadingState);
   const searchLimit = useSelector(searchLimitState);
   const searchFilter = useSelector(searchFilterState);
   const dispatch = useDispatch();
@@ -527,13 +534,19 @@ function KeywordInput() {
   const colorModeSearch = useColorModeValue('white', '#1f2937');
 
   // Chakra UI Autocomplete
+  // let items: string[] = [];
   let items = [];
 
-  const [pickerItems, setPickerItems] = useState(items);
+  //const [pickerItems, setPickerItems] = useState(items);
+  const [pickerItems, setPickerItems] = useState([]);
 
+  // const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [selectedItems, setSelectedItems] = useState([]);
 
-  const handleCreateItem = (item) => {
+  //const handleCreateItem = (item: { value: any }) => {
+  const handleCreateItem = (item: { label: string; value: string }) => {
+    // label and value strings
+    console.log('item', item);
     // don't allow empty items
     if (item.value) {
       setPickerItems((curr) => [...curr, item]);
@@ -542,7 +555,10 @@ function KeywordInput() {
   };
 
   // removal of items
-  const handleSelectedItemsChange = (selectedItems) => {
+  const handleSelectedItemsChange = (selectedItems: {
+    label: string;
+    value: string;
+  }) => {
     console.log('selectedItems', selectedItems);
     if (selectedItems) {
       setSelectedItems(selectedItems);
@@ -591,6 +607,7 @@ function KeywordInput() {
     <>
       <div className="tag-input">
         <CUIAutoComplete
+          label="Enter keywords"
           placeholder="Enter keywords"
           onCreateItem={handleCreateItem}
           items={pickerItems}
@@ -644,7 +661,7 @@ function KeywordInput() {
             Cancel
           </Button>
         )}
-        <Menu closeOnSelect={false} isLazy lazyBehavior padding="0">
+        <Menu closeOnSelect={false} isLazy={true}>
           <MenuButton
             marginLeft="1.25rem"
             as={IconButton}
