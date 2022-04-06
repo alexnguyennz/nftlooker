@@ -98,16 +98,16 @@ export default function Layout() {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   // initialise Ethers
-  if (typeof window.ethereum !== 'undefined') {
+  /* if (typeof window.ethereum !== 'undefined') {
     console.log('ethereum exists');
-  }
+  } */
   const { ethereum } = window;
 
   let provider;
 
-  let navigate = useNavigate();
-  let params = useParams();
-  let location = useLocation();
+  const navigate = useNavigate();
+  const params = useParams();
+  const location = useLocation();
 
   const fetchController = new AbortController();
 
@@ -155,7 +155,7 @@ export default function Layout() {
     };
   }, []);
 
-  useEffect(() => {}, [ethereum]);
+  // useEffect(() => {}, [ethereum]);
 
   async function getRandomWallet() {
     dispatch(viewIsLoading());
@@ -535,13 +535,18 @@ function KeywordInput() {
 
   // Chakra UI Autocomplete
   // let items: string[] = [];
-  let items = [];
+  // let items = [];
+
+  interface Item {
+    label: string;
+    value: string;
+  }
 
   //const [pickerItems, setPickerItems] = useState(items);
-  const [pickerItems, setPickerItems] = useState([]);
+  const [pickerItems, setPickerItems] = useState<Item[]>([]);
 
   // const [selectedItems, setSelectedItems] = useState<string[]>([]);
-  const [selectedItems, setSelectedItems] = useState([]);
+  const [selectedItems, setSelectedItems] = useState<Item[]>([]);
 
   //const handleCreateItem = (item: { value: any }) => {
   const handleCreateItem = (item: { label: string; value: string }) => {
@@ -555,11 +560,8 @@ function KeywordInput() {
   };
 
   // removal of items
-  const handleSelectedItemsChange = (selectedItems: {
-    label: string;
-    value: string;
-  }) => {
-    console.log('selectedItems', selectedItems);
+  const handleSelectedItemsChange = (selectedItems: Item[]) => {
+    console.log('handleSelectedItems', selectedItems); // = [{...}]
     if (selectedItems) {
       setSelectedItems(selectedItems);
     }
@@ -590,11 +592,14 @@ function KeywordInput() {
   }, []);
 
   function handleSearch() {
-    const keywords = selectedItems.map((item) => {
-      return item.value;
-    });
+    // array of objects
+    const keywords = selectedItems.map(
+      (item: { label: string; value: string }) => {
+        return item.value;
+      }
+    );
 
-    console.log('selectedItems', selectedItems);
+    //console.log('selectedItems', selectedItems);
 
     const query = keywords.join(' ');
 
@@ -602,6 +607,12 @@ function KeywordInput() {
       navigate(`/search/${query}`);
     }
   }
+
+  /* changes =  
+activeIndex: 1
+selectedItems: (2) [{…}, {…}]
+type: "__function_remove_selected_item__"
+  */
 
   return (
     <>
@@ -612,9 +623,9 @@ function KeywordInput() {
           onCreateItem={handleCreateItem}
           items={pickerItems}
           selectedItems={selectedItems}
-          onSelectedItemsChange={(changes) =>
-            handleSelectedItemsChange(changes.selectedItems)
-          }
+          onSelectedItemsChange={(
+            changes: UseMultipleSelectionStateChange<Item>
+          ) => handleSelectedItemsChange(changes.selectedItems)}
           tagStyleProps={{
             rounded: 'full',
             px: 4,

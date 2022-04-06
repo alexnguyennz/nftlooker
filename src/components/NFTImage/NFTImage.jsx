@@ -2,12 +2,12 @@ import { useToast, useColorModeValue, Button } from '@chakra-ui/react';
 
 import toast from '../../components/Toast/Toast';
 
-const mime = require('mime-types');
+//const mime = require('mime-types');
 
 export default function NFTImage(props) {
   const nft = props.nft;
   const image = props.image;
-  const mimeType = mime.lookup(image);
+  //const mimeType = mime.lookup(image);
 
   const toastInstance = useToast();
   const colorModeBg = useColorModeValue('white', '#1f2937');
@@ -50,6 +50,8 @@ export default function NFTImage(props) {
       </>
     );
   }
+
+  const mimeType = 'test';
 
   switch (mimeType) {
     case 'image/gif':
