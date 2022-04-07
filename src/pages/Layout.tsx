@@ -26,18 +26,20 @@ import {
 import { changeTab, tabState } from '../state/tab/tabSlice';
 import { settingsState, toggleAutoplay } from '../state/settings/settingsSlice';
 
-// React Query
-import { useQuery } from 'react-query';
-
 import WalletModal from '../components/WalletModal/WalletModal';
 
 import Footer from '../components/layouts/Footer';
 
 // Chakra
-import { Stack, Input } from '@chakra-ui/react';
-import { Button, ButtonGroup } from '@chakra-ui/react';
-import { Search2Icon, SettingsIcon } from '@chakra-ui/icons';
-import { Tabs, TabList, TabPanels, Tab, TabPanel } from '@chakra-ui/react';
+import {
+  Input,
+  Button,
+  Tabs,
+  TabList,
+  TabPanels,
+  Tab,
+  TabPanel,
+} from '@chakra-ui/react';
 import {
   useDisclosure,
   useColorMode,
@@ -46,19 +48,14 @@ import {
   MenuButton,
   MenuList,
   MenuItem,
-  MenuItemOption,
-  MenuGroup,
   MenuOptionGroup,
-  MenuDivider,
   Box,
   Select,
   Modal,
   ModalOverlay,
   ModalContent,
-  ModalHeader,
   ModalFooter,
   ModalBody,
-  ModalCloseButton,
   FormControl,
   FormLabel,
   Switch,
@@ -71,12 +68,10 @@ import {
   Spinner,
 } from '@chakra-ui/react';
 import {
-  SunIcon,
-  MoonIcon,
+  Search2Icon,
+  SettingsIcon,
   HamburgerIcon,
   QuestionIcon,
-  CloseIcon,
-  SmallCloseIcon,
 } from '@chakra-ui/icons';
 
 import { CUIAutoComplete } from 'chakra-ui-autocomplete';

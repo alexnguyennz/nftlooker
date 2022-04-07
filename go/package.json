@@ -1,7 +1,7 @@
 {
   "private": true,
   "scripts": {
-    "start": "nodemon server.go"
+    "start": "nodemon cmd/main.go"
   },
   "devDependencies": {
     "nodemon": "^2.0.15"

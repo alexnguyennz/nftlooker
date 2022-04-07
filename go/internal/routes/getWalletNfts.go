@@ -1,20 +1,14 @@
-package main
+package routes
 
 import (
+	"api/pkg/ipfsurl"
+	"api/pkg/request"
 	"encoding/json"
-	"errors"
 	"fmt"
-	"io/ioutil"
-	"log"
 	"net/http"
-	"net/url"
-	"strings"
-	"sync" // return errors to the caller
+	"sync"
 
-	"os"
-
-	"github.com/gorilla/mux" // Router
-	"github.com/joho/godotenv"
+	"github.com/gorilla/mux"
 )
 
 // TYPES
@@ -40,43 +34,20 @@ type Response struct {
 	Result []Result `json:"result"`
 }
 
-func getWalletNfts(w http.ResponseWriter, r *http.Request) {
+func GetWalletNfts(w http.ResponseWriter, r *http.Request) {
 
 	// PARAMS
 	vars := mux.Vars(r)
 	chain := vars["chain"]
 	address := vars["address"]
 
-
 	/*** REQUEST ***/
 	/***************/
-	
-	// Moralis GetNFTs https://github.com/nft-api/nft-api#getnfts
-	req, err := http.NewRequest("GET", os.Getenv("MORALIS_API_URL") + address + "/nft?chain=" + chain, nil)
-	if err != nil {
-		log.Fatal(err)
-	}
 
-	// Set Headers
-	req.Header = http.Header{
-		"accept": []string{"application/json"},
-		"x-api-key": []string{os.Getenv("MORALIS_API_KEY")},
-	}
-
-	// Make Request
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// Format Body
-	defer resp.Body.Close()
-	resBody, _ := ioutil.ReadAll(resp.Body)
-	response := string(resBody)
+	response, err := request.APIRequest(address + "/nft?chain=" + chain)
 
 	/*** END REQUEST ***/
 	/*******************/
-
 
 	// Declare Response typed result
 	var result Response
@@ -85,9 +56,9 @@ func getWalletNfts(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		fmt.Println("Couldn't unmarshal: ", err)
-		return 
+		return
 	}
-	
+
 	var wg sync.WaitGroup // Create WaitGroup to wait for all goroutines to finish
 
 	// Loop through each NFT's results
@@ -101,7 +72,7 @@ func getWalletNfts(w http.ResponseWriter, r *http.Request) {
 			// Decrease WaitGroup when goroutine has finished
 			defer wg.Done()
 
-			response, err := Request(nft.Token_Uri)
+			response, err := request.Request(nft.Token_Uri)
 
 			if err != nil {
 				fmt.Println("Error -", err)
@@ -116,7 +87,7 @@ func getWalletNfts(w http.ResponseWriter, r *http.Request) {
 			if err != nil {
 				fmt.Println("Couldn't unmarshal", err)
 			}
-			
+
 			// changeIpfsUrl
 			if metadata != nil {
 
@@ -127,39 +98,20 @@ func getWalletNfts(w http.ResponseWriter, r *http.Request) {
 
 				if metadata["image"] != nil {
 
-					// parse image URL
-					u, _ := url.Parse(metadata["image"].(string))
+					// change URL if it uses IPFS protocol
+					metadata["image"] = ipfsurl.ChangeIpfsUrl(metadata["image"].(string))
 
-					if strings.HasPrefix(metadata["image"].(string), "ipfs://ipfs/") {
-
-						u.Scheme = "https"
-						u.Path = "/ipfs" + u.Path // prepend /ipfs/ path to CID
-						u.Host = "ipfs.io"
-						
-					} else if strings.HasPrefix(metadata["image"].(string), "ipfs://") {
-		
-						u.Scheme = "https"
-						u.Path = "/ipfs/" + u.Host // prepend /ipfs/ path to CID
-						u.Host = "ipfs.io"
-		
-					} else if strings.HasPrefix(metadata["image"].(string), "https://gateway.pinata.cloud/") {
-						u.Host = "ipfs.io"
-					} else { // Testing
-						u.Host = "TESTINGCHANGETHIS.IO"
-					} 
-
-					metadata["image"] = u.String() // update transformed image URL
-		
 					// Format into JSON
 					metadataJson, _ := json.Marshal(metadata)
 					data := string(metadataJson)
-		
+
 					result.Result[i].Metadata = data // update original response
 				}
 			}
+
 		}(i, nft) // End goroutine
 	} // End for range loop
-	
+
 	// Block execution until all goroutines are done
 	wg.Wait()
 
@@ -176,46 +128,6 @@ func getWalletNfts(w http.ResponseWriter, r *http.Request) {
 
 	// Send HTTP Response
 	w.WriteHeader(http.StatusOK)
-	fmt.Fprintf(w, "%v", data) // Send Data Response 
+	fmt.Fprintf(w, "%v", data) 
 
-}
-
-func Request(url string) (string, error) {
-	
-	resp, err := http.Get(url)
-	if err != nil {
-		return "", errors.New("response error from Get() of " + url)
-	}
-
-	// close once body is returned
-	defer resp.Body.Close()
-
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return "", errors.New("couldn't read body")
-	}
-
-	data := string(body)
-
-	return data, nil
-}
-
-
-func main() {
-
-	r := mux.NewRouter() // gorilla/mux router
-
-	// LOAD ENV VARIABLES
-	err := godotenv.Load()
-	if err != nil { log.Fatal("Error loading .env file") }
-	
-	/***** ROUTES *****/
-	/******************/
-
-	r.HandleFunc("/nfts/chain/{chain}/address/{address}", getWalletNfts)
-
-	/*** END ROUTES ***/
-	/******************/
-
-	log.Fatal(http.ListenAndServe("localhost:" + os.Getenv("GO_PORT"), r))
 }

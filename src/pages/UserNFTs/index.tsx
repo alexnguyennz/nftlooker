@@ -26,52 +26,27 @@ import {
   useToast,
   Tabs,
   TabList,
-  Tab,
   TabPanels,
   TabPanel,
-  Menu,
-  MenuButton,
-  MenuList,
-  MenuItem,
-  MenuItemOption,
-  MenuGroup,
-  MenuOptionGroup,
-  MenuDivider,
-  Button,
   Popover,
   PopoverTrigger,
   PopoverContent,
   PopoverHeader,
   PopoverBody,
-  PopoverFooter,
   PopoverArrow,
   PopoverCloseButton,
-  PopoverAnchor,
 } from '@chakra-ui/react';
 import { EmailIcon } from '@chakra-ui/icons';
 
 import { FaTwitter, FaFacebook } from 'react-icons/fa';
-import { HiOutlineMail } from 'react-icons/hi';
 
 import {
   EmailShareButton,
   FacebookShareButton,
-  RedditShareButton,
   TwitterShareButton,
 } from 'react-share';
 
 import toast from '../../components/Toast/Toast';
-
-// windowing
-import { Virtuoso } from 'react-virtuoso';
-
-import { ScrollMenu } from 'react-horizontal-scrolling-menu';
-import {
-  onWheel,
-  Arrow,
-  LeftArrow,
-  RightArrow,
-} from '../../components/ScrollableTab/ScrollableTab';
 
 export default function UserNFTs() {
   // Router
@@ -104,7 +79,7 @@ export default function UserNFTs() {
     };
   }, []);
 
-  let queries = useQueries(
+  const queries = useQueries(
     Object.keys(chains).map((chain) => {
       return {
         queryKey: [location, params.walletAddress, chain], // location
@@ -123,16 +98,28 @@ export default function UserNFTs() {
       dispatch(viewIsNotLoading());
 
       // check for any NFTs
+
+      interface IChain {
+        count: number;
+        loaded: boolean;
+        name: string;
+        order: number;
+        // data
+      }
+
       setNoNfts(
         Object.values(queries).every((collection) => {
-          const chain = Object.values(collection.data)[0];
+          //console.log('Test', collection.data);
+          // collection.data = {eth: {}}
+          const chain: IChain = Object.values(collection.data)[0];
           return chain.count === 0;
         })
       );
     }
   }, [queries]);
 
-  async function fetchNfts(chain, signal) {
+  async function fetchNfts(chain: string, signal: AbortSignal) {
+    console.log('signal', signal);
     // reset UI
     dispatch(changeChainTab(-1));
     setNoNfts(false);
@@ -252,7 +239,6 @@ export default function UserNFTs() {
         variant="solid-rounded"
         colorScheme="gray"
         isLazy={false}
-        lazyBehavior={false}
       >
         <TabList>
           <div className="flex items-center">
@@ -263,8 +249,8 @@ export default function UserNFTs() {
         </TabList>
 
         <TabPanels>
-          {queries.map((query, idx) => (
-            <TabPanel key={Object.keys(query.data)[0]} value={idx} paddingX="0">
+          {queries.map((query) => (
+            <TabPanel key={Object.keys(query.data)[0]} paddingX="0">
               <ChainData chain={query.data} />
             </TabPanel>
           ))}
