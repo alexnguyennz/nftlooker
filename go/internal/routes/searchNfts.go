@@ -11,9 +11,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-
-
-func GetWalletNfts(w http.ResponseWriter, r *http.Request) {
+func SearchNfts(w http.ResponseWriter, r *http.Request) {
 
 	type Result struct {
 		Token_Address string `json:"token_address"`
@@ -40,10 +38,12 @@ func GetWalletNfts(w http.ResponseWriter, r *http.Request) {
 	// PARAMS
 	vars := mux.Vars(r)
 	chain := vars["chain"]
-	address := vars["address"]
+	q := vars["q"]
+	filter := vars["filter"]
+	limit := vars["limit"]
+	offset := vars["offset"]
 
-	// Moralis GetNfts https://github.com/nft-api/nft-api#getnfts
-	response, err := request.APIRequest(address + "/nft?chain=" + chain)
+	response, err := request.APIRequest(`/nft/search?chain=` + chain + `&q=` + q + `&filter=` + filter + `&limit=` + limit + `&offset=` + offset)
 	if err != nil {
 		fmt.Println("Error - ", err)
 	}
@@ -78,6 +78,7 @@ func GetWalletNfts(w http.ResponseWriter, r *http.Request) {
 			var metadata map[string]interface{}
 
 			err = json.Unmarshal([]byte(response), &metadata)
+
 			if err != nil {
 				fmt.Println("Couldn't unmarshal", err)
 			}
@@ -108,17 +109,11 @@ func GetWalletNfts(w http.ResponseWriter, r *http.Request) {
 
 	wg.Wait() // Block execution until all goroutines are done
 
-	// Group NFTs by collection address
-	grouped := make(map[string][]Result)
-	for _, collection := range data.Result {
-		grouped[collection.Token_Address] = append(grouped[collection.Token_Address], collection)
-	}
-
 	// Format into JSON
-	jsonByte, _ := json.Marshal(grouped)
+	jsonByte, _ := json.Marshal(data.Result)
 	json := string(jsonByte)
 
 	// Send HTTP Response
 	w.WriteHeader(http.StatusOK)
-	fmt.Fprintf(w, "%v", json)
+	fmt.Fprintf(w, "%v", json) 
 }

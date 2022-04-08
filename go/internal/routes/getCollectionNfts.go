@@ -11,28 +11,20 @@ import (
 	"github.com/gorilla/mux"
 )
 
-
-
-func GetWalletNfts(w http.ResponseWriter, r *http.Request) {
+func GetCollectionNfts(w http.ResponseWriter, r *http.Request) {
 
 	type Result struct {
 		Token_Address string `json:"token_address"`
 		Token_Id string `json:"token_id"`
-		Block_Number_Minted string `json:"block_number_minted"`
-		Owner_Of string `json:"owner_of"`
-		Block_Number string `json:"block_number"`
-		Amount string `json:"amount"`
 		Contract_Type string `json:"contract_type"`
-		Name string `json:"name"`
-		Symbol string `json:"symbol"`
 		Token_Uri string `json:"token_uri"`
 		Metadata string `json:"metadata"`
 		Synced_At string `json:"synced_at"`
-		Is_Valid int `json:"is_valid"`
-		Syncing int `json:"syncing"`
-		Frozen int `json:"frozen"`
+		Amount string `json:"amount"`
+		Name string `json:"name"`
+		Symbol string `json:"symbol"`
 	}
-	
+
 	type Data struct {
 		Result []Result `json:"result"`
 	}
@@ -41,9 +33,11 @@ func GetWalletNfts(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	chain := vars["chain"]
 	address := vars["address"]
+	limit := vars["limit"]
+	offset := vars["offset"]
 
-	// Moralis GetNfts https://github.com/nft-api/nft-api#getnfts
-	response, err := request.APIRequest(address + "/nft?chain=" + chain)
+	// Moralis GetAllTokenIds https://github.com/nft-api/nft-api#getalltokenids
+	response, err := request.APIRequest(`/nft/` + address + `/?chain=` + chain + `&limit=` + limit + `&offset=` + offset)
 	if err != nil {
 		fmt.Println("Error - ", err)
 	}
@@ -56,15 +50,14 @@ func GetWalletNfts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var wg sync.WaitGroup // Create WaitGroup to wait for all goroutines to finish
+	var wg sync.WaitGroup
 
-	// Loop through each NFT's results
 	for i, nft := range data.Result {
 
 		wg.Add(1)
 
 		// Fetch each NFT's metadata in parallel
-		go func(i int, nft Result) {
+		go func (i int, nft Result) {
 
 			// Decrease WaitGroup when goroutine has finished
 			defer wg.Done()
@@ -103,22 +96,16 @@ func GetWalletNfts(w http.ResponseWriter, r *http.Request) {
 				}
 			}
 
-		}(i, nft) // End goroutine
-	} // End for range loop
+		}(i, nft)
 
-	wg.Wait() // Block execution until all goroutines are done
-
-	// Group NFTs by collection address
-	grouped := make(map[string][]Result)
-	for _, collection := range data.Result {
-		grouped[collection.Token_Address] = append(grouped[collection.Token_Address], collection)
 	}
 
+	wg.Wait()
+
 	// Format into JSON
-	jsonByte, _ := json.Marshal(grouped)
+	jsonByte, _ := json.Marshal(data.Result)
 	json := string(jsonByte)
 
-	// Send HTTP Response
 	w.WriteHeader(http.StatusOK)
 	fmt.Fprintf(w, "%v", json)
 }

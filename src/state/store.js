@@ -41,7 +41,8 @@ function loadFromLocalStorage() {
 }
 
 // create store with rootReducers and load localStorage values to overwrite default state
-const store = createStore(rootReducers, loadFromLocalStorage());
+//const store = createStore(rootReducers, loadFromLocalStorage());
+const store = createStore(rootReducers);
 
 // listen for store changes to save them to localStorage
 store.subscribe(() => saveToLocalStorage(store.getState()));

@@ -1,16 +1,14 @@
 package main
 
 import (
+	"api/internal/routes"
 	"log"
 	"net/http"
 	"os"
 
-	"api/internal/routes"
-
-	"github.com/gorilla/mux"   // Router
-	"github.com/joho/godotenv" // .env
+	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
 )
-
 
 
 func main() {
@@ -24,10 +22,15 @@ func main() {
 	/***** ROUTES *****/
 	/******************/
 	r.HandleFunc("/nfts/chain/{chain}/address/{address}", routes.GetWalletNfts)
-	r.HandleFunc("/randomwallet", routes.GetRandomWallet)
+	r.HandleFunc("/nfts/search/chain/{chain}/q/{q}/filter/{filter}/limit/{limit}/offset/{offset}", routes.SearchNfts)
+	//r.HandleFunc("/nfts/search?chain={chain}&q={q}&filter={filter}&limit={limit}&offset={offset}", routes.SearchNfts)
 
 	r.HandleFunc("/nft/chain/{chain}/address/{address}/id/{tokenId}", routes.GetNft)
 
+	r.HandleFunc("/collection/metadata/chain/{chain}/address/{address}", routes.GetCollectionMetadata)
+	r.HandleFunc("/collection/nfts/chain/{chain}/address/{address}/limit/{limit}/offset/{offset}", routes.GetCollectionNfts)
+
+	r.HandleFunc("/randomwallet", routes.GetRandomWallet)
 
 	log.Fatal(http.ListenAndServe("localhost:" + os.Getenv("GO_PORT"), r))
 }

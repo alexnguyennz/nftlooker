@@ -10,25 +10,9 @@ import (
 	"github.com/gorilla/mux"
 )
 
-// Example  eth/collection/0x18f36d3222324ddac1efd0a524aabfb9d77d8041/nft/2098
 func GetNft(w http.ResponseWriter, r *http.Request) {
 
-	// PARAMS
-	vars := mux.Vars(r)
-	chain := vars["chain"]
-	address := vars["address"]
-	tokenId := vars["tokenId"]
-
-	// /nft/${address}/${tokenId}?chain=${chain}&format=decimal`,
-	response, err := request.APIRequest(`/nft/` + address + `/` + tokenId + `?chain=` + chain)
-
-	if err != nil {
-		return
-	}
-
-	//fmt.Fprintf(w, "%v\n\n", response)
-
-	type Response struct {
+	type Data struct {
 		Token_Address string `json:"token_address"`
 		Token_Id string `json:"token_id"`
 		Block_Number_Minted string `json:"block_number_minted"`
@@ -46,37 +30,45 @@ func GetNft(w http.ResponseWriter, r *http.Request) {
 		Frozen int `json:"frozen"`
 	}
 
-	var result Response
+	type Attr struct {
+		Type  string
+		Value interface{}
+	}
+	
+	type AttrList []Attr 
+
+	// PARAMS
+	vars := mux.Vars(r)
+	chain := vars["chain"]
+	address := vars["address"]
+	tokenId := vars["tokenId"]
+
+	response, err := request.APIRequest(`/nft/` + address + `/` + tokenId + `?chain=` + chain)
+	if err != nil {
+		return
+	}
+
+	var result Data
 
 	err = json.Unmarshal([]byte(response), &result)
-
 	if err != nil {
 		fmt.Println("Couldn't unmarshal: ", err)
 		return
 	}
 
-	//fmt.Fprintf(w, "Unmarshal: %v\n\n", result)
-
 	// Fetch Metadata
 	response, err = request.Request(result.Token_Uri)
-
 	if err != nil {
 		fmt.Println("Error -", err)
 		return
 	}
 
-	//fmt.Fprintf(w, "Metadata: %v\n\n", response)
-
 	var metadata map[string]interface{}
 	
-
 	err = json.Unmarshal([]byte(response), &metadata)
-
 	if err != nil {
 		fmt.Println("Couldn't unmarshal", err)
 	}
-
-	//fmt.Fprintf(w, "Metadata: %v\n\n", metadata)
 
 	// changeIpfsUrl
 	if metadata != nil {
@@ -98,25 +90,45 @@ func GetNft(w http.ResponseWriter, r *http.Request) {
 			dataBytes := []byte(data) // convert back to send updated metadata with rest of response
 
 			// custom struct to send updated marshalled metadata with rest of original response
-			resultJson, err := json.Marshal(struct {
-				Response
+			jsonByte, err := json.Marshal(struct {
+				Data
 				Metadata json.RawMessage `json:"metadata"`
 			}{
-				Response: result,
+				Data: result,
 				Metadata: dataBytes,
 			})
 			if err != nil {
 				panic(err)
 			}
 
-			send := string(resultJson)
+			// some NFTs don't use array for attributes, convert object into array of objects
+			attributes, _ := json.Marshal(metadata["attributes"])
+			// fmt.Fprintf(w, "len %v\n\n", len(attributes))
+
+			switch last := len(attributes)-1; {
+				// is array
+				//case attributes[0] == '[' && attributes[last] == ']': // do nothing
+					
+				// is object
+				case attributes[0] == '{' && attributes[last] == '}':
+					var obj map[string]interface{}
+					json.Unmarshal(attributes, &obj)
+
+					var ls *AttrList // * attached to a type (*string) indicates a pointer to the type
+
+					for key, value := range obj {
+						// * attached to a variable in an assignment (*v = ...) indicates an indirect assignment. That is, change the value pointed at by the variable.
+             *ls = append(*ls, Attr{Type: key, Value: value})
+        	}
+
+					fmt.Fprintf(w, "%v", ls)
+					return 
+			}
+
+			json := string(jsonByte)
 
 			w.WriteHeader(http.StatusOK)
-			fmt.Fprintf(w, "%v", send)
-
+			fmt.Fprintf(w, "%v", json)
 		}
 	}
-
-	// if attributes isn't array, convert into array of objects - do this
-
 }

@@ -24,10 +24,10 @@ func ChangeIpfsUrl(nftUrl string) string {
 
 			} else if strings.HasPrefix(nftUrl, "https://gateway.pinata.cloud/") {
 				u.Host = "ipfs.io"
-			
-			} else {
-				u.Host = "TESTINGCHANGETHIS.IO"
 			}
+			/* } else {
+				u.Host = "TESTINGCHANGETHIS.IO"
+			} */
 
 			return u.String()
 		
