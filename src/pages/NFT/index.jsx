@@ -32,14 +32,16 @@ export default function NFT() {
 
   // React Query
   const { isLoading, error, data, isFetching, isStale } = useQuery(
-    'nftMetadata',
+    [params.chain, params.contractAddress, params.tokenId, 'nftMetadata'],
     async () => {
       const { data } = await axios(
-        `/api/nft?chain=${params.chain}&address=${params.contractAddress}&tokenId=${params.tokenId}`
+        `/api/nft/chain/${params.chain}/address/${params.contractAddress}/id/${params.tokenId}`
       );
       return data;
     }
   );
+
+  console.log('Original Response', data);
 
   useEffect(() => {
     if (data) {

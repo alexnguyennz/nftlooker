@@ -125,17 +125,8 @@ export default function UserNFTs() {
     dispatch(changeChainTab(-1));
     setNoNfts(false);
 
-    // Go test
-    const { data } = await axios(
-      `http://localhost:9999/nfts/chain/eth/address/0xcd2E72aEBe2A203b84f46DEEC948E6465dB51c75`
-    );
-
-    console.log('Go Response:', data);
-
-    //console.log('Go', JSON.parse(Object.values(data)[0][0].Metadata));
-
     return await axios(
-      `/api/nfts?chain=${chain}&address=${params.walletAddress}`,
+      `/api/nfts/chain/${chain}/address/${params.walletAddress}`,
       {
         signal,
       }

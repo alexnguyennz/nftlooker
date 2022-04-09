@@ -3,6 +3,7 @@ package routes
 import (
 	"api/pkg/ipfsurl"
 	"api/pkg/request"
+	"api/pkg/resolve"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -42,8 +43,11 @@ func GetWalletNfts(w http.ResponseWriter, r *http.Request) {
 	chain := vars["chain"]
 	address := vars["address"]
 
+	// Resolve address if ENS or Unstoppable Domains
+	resolvedAddress, _ := resolve.ResolveDomain(address)
+
 	// Moralis GetNfts https://github.com/nft-api/nft-api#getnfts
-	response, err := request.APIRequest(address + "/nft?chain=" + chain)
+	response, err := request.APIRequest(resolvedAddress + "/nft?chain=" + chain)
 	if err != nil {
 		fmt.Println("Error - ", err)
 	}

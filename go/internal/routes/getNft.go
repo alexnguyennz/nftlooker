@@ -48,16 +48,16 @@ func GetNft(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var result Data
+	var data Data
 
-	err = json.Unmarshal([]byte(response), &result)
+	err = json.Unmarshal([]byte(response), &data)
 	if err != nil {
 		fmt.Println("Couldn't unmarshal: ", err)
 		return
 	}
 
 	// Fetch Metadata
-	response, err = request.Request(result.Token_Uri)
+	response, err = request.Request(data.Token_Uri)
 	if err != nil {
 		fmt.Println("Error -", err)
 		return
@@ -84,17 +84,17 @@ func GetNft(w http.ResponseWriter, r *http.Request) {
 			metadata["image"] = ipfsurl.ChangeIpfsUrl(metadata["image"].(string))
 
 			// Format into JSON
-			metadataJson, _ := json.Marshal(metadata)
-			data := string(metadataJson)
+			jsonByte, _ := json.Marshal(metadata)
+			jsonData := string(jsonByte)
 
-			dataBytes := []byte(data) // convert back to send updated metadata with rest of response
+			dataBytes := []byte(jsonData) // convert back to send updated metadata with rest of response
 
 			// custom struct to send updated marshalled metadata with rest of original response
 			jsonByte, err := json.Marshal(struct {
 				Data
 				Metadata json.RawMessage `json:"metadata"`
 			}{
-				Data: result,
+				Data: data,
 				Metadata: dataBytes,
 			})
 			if err != nil {

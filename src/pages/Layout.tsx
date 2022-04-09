@@ -155,8 +155,7 @@ export default function Layout() {
   async function getRandomWallet() {
     dispatch(viewIsLoading());
 
-    // Go, eventually proxy to 9999 or change to 7777
-    axios(`http://localhost:9999/randomwallet`, {
+    axios(`/api/randomwallet`, {
       signal: fetchController.signal,
     })
       .then((response) => {
@@ -165,16 +164,6 @@ export default function Layout() {
         navigate(`/${response.data}`);
       })
       .catch((err) => console.log(err));
-
-    /*axios(`/api/randomWallet`, {
-      signal: fetchController.signal,
-    })
-      .then((response) => {
-        console.log('Original Response', response);
-        setAddress(response.data);
-        navigate(`/${response.data}`);
-      })
-      .catch((err) => console.log(err)); */
   }
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {

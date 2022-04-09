@@ -254,9 +254,28 @@ function NFTImage(props) {
 
 export default function NFTCard(props) {
   //const metadata = props.nft.external_data;
-  const nft = props.nft;
+  //const nft = props.nft;
   //const collection = props.collection;
   const chain = props.chain;
+
+  console.log('props', props);
+
+  const [nft, setNft] = useState('');
+
+  useEffect(() => {
+    // process JSON otherwise set NFTs as usual
+    try {
+      const metadata = JSON.parse(props.nft.metadata);
+      const updatedNft = {
+        ...props.nft,
+        metadata,
+      };
+
+      setNft(updatedNft);
+    } catch {
+      setNft(props.nft);
+    }
+  }, []);
 
   const colorModeBg = useColorModeValue('bg-white', 'bg-gray-800');
   const colorModeCard = useColorModeValue(
@@ -266,6 +285,8 @@ export default function NFTCard(props) {
 
   //console.log('received nft', nft);
   //console.log('received collection', collection);
+
+  if (!nft) return null;
 
   return (
     <>
@@ -287,6 +308,7 @@ export default function NFTCard(props) {
               <Link
                 to={`/${chain}/collection/${nft.token_address}/nft/${nft.token_id}`}
               >
+                {/* {nft.metadata && nft.metadata.name} */}
                 {nft.metadata && nft.metadata.name}
               </Link>
             </h3>
@@ -298,9 +320,11 @@ export default function NFTCard(props) {
                   View
                 </Link>
               </Button>
+              {/* {nft.metadata.original_image && ( */}
               {nft.metadata.original_image && (
                 <Tooltip label="Open original link" openDelay={750} hasArrow>
                   <a
+                    // href={nft.metadata.original_image}
                     href={nft.metadata.original_image}
                     target="_blank"
                     rel="noreferrer noopener nofollow"

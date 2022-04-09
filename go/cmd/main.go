@@ -19,18 +19,23 @@ func main() {
 	err := godotenv.Load()
 	if err != nil { log.Fatal("Error loading .env file") }
 	
-	/***** ROUTES *****/
-	/******************/
-	r.HandleFunc("/nfts/chain/{chain}/address/{address}", routes.GetWalletNfts)
-	r.HandleFunc("/nfts/search/chain/{chain}/q/{q}/filter/{filter}/limit/{limit}/offset/{offset}", routes.SearchNfts)
-	//r.HandleFunc("/nfts/search?chain={chain}&q={q}&filter={filter}&limit={limit}&offset={offset}", routes.SearchNfts)
+	// Get Wallet NFTs
+	r.HandleFunc("/api/nfts/chain/{chain}/address/{address}", routes.GetWalletNfts)
 
-	r.HandleFunc("/nft/chain/{chain}/address/{address}/id/{tokenId}", routes.GetNft)
-
-	r.HandleFunc("/collection/metadata/chain/{chain}/address/{address}", routes.GetCollectionMetadata)
-	r.HandleFunc("/collection/nfts/chain/{chain}/address/{address}/limit/{limit}/offset/{offset}", routes.GetCollectionNfts)
-
-	r.HandleFunc("/randomwallet", routes.GetRandomWallet)
+	// Search NFTs
+	r.HandleFunc("/api/nfts/search/chain/{chain}/q/{q}/filter/{filter}/limit/{limit}/offset/{offset}", routes.SearchNfts)
+	
+	// Get NFT Metadata
+	r.HandleFunc("/api/nft/chain/{chain}/address/{address}/id/{tokenId}", routes.GetNft)
+	
+	// Get Collection Metadata
+	r.HandleFunc("/api/collection/metadata/chain/{chain}/address/{address}", routes.GetCollectionMetadata)
+	
+	// Get Collection NFTs
+	r.HandleFunc("/api/collection/nfts/chain/{chain}/address/{address}/limit/{limit}/offset/{offset}", routes.GetCollectionNfts)
+	
+	// Get Random Wallet
+	r.HandleFunc("/api/randomwallet", routes.GetRandomWallet)
 
 	log.Fatal(http.ListenAndServe("localhost:" + os.Getenv("GO_PORT"), r))
 }

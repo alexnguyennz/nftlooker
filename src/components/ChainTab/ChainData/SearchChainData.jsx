@@ -46,7 +46,7 @@ function SearchChainData(props) {
     });
 
     const { data } = await axios(
-      `/api/search?chain=${chain}&q=${props.q}&filter=${searchFilter}&limit=${searchLimit}&offset=` +
+      `/api/nfts/search/chain/${chain}/q/${props.q}/filter/${searchFilter}/limit/${searchLimit}/offset/` +
         pageParam
     );
 
@@ -95,7 +95,6 @@ function SearchChainData(props) {
 
   useEffect(() => {
     if (data) {
-      console.log('data exists for', chain);
       const nftTotals = data.pages.reduce((acc, element) => {
         const nftCount = Object.values(element)[0].count;
 
@@ -148,7 +147,7 @@ function SearchChainData(props) {
             colorScheme="blue"
             lineHeight="1"
           >
-            Load More (+{searchLimit})
+            Load More +{searchLimit}
           </Button>
         ) : (
           <Alert status="error">
