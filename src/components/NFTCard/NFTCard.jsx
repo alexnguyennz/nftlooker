@@ -33,13 +33,17 @@ function NFTImage(props) {
 
   useEffect(() => {
     async function generateUrl() {
-      const { image, contentType } = await generateNftUrl(
-        nft.metadata.image,
-        '250'
-      );
+      try {
+        const { image, contentType } = await generateNftUrl(
+          nft.metadata.image,
+          '250'
+        );
 
-      setImage(image);
-      setNftContentType(contentType);
+        setImage(image);
+        setNftContentType(contentType);
+      } catch (err) {
+        console.log(err);
+      }
     }
 
     generateUrl();
