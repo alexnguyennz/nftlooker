@@ -32,5 +32,3 @@ func ChangeIpfsUrl(nftUrl string) string {
 			return u.String()
 		
 }
-
-// changeIpfsUrl

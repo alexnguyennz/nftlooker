@@ -88,11 +88,11 @@ export function SearchNFTs() {
   }, []);
 
   useEffect(() => {
-    console.log('current chainTab', chainTab);
+    //console.log('current chainTab', chainTab);
   }, [chainTab]);
 
   useEffect(() => {
-    console.log('chains state', chainsState);
+    //console.log('chains state', chainsState);
 
     if (Object.values(chainsState).every((chain) => chain.loaded)) {
       dispatch(viewIsNotLoading());

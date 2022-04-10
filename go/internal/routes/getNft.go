@@ -83,6 +83,8 @@ func GetNft(w http.ResponseWriter, r *http.Request) {
 			// change URL if it uses IPFS protocol
 			metadata["image"] = ipfsurl.ChangeIpfsUrl(metadata["image"].(string))
 
+			metadata["original_image"] = metadata["image"] // set original image to use as backup
+
 			// Format into JSON
 			jsonByte, _ := json.Marshal(metadata)
 			jsonData := string(jsonByte)

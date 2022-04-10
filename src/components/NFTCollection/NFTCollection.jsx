@@ -6,8 +6,6 @@ export default function NFTCollection(props) {
   const collection = props.collection;
   const chain = props.chain;
 
-  console.log('collectiopn chain', chain);
-
   //console.log('chain', props.chain);
 
   //console.log(collection);

@@ -41,12 +41,10 @@ export default function NFT() {
     }
   );
 
-  console.log('Original Response', data);
-
   useEffect(() => {
     if (data) {
       dispatch(viewIsNotLoading());
-      console.log('data', data.metadata.attributes);
+      // console.log('data', data.metadata.attributes);
     } else dispatch(viewIsLoading());
   }, [data]);
 
@@ -57,11 +55,7 @@ export default function NFT() {
       <div className="space-y-10">
         <section className="grid grid-cols 1 md:grid-cols-2 gap-5">
           <div className="mx-auto w-full md:w-3/4">
-            <NFTImage
-              nft={data}
-              chain={params.chain}
-              image={data.metadata && data.metadata.image}
-            />
+            <NFTImage nft={data} />
           </div>
           <div>
             <h3 className="pb-2 border-b border-gray-500 text-4xl font-bold ">

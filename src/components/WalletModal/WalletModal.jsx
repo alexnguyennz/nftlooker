@@ -28,7 +28,6 @@ import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 // UTILS
 import ellipseAddress from '../../utils/ellipseAddress';
 import { explorer } from '../../utils/chainExplorer';
-import Web3 from 'web3';
 
 export default function WalletModal() {
   let provider;
@@ -67,11 +66,11 @@ export default function WalletModal() {
   }, []);
 
   useEffect(() => {
-    console.log('color mode', colorMode);
+    // console.log('color mode', colorMode);
   }, [colorMode]);
 
   useEffect(() => {
-    console.log('wallet state', wallet);
+    // console.log('wallet state', wallet);
   }, [wallet]);
 
   async function connectMetaMask() {

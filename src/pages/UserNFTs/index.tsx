@@ -120,7 +120,6 @@ export default function UserNFTs() {
   }, [queries]);
 
   async function fetchNfts(chain: string, signal: AbortSignal) {
-    console.log('signal', signal);
     // reset UI
     dispatch(changeChainTab(-1));
     setNoNfts(false);
@@ -132,7 +131,6 @@ export default function UserNFTs() {
       }
     )
       .then(({ data }) => {
-        console.log('Original Response', data);
         const nftCount = Object.values(data).flat().length;
 
         // set the chain tab to one that has NFTs and only set it once i.e. the first loaded tab

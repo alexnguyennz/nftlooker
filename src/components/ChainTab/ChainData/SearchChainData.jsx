@@ -29,7 +29,6 @@ function SearchChainData(props) {
   const chain = props.chain;
 
   const fetchNfts = async ({ pageParam = 0 }) => {
-    console.log('param', pageParam);
     // reset UI state
     // only reset chain states when it's a fresh query, not more NFTs loaded to each tab
     if (pageParam == 0) {
@@ -50,7 +49,7 @@ function SearchChainData(props) {
         pageParam
     );
 
-    console.log('response', data);
+    //console.log('response', data);
 
     const nftCount = Object.values(data).flat().length;
 

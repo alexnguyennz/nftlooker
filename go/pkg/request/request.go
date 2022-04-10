@@ -12,7 +12,7 @@ func Request(url string) (string, error) {
 
 	resp, err := http.Get(url)
 	if err != nil {
-		return "", errors.New("response error from Get() of " + url)
+		return url, errors.New("Get() response error")
 	}
 
 	// close once body is returned

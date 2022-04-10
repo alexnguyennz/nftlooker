@@ -72,7 +72,7 @@ export function Collection() {
     },
   ]);
 
-  console.log('Original Response', queries[1]);
+  // console.log('Original Response', queries[1]);
 
   //console.log('results', results[2].data[0]);
   const loaded = queries.every((query) => query.isSuccess);
@@ -115,21 +115,14 @@ export function Collection() {
 }
 
 export function CollectionThumbnail(props) {
-  const params = useParams(); // React Router
+  const metadata = JSON.parse(props.result.metadata);
 
-  const data = props.result;
+  const data = {
+    ...props.result,
+    metadata,
+  };
 
-  /* if (isLoading) return null;
-  if (error) return 'An error has occurred: ' + error.message; */
-
-  const metadata = JSON.parse(data.metadata);
-
-  // hacky solution
-  const image = metadata.image
-    .replace('h-250', 'h-1000')
-    .replace('w-250', 'w-1000');
-
-  return <NFTImage nft={data} chain={params.chain} image={metadata && image} />;
+  return <NFTImage nft={data} />;
 }
 
 export function CollectionMetadata(props) {
@@ -220,7 +213,7 @@ export function CollectionNfts() {
     if (data) {
       const page = data.pages.length - 1;
 
-      console.log('test', data.pages[page].data);
+      // console.log('test', data.pages[page].data);
 
       const parsedNfts = data.pages[page].data.map((nft) => {
         const metadata = JSON.parse(nft.metadata);
@@ -238,7 +231,7 @@ export function CollectionNfts() {
   }, [data]);
 
   useEffect(() => {
-    console.log('parsed', nfts);
+    // console.log('parsed', nfts);
   }, [nfts]);
 
   if (!isSuccess) return null;
@@ -259,9 +252,9 @@ export function CollectionNfts() {
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-10">
             {data.pages.map((page) => (
               <React.Fragment key={page.offset}>
-                {page.data.map((nft) => (
+                {page.data.map((nft, idx) => (
                   <NFTCard
-                    key={nft.token_id}
+                    key={nft.token_address + nft.token_id + idx}
                     collection={data}
                     nft={nft}
                     chain={params.chain}

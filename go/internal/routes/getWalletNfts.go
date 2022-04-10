@@ -75,9 +75,11 @@ func GetWalletNfts(w http.ResponseWriter, r *http.Request) {
 
 			response, err := request.Request(nft.Token_Uri)
 			if err != nil {
-				fmt.Println("Error -", err)
+				fmt.Println("Error fetching NFT Token URI - likely base64")
 				return
 			}
+
+			
 
 			var metadata map[string]interface{}
 
@@ -96,8 +98,12 @@ func GetWalletNfts(w http.ResponseWriter, r *http.Request) {
 
 				if metadata["image"] != nil {
 
+					
+
 					// change URL if it uses IPFS protocol
 					metadata["image"] = ipfsurl.ChangeIpfsUrl(metadata["image"].(string))
+
+					metadata["original_image"] = metadata["image"] // set original image to use as backup
 
 					// Format into JSON
 					jsonByte, _ := json.Marshal(metadata)
