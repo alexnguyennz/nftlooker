@@ -16,6 +16,10 @@ function changeIpfsUrl(metadata) {
         'https://cf-ipfs.com/'
       );
       metadata.image = metadata.image.replace(/^.*:\/\//i, 'https://ipfs.io/');
+      metadata.content_image = metadata.image.replace(
+        /^.*:\/\//i,
+        'https://ipfs.io/'
+      );
       metadata.original_image = metadata.image;
     } else if (metadata.image.startsWith('ipfs://')) {
       // replace any starting protocols e.g. http://, https://
@@ -26,6 +30,10 @@ function changeIpfsUrl(metadata) {
         'https://cf-ipfs.com/ipfs'
       );
       metadata.image = metadata.image.replace(
+        /^.*:\/\//i,
+        'https://ipfs.io/ipfs/'
+      );
+      metadata.content_image = metadata.image.replace(
         /^.*:\/\//i,
         'https://ipfs.io/ipfs/'
       );
@@ -40,6 +48,10 @@ function changeIpfsUrl(metadata) {
       );
 
       metadata.image = metadata.image.replace(
+        'https://gateway.pinata.cloud/ipfs/',
+        'https://ipfs.io/ipfs/'
+      );
+      metadata.content_image = metadata.image.replace(
         'https://gateway.pinata.cloud/ipfs/',
         'https://ipfs.io/ipfs/'
       );

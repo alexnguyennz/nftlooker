@@ -1,16 +1,55 @@
-import { useToast, useColorModeValue, Button } from '@chakra-ui/react';
+import { useEffect, useState } from 'react';
+
+// Redux
+import { useSelector } from 'react-redux';
+import { settingsState } from '../../state/settings/settingsSlice';
+
+import { Link } from 'react-router-dom';
+
+// Components
+import {
+  useToast,
+  useColorModeValue,
+  Image,
+  Button,
+  Spinner,
+} from '@chakra-ui/react';
 
 import toast from '../../components/Toast/Toast';
 
-const mime = require('mime-types');
+import ModelViewer from '@google/model-viewer';
+
+// Image Transformation
+import generateNftUrl from '../../utils/generateNftUrl';
+import LoadingSpinner from '../LoadingSpinner/LoadingSpinner';
 
 export default function NFTImage(props) {
-  const nft = props.nft;
-  const image = props.image;
-  const mimeType = mime.lookup(image);
+  //const nft = props.nft;
+  //const image = props.image;
+
+  const settings = useSelector(settingsState);
+
+  const { chain, nft } = props;
+
+  const [image, setImage] = useState('');
+  const [nftContentType, setNftContentType] = useState('');
 
   const toastInstance = useToast();
   const colorModeBg = useColorModeValue('white', '#1f2937');
+
+  useEffect(() => {
+    async function generateUrl() {
+      const { image, contentType } = await generateNftUrl(
+        nft.metadata.image,
+        '1000'
+      );
+
+      setImage(image);
+      setNftContentType(contentType);
+    }
+
+    generateUrl();
+  }, []);
 
   function fullScreen() {
     const elem = document.querySelector('model-viewer');
@@ -29,35 +68,25 @@ export default function NFTImage(props) {
     }
   }
 
-  function pip() {
-    const elem = document.querySelector('video');
-
-    elem.requestPictureInPicture();
-  }
-
-  function Video(props) {
-    return (
-      <>
-        <video width="100%" controls autoPlay muted loop>
-          <source src={`${image}`} type={props.mime} />
-        </video>
-
-        <div className="mt-3 text-right">
-          <Button onClick={pip} colorScheme="blue">
-            PIP
-          </Button>
-        </div>
-      </>
-    );
-  }
-
-  switch (mimeType) {
+  switch (nftContentType) {
     case 'image/gif':
-      return <Video mime="video/mp4" />;
     case 'video/mp4':
-      return <Video mime="video/mp4" />;
     case 'video/webm':
-      return <Video mime="video/webm" />;
+      return (
+        <>
+          {settings.autoplay ? (
+            <video width="100%" controls muted loop autoPlay>
+              <source src={`${image}`} type={nftContentType} />
+              Your browser does not support the video tag.
+            </video>
+          ) : (
+            <video width="100%" controls muted loop>
+              <source src={`${image}`} type={nftContentType} />
+              Your browser does not support the video tag.
+            </video>
+          )}
+        </>
+      );
     case 'model/gltf-binary':
       return (
         <>
@@ -90,6 +119,19 @@ export default function NFTImage(props) {
           </div>
         </>
       );
+    case 'audio/wave':
+    case 'audio/wav':
+    case 'audio/mpeg':
+    case 'audio/ogg':
+    case 'audio/webm':
+      return (
+        <audio
+          style={{ width: '100%' }}
+          src={image}
+          controls
+          preload="length"
+        ></audio>
+      );
     default:
       return (
         <a
@@ -97,7 +139,11 @@ export default function NFTImage(props) {
           target="_blank"
           rel="noopener noreferrer nofollow"
         >
-          <img src={image} className="mx-auto w-full" />
+          <Image
+            src={image}
+            fallback={<LoadingSpinner />}
+            className="mx-auto w-full"
+          />
         </a>
       );
   }

@@ -51,6 +51,11 @@ model-viewer#nft-model {
 /* Paginate */
 
 @layer components {
+  /* Tabs */
+  .tab-name {
+    @apply hidden sm:block;
+  }
+
   /* USED */
 
   .pagination {

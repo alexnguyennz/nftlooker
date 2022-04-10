@@ -11,7 +11,11 @@ import {
 
 // Redux
 import { useSelector, useDispatch } from 'react-redux';
-import { viewIsLoading, viewIsNotLoading } from '../state/loading/loadingSlice';
+import {
+  viewIsLoading,
+  viewIsNotLoading,
+  loadingState,
+} from '../state/loading/loadingSlice';
 import { toggleTestnets, testnetsState } from '../state/testnets/testnetsSlice';
 import {
   changeLimit,
@@ -20,19 +24,22 @@ import {
   searchFilterState,
 } from '../state/search/searchSlice';
 import { changeTab, tabState } from '../state/tab/tabSlice';
-
-// React Query
-import { useQuery } from 'react-query';
+import { settingsState, toggleAutoplay } from '../state/settings/settingsSlice';
 
 import WalletModal from '../components/WalletModal/WalletModal';
 
 import Footer from '../components/layouts/Footer';
 
 // Chakra
-import { Stack, Input } from '@chakra-ui/react';
-import { Button, ButtonGroup } from '@chakra-ui/react';
-import { Search2Icon, SettingsIcon } from '@chakra-ui/icons';
-import { Tabs, TabList, TabPanels, Tab, TabPanel } from '@chakra-ui/react';
+import {
+  Input,
+  Button,
+  Tabs,
+  TabList,
+  TabPanels,
+  Tab,
+  TabPanel,
+} from '@chakra-ui/react';
 import {
   useDisclosure,
   useColorMode,
@@ -41,19 +48,14 @@ import {
   MenuButton,
   MenuList,
   MenuItem,
-  MenuItemOption,
-  MenuGroup,
   MenuOptionGroup,
-  MenuDivider,
   Box,
   Select,
   Modal,
   ModalOverlay,
   ModalContent,
-  ModalHeader,
   ModalFooter,
   ModalBody,
-  ModalCloseButton,
   FormControl,
   FormLabel,
   Switch,
@@ -66,12 +68,10 @@ import {
   Spinner,
 } from '@chakra-ui/react';
 import {
-  SunIcon,
-  MoonIcon,
+  Search2Icon,
+  SettingsIcon,
   HamburgerIcon,
   QuestionIcon,
-  CloseIcon,
-  SmallCloseIcon,
 } from '@chakra-ui/icons';
 
 import { CUIAutoComplete } from 'chakra-ui-autocomplete';
@@ -81,7 +81,10 @@ import axios from 'axios';
 // testing address
 //const WALLET_ADDRESS = '0x2aea6d8220b61950f30674606faaa01c23465299';
 
-export function Layout() {
+// declare that window obj already exists
+declare let window: any;
+
+export default function Layout() {
   const [address, setAddress] = useState('');
 
   const [search, setSearch] = useState(['']);
@@ -90,18 +93,23 @@ export function Layout() {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   // initialise Ethers
+  /* if (typeof window.ethereum !== 'undefined') {
+    console.log('ethereum exists');
+  } */
   const { ethereum } = window;
+
   let provider;
 
-  let navigate = useNavigate();
-  let params = useParams();
-  let location = useLocation();
+  const navigate = useNavigate();
+  const params = useParams();
+  const location = useLocation();
 
   const fetchController = new AbortController();
 
   // Redux
-  const loading = useSelector((state) => state.loading.value);
+  const loading = useSelector(loadingState);
   const tab = useSelector(tabState);
+  const settings = useSelector(settingsState);
   const dispatch = useDispatch();
 
   // Color Mode
@@ -110,6 +118,7 @@ export function Layout() {
   const colorModeBody = useColorModeValue('bg-rose-50', 'bg-gray-900'); // chakra gray-800 #1A202C
   const colorModeBodyHex = useColorModeValue('#fff1f2', '#111827');
   const colorModeView = useColorModeValue('pink', 'gray');
+
   // bg-rose-50 background-color: rgb(255 241 242); #fff1f2
   // bg-gray-900 	background-color: rgb(17 24 39); #111827
 
@@ -132,7 +141,7 @@ export function Layout() {
     if (params.walletAddress) {
       setAddress(params.walletAddress);
     } else if (params.q) {
-      setSearch(params.q);
+      setSearch([params.q]);
     }
 
     return () => {
@@ -141,20 +150,23 @@ export function Layout() {
     };
   }, []);
 
-  useEffect(() => {}, [ethereum]);
+  // useEffect(() => {}, [ethereum]);
 
   async function getRandomWallet() {
     dispatch(viewIsLoading());
 
-    const response = await axios(`/api/randomWallet`, {
+    axios(`/api/randomwallet`, {
       signal: fetchController.signal,
-    }).catch((err) => console.log(err));
-
-    setAddress(response.data);
-    navigate(`/${response.data}`);
+    })
+      .then((response) => {
+        console.log('Go Random Response', response);
+        setAddress(response.data);
+        navigate(`/${response.data}`);
+      })
+      .catch((err) => console.log(err));
   }
 
-  function handleSubmit(e) {
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
     if (address) {
@@ -225,12 +237,27 @@ export function Layout() {
               <MenuItem>
                 <FormControl className="flex justify-between">
                   <FormLabel htmlFor="dark-mode" mb="0">
-                    dark mode
+                    Dark mode
                   </FormLabel>
                   <Switch
                     id="dark-mode"
                     isChecked={colorMode === 'light' ? false : true}
                     onChange={toggleColorMode}
+                  />
+                </FormControl>
+              </MenuItem>
+
+              <MenuItem>
+                <FormControl className="flex justify-between">
+                  <FormLabel htmlFor="autoplay-mode" mb="0">
+                    Autoplay videos
+                  </FormLabel>
+                  <Switch
+                    id="autoplay"
+                    isChecked={settings.autoplay}
+                    onChange={() =>
+                      dispatch(toggleAutoplay(!settings.autoplay))
+                    }
                   />
                 </FormControl>
               </MenuItem>
@@ -261,8 +288,8 @@ export function Layout() {
         <Modal size="xl" onClose={onClose} isOpen={isOpen} isCentered>
           <ModalOverlay />
           <ModalContent className="mx-5">
-            <ModalBody className="">
-              <p className="pb-5">
+            <ModalBody>
+              <p className="pt-3 pb-5">
                 NFT Looker is a simple way to view NFTs - by entering a wallet
                 address or searching using keywords. You can view an individual
                 NFT or collection for more info.
@@ -368,7 +395,9 @@ export function Layout() {
               </ul>
             </ModalBody>
             <ModalFooter>
-              <Button onClick={onClose}>Close</Button>
+              <Button onClick={onClose} className="mb-1">
+                Close
+              </Button>
             </ModalFooter>
           </ModalContent>
         </Modal>
@@ -489,7 +518,7 @@ export function Layout() {
 
 function KeywordInput() {
   // Redux
-  const loading = useSelector((state) => state.loading.value);
+  const loading = useSelector(loadingState);
   const searchLimit = useSelector(searchLimitState);
   const searchFilter = useSelector(searchFilterState);
   const dispatch = useDispatch();
@@ -498,14 +527,27 @@ function KeywordInput() {
   const navigate = useNavigate();
   const params = useParams();
 
+  const colorModeSearch = useColorModeValue('white', '#1f2937');
+
   // Chakra UI Autocomplete
-  let items = [];
+  // let items: string[] = [];
+  // let items = [];
 
-  const [pickerItems, setPickerItems] = useState(items);
+  interface Item {
+    label: string;
+    value: string;
+  }
 
-  const [selectedItems, setSelectedItems] = useState([]);
+  //const [pickerItems, setPickerItems] = useState(items);
+  const [pickerItems, setPickerItems] = useState<Item[]>([]);
 
-  const handleCreateItem = (item) => {
+  // const [selectedItems, setSelectedItems] = useState<string[]>([]);
+  const [selectedItems, setSelectedItems] = useState<Item[]>([]);
+
+  //const handleCreateItem = (item: { value: any }) => {
+  const handleCreateItem = (item: { label: string; value: string }) => {
+    // label and value strings
+    console.log('item', item);
     // don't allow empty items
     if (item.value) {
       setPickerItems((curr) => [...curr, item]);
@@ -514,8 +556,8 @@ function KeywordInput() {
   };
 
   // removal of items
-  const handleSelectedItemsChange = (selectedItems) => {
-    console.log('selectedItems', selectedItems);
+  const handleSelectedItemsChange = (selectedItems: Item[]) => {
+    console.log('handleSelectedItems', selectedItems); // = [{...}]
     if (selectedItems) {
       setSelectedItems(selectedItems);
     }
@@ -546,11 +588,14 @@ function KeywordInput() {
   }, []);
 
   function handleSearch() {
-    const keywords = selectedItems.map((item) => {
-      return item.value;
-    });
+    // array of objects
+    const keywords = selectedItems.map(
+      (item: { label: string; value: string }) => {
+        return item.value;
+      }
+    );
 
-    console.log('selectedItems', selectedItems);
+    //console.log('selectedItems', selectedItems);
 
     const query = keywords.join(' ');
 
@@ -559,17 +604,24 @@ function KeywordInput() {
     }
   }
 
+  /* changes =  
+activeIndex: 1
+selectedItems: (2) [{…}, {…}]
+type: "__function_remove_selected_item__"
+  */
+
   return (
     <>
       <div className="tag-input">
         <CUIAutoComplete
+          label="Enter keywords"
           placeholder="Enter keywords"
           onCreateItem={handleCreateItem}
           items={pickerItems}
           selectedItems={selectedItems}
-          onSelectedItemsChange={(changes) =>
-            handleSelectedItemsChange(changes.selectedItems)
-          }
+          onSelectedItemsChange={(
+            changes: UseMultipleSelectionStateChange<Item>
+          ) => handleSelectedItemsChange(changes.selectedItems)}
           tagStyleProps={{
             rounded: 'full',
             px: 4,
@@ -577,7 +629,7 @@ function KeywordInput() {
             fontSize: '1rem',
           }}
           inputStyleProps={{
-            backgroundColor: 'white',
+            backgroundColor: `${colorModeSearch}`,
             size: 'lg',
             isDisabled: loading,
             isRequired: true,
@@ -616,7 +668,7 @@ function KeywordInput() {
             Cancel
           </Button>
         )}
-        <Menu closeOnSelect={false} isLazy lazyBehavior>
+        <Menu closeOnSelect={false} isLazy={true}>
           <MenuButton
             marginLeft="1.25rem"
             as={IconButton}
@@ -625,7 +677,7 @@ function KeywordInput() {
             padding="18px"
             paddingY="24px"
           />
-          <MenuList minWidth="120px" className="p-3">
+          <MenuList minWidth="120px" padding="0.75em">
             <MenuOptionGroup
               title="Limit"
               className="text-left"
@@ -634,13 +686,13 @@ function KeywordInput() {
             >
               <Select
                 defaultValue={searchLimit}
-                onChange={(e) => dispatch(changeLimit(e.currentTarget.value))}
+                onChange={(e) =>
+                  dispatch(changeLimit(Number(e.currentTarget.value)))
+                }
               >
                 <option value="5">5</option>
                 <option value="10">10</option>
                 <option value="25">25</option>
-                <option value="50">50</option>
-                <option value="100">100</option>
               </Select>
             </MenuOptionGroup>
             <MenuOptionGroup

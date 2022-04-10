@@ -10,14 +10,20 @@ const {
   DEFAULT_IMAGEKIT_IMG,
 } = require('../utils/image.js');
 const changeIpfsUrl = require('../utils/changeIpfsUrl.js');
+const resolveDomain = require('../utils/resolve.js');
+const getContentType = require('../utils/getContentType.js');
 
-// Moralis SearchNFTs
-const searchNfts = async (req, res) => {
-  const { chain, q, filter, limit, offset } = req.query;
+// Moralis GetNFTs
+const getWalletNfts = async (request, res) => {
+  const { chain, address } = request.query;
+
+  let resolvedAddress = address;
+
+  resolvedAddress = await resolveDomain(address);
 
   const response = await axios
     .get(
-      `${process.env.MORALIS_API_URL}/nft/search?chain=${chain}&format=decimal&q=${q}&filter=${filter}&limit=${limit}&offset=${offset}`,
+      `${process.env.MORALIS_API_URL}/${resolvedAddress}/nft?chain=${chain}&format=decimal`,
       {
         headers: {
           accept: 'application/json',
@@ -29,9 +35,11 @@ const searchNfts = async (req, res) => {
       console.log(err);
     });
 
-  //console.log('search', response.data.result);
+  //console.log('response', response.data);
 
   const nfts = response.data.result.map(async (item) => {
+    // no null token_uri e.g. with tokenized tweets
+
     const response = await axios.get(item.token_uri).catch((err) => {
       if (err.code == 'ENOTFOUND') console.log(err);
       //console.log(err.code);
@@ -65,24 +73,54 @@ const searchNfts = async (req, res) => {
         changeIpfsUrl(metadata);
       }
 
-      //getContentType(metadata.image).then((response) => console.log(response));
-      //console.log('contenType', contentType);
-
-      //const mimeType = mime.lookup(metadata.image);
-      //console.log('mime', mimeType);
-
       if (metadata.image) {
         if (metadata.image.startsWith('data:image')) {
-          //
+          //console.log('data:image');
+          //console.log('metadata', metadata);
+          /* cloudinary.v2.uploader.upload(
+            'https://www.google.co.nz/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png',
+            { public_id: 'nftlooker/testetse' },
+            function (error, result) {
+              console.log(result, error);
+            }
+          ); */
+          //metadata.image = encodeURIComponent(metadata.image);
+          /*metadata.image = cloudinary.url(
+            'https://www.google.co.nz/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png',
+            {
+              type: 'fetch',
+              transformation: [
+                {
+                  overlay: {
+                    url: 'aHR0cHM6Ly9yZXMuY2xvdWRpbmFyeS5jb20vaG9vdmVyY2Zpc2QvaW1hZ2UvdXBsb2FkL2ZfYXV0byxxX2F1dG8vd18yMDAsaF8yMDAscl8xMC9lX2NvbG9yaXplLGNvX3JnYjo3NTQwODgvbF90ZXh0OkFyaWFsXzEwMF9ib2xkX2NlbnRlcjoxLGNvX3JnYjpGRkZGRkYvdjE1ODYxMTIyNDMvMXB4LnBuZw==',
+                  },
+                },
+                { flags: 'layer_apply', gravity: 'north_west', x: 15, y: 15 },
+              ],
+            }
+          ); */
+          //console.log('encoded', metadata.image);
         } else if (metadata.image.endsWith('.gif')) {
           // Cloudinary
-          metadata.image = cloudinary.url(metadata.image, {
+          /* metadata.image = cloudinary.url(metadata.image, {
             type: 'fetch',
             transformation: [
               { width: 250, height: 250 },
               { fetch_format: 'mp4' },
             ],
             default_image: DEFAULT_CLOUDINARY_IMG,
+          }); */
+
+          // ImageKit
+          metadata.image = imagekit.url({
+            src: `${process.env.IMAGEKIT_API_URL}/${metadata.image}`,
+            transformation: [
+              {
+                height: '250',
+                width: '250',
+                defaultImage: DEFAULT_IMAGEKIT_IMG,
+              },
+            ],
           });
         } else if (
           metadata.image.endsWith('.mp4') ||
@@ -97,12 +135,15 @@ const searchNfts = async (req, res) => {
             transformation: [{ width: 400, height: 300 }], // 16/9
             default_image: DEFAULT_CLOUDINARY_IMG,
           });
+
+          // ImageKit
+          //metadata.image = `https://ik.imagekit.io/glad/tr:w-400,h-300/${metadata.image}`
         } else if (
           !metadata.image.endsWith('.glb') &&
           !metadata.image.endsWith('.gitf')
         ) {
           // Cloudinary
-          /*metadata.image = cloudinary.url(metadata.image, {
+          /* metadata.image = cloudinary.url(metadata.image, {
             type: 'fetch',
             transformation: [
               { width: 250, height: 250 },
@@ -119,13 +160,18 @@ const searchNfts = async (req, res) => {
               {
                 height: '250',
                 width: '250',
+                quality: 80,
                 defaultImage: DEFAULT_IMAGEKIT_IMG,
+                // blur: '6', // low size placeholder
               },
             ],
-            /* signed URLs to prevent modification and expire ImageKit
-            signed: true,
-            expireSeconds: 300, */
           });
+
+          // Get Content Type
+          //metadata.content_type = await getContentType(metadata.image);
+
+          // audio test
+          //metadata.image = 'https://www.kozco.com/tech/piano2.wav';
         }
       }
 
@@ -139,14 +185,13 @@ const searchNfts = async (req, res) => {
   });
 
   await Promise.allSettled(nfts).then((responses) => {
-    //console.log('responses', responses[0]);
     const data = responses.map((item) => {
       return item.value;
     });
 
-    console.log(`${chain} nfts`, data);
+    // console.log(`${chain} nfts`, data);
 
-    /* group NFTs by collection
+    // group NFTs by collection
     const grouped = data.reduce((acc, element) => {
       // make array if key value doesn't already exist
       try {
@@ -161,10 +206,12 @@ const searchNfts = async (req, res) => {
       }
 
       return acc;
-    }, Object.create(null)); */
+    }, Object.create(null));
 
-    res.send(data);
+    //console.log('grouped', grouped);
+
+    res.send(grouped);
   });
 };
 
-module.exports = searchNfts;
+module.exports = getWalletNfts;

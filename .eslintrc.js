@@ -4,7 +4,13 @@ module.exports = {
     node: true,
     es2021: true,
   },
-  extends: ['eslint:recommended', 'plugin:react/recommended', 'prettier'],
+  extends: [
+    'eslint:recommended',
+    //'plugin:react/recommended',
+    'plugin:@typescript-eslint/recommended',
+    'prettier',
+  ],
+  parser: '@typescript-eslint/parser',
   parserOptions: {
     ecmaFeatures: {
       jsx: true,
@@ -12,11 +18,12 @@ module.exports = {
     ecmaVersion: 'latest',
     sourceType: 'module',
   },
-  plugins: ['react'],
+  plugins: [/*'react', */ '@typescript-eslint'],
   rules: {
     'no-unused-vars': 'off',
-    'react/jsx-uses-react': 'off',
-    'react/react-in-jsx-scope': 'off',
-    'react/prop-types': 'off',
+    '@typescript-eslint/ban-ts-comment': 'off',
+    //'react/jsx-uses-react': 'off',
+    //'react/react-in-jsx-scope': 'off',
+    //'react/prop-types': 'off',
   },
 };

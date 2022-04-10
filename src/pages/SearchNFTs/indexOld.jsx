@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 // Router
 import { useLocation, useParams } from 'react-router-dom';
@@ -9,25 +9,30 @@ import {
   viewIsLoading,
   viewIsNotLoading,
 } from '../../state/loading/loadingSlice';
+import { testnetsState } from '../../state/testnets/testnetsSlice';
+import { changeTab } from '../../state/tab/tabSlice';
 import { changeChainTab, chainTabState } from '../../state/tab/tabSlice';
+import {
+  searchLimitState,
+  searchFilterState,
+} from '../../state/search/searchSlice';
 
 // Data
-import { useQueries } from 'react-query';
 import axios from 'axios';
-import chains from '../../data'; // placeholder
+import { useQueries } from 'react-query';
+import chains from '../../data';
 
 // Components
 import NoNFTs from '../../components/NoNFTs/NoNFTs';
 import ChainTab from '../../components/ChainTab/ChainTab';
 import ChainData from '../../components/ChainTab/ChainData/ChainData';
 
-// Chakra UI
 import {
   useToast,
   Tabs,
   TabList,
-  Tab,
   TabPanels,
+  Tab,
   TabPanel,
   Menu,
   MenuButton,
@@ -38,43 +43,16 @@ import {
   MenuOptionGroup,
   MenuDivider,
   Button,
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
-  PopoverHeader,
-  PopoverBody,
-  PopoverFooter,
-  PopoverArrow,
-  PopoverCloseButton,
-  PopoverAnchor,
+  Alert,
+  AlertIcon,
 } from '@chakra-ui/react';
-import { EmailIcon } from '@chakra-ui/icons';
 
-import { FaTwitter, FaFacebook } from 'react-icons/fa';
-import { HiOutlineMail } from 'react-icons/hi';
-
-import {
-  EmailShareButton,
-  FacebookShareButton,
-  RedditShareButton,
-  TwitterShareButton,
-} from 'react-share';
+import ChainIcon from '../../components/ChainIcon/ChainIcon';
 
 import toast from '../../components/Toast/Toast';
 
-// windowing
-import { Virtuoso } from 'react-virtuoso';
-
-import { ScrollMenu } from 'react-horizontal-scrolling-menu';
-import {
-  onWheel,
-  Arrow,
-  LeftArrow,
-  RightArrow,
-} from '../../components/ScrollableTab/ScrollableTab';
-
-export default function UserNFTs() {
-  // Router
+export function SearchNFTs() {
+  // React Router
   const params = useParams();
   const location = useLocation();
 
@@ -82,21 +60,17 @@ export default function UserNFTs() {
   const dispatch = useDispatch();
   const chainTab = useSelector(chainTabState);
   let chainTabSet = false;
+  const searchLimit = useSelector(searchLimitState);
+  const searchFilter = useSelector(searchFilterState);
 
   const [noNfts, setNoNfts] = useState('');
 
   const toastInstance = useToast();
 
-  const [, setToggle] = useState(true);
   useEffect(() => {
-    const id = setInterval(() => {
-      setToggle((toggle) => !toggle);
-    }, 3000);
-    return () => clearInterval(id);
-  }, []);
+    dispatch(changeTab(1)); // manually set to Search tab on search routes
 
-  useEffect(() => {
-    document.title = `NFT Looker. ${params.walletAddress}`;
+    document.title = `NFT Looker. Search for ${params.q}`;
 
     return () => {
       dispatch(viewIsNotLoading());
@@ -129,6 +103,8 @@ export default function UserNFTs() {
         })
       );
     }
+
+    //console.log('chain queries', queries);
   }, [queries]);
 
   async function fetchNfts(chain, signal) {
@@ -137,7 +113,7 @@ export default function UserNFTs() {
     setNoNfts('');
 
     return await axios(
-      `/api/nfts?chain=${chain}&address=${params.walletAddress}`,
+      `/api/search?chain=${chain}&q=${params.q}&filter=${searchFilter}&limit=${searchLimit}&offset=0`,
       {
         signal,
       }
@@ -186,51 +162,6 @@ export default function UserNFTs() {
       });
   }
 
-  function ShareMenu() {
-    return (
-      <Popover>
-        <PopoverTrigger>
-          <button>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-            >
-              <path d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z" />
-            </svg>
-          </button>
-        </PopoverTrigger>
-        <PopoverContent>
-          <PopoverArrow />
-          <PopoverCloseButton />
-          <PopoverHeader>Share</PopoverHeader>
-          <PopoverBody className="flex items-center mx-auto space-x-5">
-            <EmailShareButton
-              url=""
-              subject="View NFTs"
-              body={`View NFTs at https://nftlooker.app${location.pathname}`}
-            >
-              <EmailIcon />
-            </EmailShareButton>
-            <TwitterShareButton
-              url={`nftlooker.app${location.pathname}`}
-              title={`View NFTs at`}
-            >
-              <FaTwitter />
-            </TwitterShareButton>
-            <FacebookShareButton
-              url={`nftlooker.app${location.pathname}`}
-              quote={`View NFTs at`}
-            >
-              <FaFacebook />
-            </FacebookShareButton>
-          </PopoverBody>
-        </PopoverContent>
-      </Popover>
-    );
-  }
-
   return (
     <>
       <Tabs
@@ -259,7 +190,7 @@ export default function UserNFTs() {
         </TabPanels>
       </Tabs>
 
-      {noNfts && <NoNFTs noNfts={noNfts} />}
+      <NoNFTs noNfts={noNfts} />
     </>
   );
 }

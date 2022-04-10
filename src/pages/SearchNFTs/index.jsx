@@ -19,13 +19,17 @@ import {
 
 // Data
 import axios from 'axios';
-import { useQueries } from 'react-query';
+import { useQueries, useInfiniteQuery, useQuery } from 'react-query';
 import chains from '../../data';
 
 // Components
 import NoNFTs from '../../components/NoNFTs/NoNFTs';
 import ChainTab from '../../components/ChainTab/ChainTab';
+import SearchChainTab from '../../components/ChainTab/SearchChainTab';
 import ChainData from '../../components/ChainTab/ChainData/ChainData';
+
+import SearchChainData from '../../components/ChainTab/ChainData/SearchChainData';
+import SearchChainDataTest from '../../components/ChainTab/ChainData/SearchChainDataTest';
 
 import {
   useToast,
@@ -59,16 +63,21 @@ export function SearchNFTs() {
   // State
   const dispatch = useDispatch();
   const chainTab = useSelector(chainTabState);
-  let chainTabSet = false;
-  const searchLimit = useSelector(searchLimitState);
-  const searchFilter = useSelector(searchFilterState);
+  const [chainTabSet, setChainTabSet] = useState(false);
 
-  const [noNfts, setNoNfts] = useState('');
+  const [chainsState, setChainsState] = useState(chains);
 
-  const toastInstance = useToast();
+  const [noNfts, setNoNfts] = useState(false);
 
   useEffect(() => {
     dispatch(changeTab(1)); // manually set to Search tab on search routes
+
+    // need this
+
+    // reset UI
+    //setChainsState(chains);
+    //dispatch(changeChainTab(-1));
+    //setNoNfts(false);
 
     document.title = `NFT Looker. Search for ${params.q}`;
 
@@ -78,88 +87,32 @@ export function SearchNFTs() {
     };
   }, []);
 
-  let queries = useQueries(
-    Object.keys(chains).map((chain) => {
-      return {
-        queryKey: [location, chain], // location
-        queryFn: ({ signal }) => fetchNfts(chain, signal),
-        placeholderData: {
-          [chain]: chains[chain],
-        },
-      };
-    })
-  );
+  useEffect(() => {
+    //console.log('current chainTab', chainTab);
+  }, [chainTab]);
 
   useEffect(() => {
-    if (queries.some((query) => query.isFetching)) {
-      dispatch(viewIsLoading());
-    } else {
+    //console.log('chains state', chainsState);
+
+    if (Object.values(chainsState).every((chain) => chain.loaded)) {
       dispatch(viewIsNotLoading());
 
-      setNoNfts(
-        Object.values(queries).every((collection) => {
-          const chain = Object.values(collection.data)[0];
-          return chain.count === 0;
-        })
-      );
-    }
-
-    //console.log('chain queries', queries);
-  }, [queries]);
-
-  async function fetchNfts(chain, signal) {
-    // reset UI
-    dispatch(changeChainTab(-1));
-    setNoNfts('');
-
-    return await axios(
-      `/api/search?chain=${chain}&q=${params.q}&filter=${searchFilter}&limit=${searchLimit}&offset=0`,
-      {
-        signal,
+      // check for any NFTs
+      if (Object.values(chainsState).every((chain) => !chain.total)) {
+        setNoNfts(true);
       }
-    )
-      .then(({ data }) => {
-        const nftCount = Object.values(data).flat().length;
+    } else {
+      dispatch(viewIsLoading());
+    }
+  }, [chainsState]);
 
-        // set the chain tab to one that has NFTs and only set it once i.e. the first loaded tab
-        if (nftCount > 0 && !chainTabSet) {
-          dispatch(changeChainTab(chains[chain].order));
-          chainTabSet = true;
-        }
+  function handleChainState(data) {
+    setChainsState((prevState) => ({ ...prevState, [data.abbr]: data }));
 
-        return {
-          [chain]: {
-            name: chains[chain]['name'],
-            order: chains[chain]['order'],
-            data,
-            loaded: true,
-            count: nftCount,
-          },
-        };
-      })
-      .catch((err) => {
-        if (err.message == 'canceled') {
-          toast(toastInstance, 'error', 'Cancelled.');
-        } else if (err.message == 'Request failed with status code 500') {
-          toast(
-            toastInstance,
-            'error',
-            'Error - likely invalid address or search.'
-          );
-        } else {
-          toast(toastInstance, 'error', 'Server error', `${err.message}`);
-        }
-
-        return {
-          [chain]: {
-            name: chains[chain]['name'],
-            order: chains[chain]['order'],
-            data: {},
-            loaded: true,
-            count: 0,
-          },
-        };
-      });
+    if (data.total > 0 && !chainTabSet) {
+      dispatch(changeChainTab(data.order));
+      setChainTabSet(true);
+    }
   }
 
   return (
@@ -175,16 +128,24 @@ export function SearchNFTs() {
       >
         <TabList>
           <div className="flex items-center">
-            {queries.map((query, idx) => (
-              <ChainTab chain={query.data} idx={idx} key={idx} />
+            {Object.keys(chainsState).map((chain, idx) => (
+              <SearchChainTab chain={chainsState[chain]} idx={idx} key={idx} />
             ))}
           </div>
         </TabList>
 
         <TabPanels>
-          {queries.map((query, idx) => (
-            <TabPanel key={Object.keys(query.data)[0]} value={idx}>
-              <ChainData chain={query.data} />
+          {Object.keys(chainsState).map((chain, idx) => (
+            <TabPanel key={chain} value={idx} paddingX="0">
+              <SearchChainData
+                chain={chain}
+                q={params.q}
+                chainTabSet={chainTabSet}
+                onChainTabSet={(bool) => setChainTabSet(bool)}
+                chains={chainsState}
+                onChains={(data) => handleChainState(data)}
+                location={location}
+              />
             </TabPanel>
           ))}
         </TabPanels>

@@ -28,7 +28,6 @@ import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 // UTILS
 import ellipseAddress from '../../utils/ellipseAddress';
 import { explorer } from '../../utils/chainExplorer';
-import Web3 from 'web3';
 
 export default function WalletModal() {
   let provider;
@@ -67,11 +66,11 @@ export default function WalletModal() {
   }, []);
 
   useEffect(() => {
-    console.log('color mode', colorMode);
+    // console.log('color mode', colorMode);
   }, [colorMode]);
 
   useEffect(() => {
-    console.log('wallet state', wallet);
+    // console.log('wallet state', wallet);
   }, [wallet]);
 
   async function connectMetaMask() {
@@ -81,12 +80,15 @@ export default function WalletModal() {
 
       try {
         provider = new ethers.providers.Web3Provider(window.ethereum);
-        const account = await provider.send('eth_requestAccounts', []);
+        const accounts = await provider.send('eth_requestAccounts', []);
+        // const accounts = await window.ethereum.request({
+        //   method: 'eth_requestAccounts',
+        //  });
 
-        console.log('connect wallet');
+        console.log('Connecting wallet');
         dispatch(
           setWallet({
-            address: account[0],
+            address: accounts[0],
             chain: window.ethereum.networkVersion,
           })
         );
@@ -98,7 +100,7 @@ export default function WalletModal() {
         //setAddress(account[0]);
         //navigate(`/${account[0]}`);
 
-        console.log('Connected wallet:', account[0]);
+        console.log('Connected wallet:', accounts[0]);
       } catch (err) {
         console.log(err);
       }
@@ -179,7 +181,7 @@ export default function WalletModal() {
               <div className="modal-wallets grid sm:grid-cols-3">
                 <div
                   className={`p-5 text-center cursor-pointer transition ${colorMode}`}
-                  onClick={connectMetaMask}
+                  onClick={window.ethereum && connectMetaMask}
                 >
                   <img
                     src="/icons/metamask.svg"
@@ -188,7 +190,21 @@ export default function WalletModal() {
                     className="mx-auto"
                   />
                   <h3 className="text-center font-bold text-xl">MetaMask</h3>
-                  <p>Connect to your MetaMask Wallet</p>
+                  {window.ethereum ? (
+                    <p>Connect to your MetaMask Wallet</p>
+                  ) : (
+                    <p className="mt-3">
+                      <a
+                        href="https://metamask.io/download/"
+                        target="_blank"
+                        rel="noreferrer noopener nofollow"
+                      >
+                        <Button colorScheme="red" backgroundColor="red.400">
+                          Install MetaMask
+                        </Button>
+                      </a>
+                    </p>
+                  )}
                 </div>
                 {
                   <div

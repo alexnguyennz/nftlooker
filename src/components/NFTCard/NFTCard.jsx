@@ -1,11 +1,14 @@
-import { Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 
-import axios from 'axios';
+// Redux
+import { useSelector } from 'react-redux';
+import { settingsState } from '../../state/settings/settingsSlice';
+
+import { Link } from 'react-router-dom';
 
 import { Button } from '@chakra-ui/react';
 import { useColorMode, useColorModeValue } from '@chakra-ui/react';
 import { Image } from '@chakra-ui/react';
-import { Spinner } from '@chakra-ui/react';
 
 import { Tooltip } from '@chakra-ui/react';
 
@@ -13,52 +16,55 @@ import { ExternalLinkIcon } from '@chakra-ui/icons';
 
 import ModelViewer from '@google/model-viewer';
 
-// Components
-//import NFTImage from '../../components/NFTImage/NFTImage';
+// Image Transformation
+import generateNftUrl from '../../utils/generateNftUrl';
 
-const mime = require('mime-types');
-
-const contentType = require('content-type');
-
-async function getContentType(image) {
-  const response = await axios.get(image);
-
-  const type = contentType.parse(response);
-
-  console.log(type.type);
-
-  return type.type;
-}
+import LoadingSpinner from '../LoadingSpinner/LoadingSpinner';
 
 function NFTImage(props) {
-  const chain = props.chain;
+  const settings = useSelector(settingsState);
 
-  const nft = props.nft;
-  const image = nft.metadata.image;
-  const mimeType = mime.lookup(image);
-  console.log('mimeType', mimeType);
+  const { chain, nft } = props;
 
-  switch (mimeType) {
+  //console.log('props', nft);
+
+  const [image, setImage] = useState('');
+  const [nftContentType, setNftContentType] = useState('');
+
+  useEffect(() => {
+    async function generateUrl() {
+      const { image, contentType } = await generateNftUrl(
+        nft.metadata.image,
+        '250'
+      );
+
+      setImage(image);
+      setNftContentType(contentType);
+    }
+
+    generateUrl();
+  }, []);
+
+  //if (!image) return <LoadingSpinner />;
+
+  switch (nftContentType) {
     case 'image/gif':
-      return (
-        <video width="100%" controls autoPlay muted loop>
-          <source src={`${image}`} type="video/mp4" />
-          Your browser does not support the video tag.
-        </video>
-      );
     case 'video/mp4':
-      return (
-        <video width="100%" controls autoPlay muted loop className="z-20">
-          <source src={`${image}`} type="video/mp4" />
-          Your browser does not support the video tag.
-        </video>
-      );
     case 'video/webm':
       return (
-        <video width="100%" controls autoPlay muted loop className="z-20">
-          <source src={`${image}`} type="video/webm" />
-          Your browser does not support the video tag.
-        </video>
+        <>
+          {settings.autoplay ? (
+            <video width="100%" controls muted loop autoPlay>
+              <source src={`${image}`} type={nftContentType} />
+              Your browser does not support the video tag.
+            </video>
+          ) : (
+            <video width="100%" controls muted loop>
+              <source src={`${image}`} type={nftContentType} />
+              Your browser does not support the video tag.
+            </video>
+          )}
+        </>
       );
     case 'model/gltf-binary':
       return (
@@ -97,28 +103,36 @@ function NFTImage(props) {
           <Image
             src={image}
             /*onError={({ currentTarget }) => {
-              currentTarget.onerror = null; // prevents looping
-              currentTarget.src = '/img/404.webp';
-            }}*/
-            fallbackSrc={'/img/loading.svg'}
+               currentTarget.onerror = null; // prevents looping
+               currentTarget.src = '/img/no-image.png';
+            }} */
+            fallback={<LoadingSpinner />}
             className="mx-auto w-full"
           />
-
-          {/*<img
-            src={image}
-            
-            className="mx-auto w-full"
-          />*/}
         </Link>
       );
   }
 }
 
 export default function NFTCard(props) {
-  //const metadata = props.nft.external_data;
-  const nft = props.nft;
-  const collection = props.collection;
   const chain = props.chain;
+
+  const [nft, setNft] = useState('');
+
+  useEffect(() => {
+    // process JSON otherwise set NFTs as usual
+    try {
+      const metadata = JSON.parse(props.nft.metadata);
+      const updatedNft = {
+        ...props.nft,
+        metadata,
+      };
+
+      setNft(updatedNft);
+    } catch {
+      setNft(props.nft);
+    }
+  }, []);
 
   const colorModeBg = useColorModeValue('bg-white', 'bg-gray-800');
   const colorModeCard = useColorModeValue(
@@ -129,22 +143,29 @@ export default function NFTCard(props) {
   //console.log('received nft', nft);
   //console.log('received collection', collection);
 
+  if (!nft) return null;
+
   return (
     <>
-      <div className="flex flex-col max-w-sm">
+      <div className="flex flex-col max-w-sm ">
         <div
-          className={`mt-auto overflow-hidden rounded-lg shadow-md  transition-all hover:-translate-y-2 ${colorModeBg}`}
+          // className={`mt-auto overflow-hidden rounded-lg shadow-md transition-all hover:-translate-y-2 ${colorModeBg}`}
+          className={` mt-auto rounded-b-lg shadow-md transition-all hover:-translate-y-2 ${colorModeBg}`}
         >
           {nft.metadata && (
-            <NFTImage collection={collection} nft={nft} chain={chain} />
+            // <NFTImage collection={collection} nft={nft} chain={chain} />
+            <NFTImage nft={nft} chain={chain} />
           )}
 
           {/* bg-gray-50 border-t border-gray-100 */}
-          <div className={`p-3 mt-auto space-y-2 border-t ${colorModeCard}`}>
+          <div
+            className={`p-3 mt-auto space-y-2 border-t rounded-b-lg ${colorModeCard}`}
+          >
             <h3 className="text-center font-semibold">
               <Link
                 to={`/${chain}/collection/${nft.token_address}/nft/${nft.token_id}`}
               >
+                {/* {nft.metadata && nft.metadata.name} */}
                 {nft.metadata && nft.metadata.name}
               </Link>
             </h3>
@@ -156,15 +177,17 @@ export default function NFTCard(props) {
                   View
                 </Link>
               </Button>
+              {/* {nft.metadata.original_image && ( */}
               {nft.metadata.original_image && (
                 <Tooltip label="Open original link" openDelay={750} hasArrow>
                   <a
+                    // href={nft.metadata.original_image}
                     href={nft.metadata.original_image}
                     target="_blank"
                     rel="noreferrer noopener nofollow"
                     className="z-0"
                   >
-                    <ExternalLinkIcon color="gray.600" boxSize={4} />
+                    <ExternalLinkIcon boxSize={4} />
                   </a>
                 </Tooltip>
               )}

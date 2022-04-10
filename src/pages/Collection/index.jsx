@@ -31,7 +31,24 @@ export function Collection() {
   const dispatch = useDispatch(); // React Redux
   const loading = useSelector(loadingState);
 
-  console.log('params', params);
+  /* useEffect(() => {
+    test();
+  }, []);
+
+  async function test() {
+    const { data } = await axios.get(
+      `https://deep-index.moralis.io/api/v2/nft/0xbc4ca0eda7647a8ab7c2061c2e118a18a936f13d/owners?offset=1000&limit=500`,
+      {
+        headers: {
+          accept: 'application/json',
+          'X-API-KEY':
+            'xf4Tfp3RHFT92gIv1tjnTs0GR6nzd734ZgKK3MqGFGSWYA4fKdrfhk8dMr9vFlkB',
+        },
+      }
+    );
+
+    console.log('test data', data);
+  } */
 
   // React Query
   const queries = useQueries([
@@ -39,7 +56,7 @@ export function Collection() {
       queryKey: [params.chain, params.contractAddress, 'metadata'],
       queryFn: async () => {
         const { data } = await axios(
-          `/api/collection/metadata?chain=${params.chain}&address=${params.contractAddress}`
+          `/api/collection/metadata/chain/${params.chain}/address/${params.contractAddress}`
         );
         return data;
       },
@@ -48,17 +65,17 @@ export function Collection() {
       queryKey: [params.chain, params.contractAddress, 'nfts'],
       queryFn: async () => {
         const { data } = await axios(
-          `/api/collection/nfts?chain=${params.chain}&address=${params.contractAddress}&offset=0&limit=1`
+          `/api/collection/nfts/chain/${params.chain}/address/${params.contractAddress}/limit/1/offset/0`
         );
         return data;
       },
     },
   ]);
 
+  // console.log('Original Response', queries[1]);
+
   //console.log('results', results[2].data[0]);
   const loaded = queries.every((query) => query.isSuccess);
-
-  console.log('queries', queries);
 
   useEffect(() => {
     if (queries.some((query) => query.isFetching)) {
@@ -97,31 +114,15 @@ export function Collection() {
   );
 }
 
-async function fetchNfts({ pageParam = 0 }) {
-  const params = useParams();
-
-  const { data } = await axios(
-    `/api/collection/nfts?chain=${params.chain}&address=${params.contractAddress}&offset=${pageParam}&limit=5`
-  );
-  return { data, nextPage: pageParam + 1, totalOffset: 100 };
-}
-
 export function CollectionThumbnail(props) {
-  const params = useParams(); // React Router
+  const metadata = JSON.parse(props.result.metadata);
 
-  const data = props.result;
+  const data = {
+    ...props.result,
+    metadata,
+  };
 
-  /* if (isLoading) return null;
-  if (error) return 'An error has occurred: ' + error.message; */
-
-  // hacky solution
-  const image = data.metadata.image
-    .replace('h-250', 'h-1000')
-    .replace('w-250', 'h-1000');
-
-  return (
-    <NFTImage nft={data} chain={params.chain} image={data.metadata && image} />
-  );
+  return <NFTImage nft={data} />;
 }
 
 export function CollectionMetadata(props) {
@@ -178,7 +179,7 @@ export function CollectionNfts() {
 
   const fetchNfts = async ({ pageParam = 0 }) => {
     const { data } = await axios(
-      `/api/collection/nfts?chain=${params.chain}&address=${params.contractAddress}&limit=5&offset=` +
+      `/api/collection/nfts/chain/${params.chain}/address/${params.contractAddress}/limit/5/offset/` +
         pageParam
     );
 
@@ -186,6 +187,8 @@ export function CollectionNfts() {
 
     return { data, offset };
   };
+
+  const [nfts, setNfts] = useState([]);
 
   // infinite queries
   const {
@@ -195,6 +198,7 @@ export function CollectionNfts() {
     isError,
     isFetching,
     isFetchingNextPage,
+    isSuccess,
     fetchNextPage,
     hasNextPage,
     // } = useInfiniteQuery('nftMetadata', fetchNfts, {
@@ -203,6 +207,34 @@ export function CollectionNfts() {
       if (lastPage.offset <= 500) return lastPage.offset; // only allow up to 100 pages / 500 offsets
     },
   });
+
+  useEffect(() => {
+    //console.log('data', data);
+    if (data) {
+      const page = data.pages.length - 1;
+
+      // console.log('test', data.pages[page].data);
+
+      const parsedNfts = data.pages[page].data.map((nft) => {
+        const metadata = JSON.parse(nft.metadata);
+
+        return {
+          ...nft,
+          metadata,
+        };
+      });
+
+      //data.pages[page].data = parsedNfts;
+
+      setNfts(parsedNfts);
+    }
+  }, [data]);
+
+  useEffect(() => {
+    // console.log('parsed', nfts);
+  }, [nfts]);
+
+  if (!isSuccess) return null;
 
   return (
     <div>
@@ -220,9 +252,9 @@ export function CollectionNfts() {
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-10">
             {data.pages.map((page) => (
               <React.Fragment key={page.offset}>
-                {page.data.map((nft) => (
+                {page.data.map((nft, idx) => (
                   <NFTCard
-                    key={nft.token_id}
+                    key={nft.token_address + nft.token_id + idx}
                     collection={data}
                     nft={nft}
                     chain={params.chain}

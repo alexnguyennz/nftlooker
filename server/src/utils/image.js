@@ -7,7 +7,7 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
   secure: true,
 });
-const DEFAULT_CLOUDINARY_IMG = 'no-image_skjijq.png'; // change this like below
+const DEFAULT_CLOUDINARY_IMG = 'no-image_lmfa1g.png';
 
 // IMAGEKIT
 var ImageKit = require('imagekit');
