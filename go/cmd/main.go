@@ -37,5 +37,9 @@ func main() {
 	// Get Random Wallet
 	r.HandleFunc("/api/randomwallet", routes.GetRandomWallet)
 
-	log.Fatal(http.ListenAndServe("localhost:" + os.Getenv("GO_PORT"), r))
+	// Development 
+	//log.Fatal(http.ListenAndServe("localhost:" + os.Getenv("GO_PORT"), r))
+
+	// Production
+	log.Fatal(http.ListenAndServe(os.Getenv("PORT"), r))
 }
