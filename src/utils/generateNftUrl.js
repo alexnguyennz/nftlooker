@@ -111,5 +111,13 @@ export default async function generateNftUrl(image, size) {
         contentType,
       };
     })
-    .catch((err) => console.log(err));
+    .catch((err) => {
+      // console.log(err);
+
+      // if content-type fetch isn't successful, return a fallback
+      return {
+        image,
+        contentType: 'image/png',
+      };
+    });
 }

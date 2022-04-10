@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
 )
 
 
@@ -16,8 +17,8 @@ func main() {
 
 	// LOAD ENV VARIABLES
 	// Development
-	// err := godotenv.Load()
-	// if err != nil { log.Fatal("Error loading .env file") }
+	err := godotenv.Load()
+	if err != nil { log.Fatal("Error loading .env file") }
 	
 	// Get Wallet NFTs
 	r.HandleFunc("/api/nfts/chain/{chain}/address/{address}", routes.GetWalletNfts)
@@ -38,8 +39,8 @@ func main() {
 	r.HandleFunc("/api/randomwallet", routes.GetRandomWallet)
 
 	// Development 
-	//log.Fatal(http.ListenAndServe("localhost:" + os.Getenv("GO_PORT"), r))
+	log.Fatal(http.ListenAndServe("localhost:" + os.Getenv("GO_PORT"), r))
 
 	// Production
-	log.Fatal(http.ListenAndServe(":" + os.Getenv("PORT"), r))
+	//log.Fatal(http.ListenAndServe(":" + os.Getenv("PORT"), r))
 }
