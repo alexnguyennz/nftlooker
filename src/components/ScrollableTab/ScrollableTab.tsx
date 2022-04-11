@@ -4,9 +4,9 @@ import { ScrollMenu, VisibilityContext } from 'react-horizontal-scrolling-menu';
 import { ChevronLeftIcon, ChevronRightIcon } from '@chakra-ui/icons';
 
 export function onWheel(apiObj, ev) {
-  const isThouchpad = Math.abs(ev.deltaX) !== 0 || Math.abs(ev.deltaY) < 15;
+  const isTouchpad = Math.abs(ev.deltaX) !== 0 || Math.abs(ev.deltaY) < 15;
 
-  if (isThouchpad) {
+  if (isTouchpad) {
     ev.stopPropagation();
     return;
   }

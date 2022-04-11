@@ -1,8 +1,25 @@
 import { Tab, Tooltip, Spinner } from '@chakra-ui/react';
 
-import ChainIcon from '../ChainIcon/ChainIcon';
+import ChainIcon from './ChainIcon/ChainIcon';
 
-export default function ChainTab(props) {
+interface ChainProps {
+  name: string;
+  loaded: boolean;
+  count: number;
+  order: number;
+}
+
+interface Chain {
+  [key: string]: ChainProps;
+}
+
+interface Props {
+  chain: Chain;
+  idx: number;
+  key: React.Key;
+}
+
+export default function ChainTab(props: Props) {
   const data = Object.values(props.chain)[0];
 
   const chain = Object.keys(props.chain)[0];

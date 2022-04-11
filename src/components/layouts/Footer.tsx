@@ -1,4 +1,8 @@
-export default function Footer(props) {
+interface Props {
+  colorMode: string;
+}
+
+export default function Footer(props: Props) {
   const colorModeBg = props.colorMode;
 
   return (

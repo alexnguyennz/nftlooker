@@ -9,7 +9,7 @@ import {
   DEFAULT_CLOUDINARY_IMG,
 } from './image';
 
-export default async function generateNftUrl(image, size) {
+export default async function generateNftUrl(image: string, size: string) {
   // fetch head only to get Content-Type to render NFT appropriately
   return await axios
     .head(image)
@@ -20,11 +20,14 @@ export default async function generateNftUrl(image, size) {
 
       //console.log('contentType', contentType);
 
+      console.log('test', image);
+
       if (contentType === 'image/gif') {
+        console.log('gif', image);
         // Cloudinary
         // https://res.cloudinary.com/gladius/image/fetch/h_250,w_250/f_mp4/d_no-image_lmfa1g.png/https://www.thehighapesclub.com/assets/nft/invite/THCInvite.gif
         // Cloudinary 10MB Limit
-        if (contentLength < 10250000) {
+        if (Number(contentLength) < 10250000) {
           // setImage(
           //   `https://res.cloudinary.com/gladius/image/fetch/h_250,w_250/f_mp4/d_no-image_lmfa1g.png/${nft.metadata.image}`
           // );
@@ -54,7 +57,9 @@ export default async function generateNftUrl(image, size) {
       } else if (contentType === 'video/mp4' || contentType === 'video/webm') {
         // if (contentLength < 10250000) {
 
-        if (contentLength < 100000000) {
+        console.log('video', image);
+
+        if (Number(contentLength) < 100000000) {
           const stripped = image.replace(/^.*:\/\//i, '');
 
           const cloudinaryImage = cloudinary.video(

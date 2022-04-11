@@ -24,12 +24,9 @@ import chains from '../../data';
 
 // Components
 import NoNFTs from '../../components/NoNFTs/NoNFTs';
-import ChainTab from '../../components/ChainTab/ChainTab';
 import SearchChainTab from '../../components/ChainTab/SearchChainTab';
-import ChainData from '../../components/ChainTab/ChainData/ChainData';
 
 import SearchChainData from '../../components/ChainTab/ChainData/SearchChainData';
-import SearchChainDataTest from '../../components/ChainTab/ChainData/SearchChainDataTest';
 
 import {
   useToast,
@@ -50,10 +47,6 @@ import {
   Alert,
   AlertIcon,
 } from '@chakra-ui/react';
-
-import ChainIcon from '../../components/ChainIcon/ChainIcon';
-
-import toast from '../../components/Toast/Toast';
 
 export function SearchNFTs() {
   // React Router

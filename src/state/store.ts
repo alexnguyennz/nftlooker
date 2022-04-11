@@ -1,6 +1,6 @@
 import { createStore, combineReducers } from 'redux';
 
-// reducers
+// Reducers
 import walletReducer from './wallet/walletSlice';
 import loadingReducer from './loading/loadingSlice';
 import testnetsReducer from './testnets/testnetsSlice';
@@ -8,7 +8,7 @@ import searchReducer from './search/searchSlice';
 import tabReducer from './tab/tabSlice';
 import settingsReducer from './settings/settingsSlice';
 
-// combine reducers
+// Combine reducers
 const rootReducers = combineReducers({
   wallet: walletReducer,
   loading: loadingReducer,
@@ -18,7 +18,7 @@ const rootReducers = combineReducers({
   settings: settingsReducer,
 });
 
-// convert object to string to store in localStorage
+// Convert object to string for localStorage
 function saveToLocalStorage(state) {
   try {
     const serialisedState = JSON.stringify(state);
@@ -44,7 +44,7 @@ function loadFromLocalStorage() {
 //const store = createStore(rootReducers, loadFromLocalStorage());
 const store = createStore(rootReducers);
 
-// listen for store changes to save them to localStorage
+// Listen for store changes to save them to localStorage
 store.subscribe(() => saveToLocalStorage(store.getState()));
 
 export default store;

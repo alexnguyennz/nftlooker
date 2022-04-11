@@ -2,7 +2,22 @@ import React, { useEffect, useState } from 'react';
 
 import NFTCollection from '../../NFTCollection/NFTCollection';
 
-function ChainData(props) {
+interface ChainProps {
+  name: string;
+  loaded: boolean;
+  count: number;
+  order: number;
+}
+
+interface Chain {
+  [key: string]: ChainProps;
+}
+
+interface Props {
+  chain: ChainProps;
+}
+
+function ChainData(props: Props) {
   const data = Object.values(props.chain)[0].data;
 
   const chain = Object.keys(props.chain)[0];

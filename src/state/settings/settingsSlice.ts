@@ -1,5 +1,13 @@
 import { createSlice } from '@reduxjs/toolkit';
 
+interface Settings {
+  autoplay: boolean;
+}
+
+interface State {
+  settings: Settings;
+}
+
 export const settingsSlice = createSlice({
   name: 'settings',
   initialState: {
@@ -15,6 +23,6 @@ export const settingsSlice = createSlice({
 });
 
 export const { toggleAutoplay } = settingsSlice.actions;
-export const settingsState = (state) => state.settings;
+export const settingsState = (state: State) => state.settings;
 
 export default settingsSlice.reducer;

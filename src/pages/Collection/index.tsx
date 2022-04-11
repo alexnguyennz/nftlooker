@@ -115,14 +115,18 @@ export function Collection() {
 }
 
 export function CollectionThumbnail(props) {
-  const metadata = JSON.parse(props.result.metadata);
+  try {
+    const metadata = JSON.parse(props.result.metadata);
 
-  const data = {
-    ...props.result,
-    metadata,
-  };
+    const data = {
+      ...props.result,
+      metadata,
+    };
 
-  return <NFTImage nft={data} />;
+    return <NFTImage nft={data} />;
+  } catch {
+    return <NFTImage nft={props.result} />;
+  }
 }
 
 export function CollectionMetadata(props) {
@@ -183,7 +187,7 @@ export function CollectionNfts() {
         pageParam
     );
 
-    let offset = pageParam + 5; // manually increase each "page"
+    const offset = pageParam + 5; // manually increase each "page"
 
     return { data, offset };
   };
@@ -255,7 +259,6 @@ export function CollectionNfts() {
                 {page.data.map((nft, idx) => (
                   <NFTCard
                     key={nft.token_address + nft.token_id + idx}
-                    collection={data}
                     nft={nft}
                     chain={params.chain}
                   />

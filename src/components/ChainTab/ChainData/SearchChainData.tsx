@@ -20,6 +20,29 @@ import { ChevronDownIcon, AddIcon, ExternalLinkIcon } from '@chakra-ui/icons';
 // Components
 import NFTCard from '../../NFTCard/NFTCard';
 
+interface ChainProps {
+  name: string;
+  abbr: string;
+  loaded: boolean;
+  count: number;
+  order: number;
+  total: number;
+}
+
+interface Chains {
+  [key: string]: ChainProps;
+}
+
+interface Props {
+  chain: string;
+  chainTabSet: boolean;
+  chains: Chains;
+  q: string;
+  location: Location;
+  //onChains: Function;
+  //onChainTabSet: onChainTabSet
+}
+
 function SearchChainData(props) {
   // State
   const dispatch = useDispatch();
@@ -54,7 +77,7 @@ function SearchChainData(props) {
     const nftCount = Object.values(data).flat().length;
 
     // React Query
-    let offset = pageParam + searchLimit; // manually increase each "page" by the limit
+    const offset = pageParam + searchLimit; // manually increase each "page" by the limit
 
     return {
       [chain]: {
@@ -64,6 +87,7 @@ function SearchChainData(props) {
         data,
         loaded: true,
         count: nftCount,
+        total: nftCount,
       },
       offset,
     };

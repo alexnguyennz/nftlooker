@@ -21,6 +21,28 @@ import generateNftUrl from '../../utils/generateNftUrl';
 
 import LoadingSpinner from '../LoadingSpinner/LoadingSpinner';
 
+declare global {
+  namespace JSX {
+    interface IntrinsicElements {
+      'model-viewer': ModelViewer &
+        React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
+    }
+  }
+}
+
+interface ModelViewer {
+  bounds: string;
+  src: string;
+  ar: boolean;
+  'ar-modes': string;
+  'camera-controls': boolean;
+  'environment-image': string;
+  'shadow-intensity': string;
+  autoplay: boolean;
+  width: string;
+  height: string;
+}
+
 function NFTImage(props) {
   const settings = useSelector(settingsState);
 
@@ -118,10 +140,38 @@ function NFTImage(props) {
   }
 }
 
-export default function NFTCard(props) {
+interface Metadata {
+  name: string;
+  original_image: string;
+}
+
+interface Nft {
+  amount: string;
+  block_number: string;
+  block_number_minted: string;
+  contract_type: string;
+  frozen: number;
+  is_valid: number;
+  metadata: string & Metadata;
+  name: string;
+  owner_of: string;
+  symbol: string;
+  synced_at: string;
+  syncing: number;
+  token_address: string;
+  token_id: string;
+  token_uri: string;
+}
+
+interface Props {
+  chain: string;
+  nft: Nft;
+}
+
+export default function NFTCard(props: Props) {
   const chain = props.chain;
 
-  const [nft, setNft] = useState('');
+  const [nft, setNft] = useState<Nft>(null);
 
   useEffect(() => {
     // process JSON otherwise set NFTs as usual
@@ -134,6 +184,7 @@ export default function NFTCard(props) {
 
       setNft(updatedNft);
     } catch {
+      // if JSON parse fails
       setNft(props.nft);
     }
   }, []);

@@ -94,7 +94,7 @@ export default function WalletModal() {
         );
 
         // persist connect state
-        localStorage.setItem('WEB3_CONNECTED', true);
+        localStorage.setItem('WEB3_CONNECTED', 'true');
 
         // manually get data for NFTs
         //setAddress(account[0]);
@@ -167,13 +167,7 @@ export default function WalletModal() {
         >
           Connect
         </Button>
-        <Modal
-          size="xl"
-          onClose={onClose}
-          isOpen={isOpen}
-          isCentered
-          className="rounded-none"
-        >
+        <Modal size="xl" onClose={onClose} isOpen={isOpen} isCentered>
           {/* chakra-radii-md: 0.375rem; */}
           <ModalOverlay /> {/* force scrollbar */}
           <ModalContent className="mx-5">

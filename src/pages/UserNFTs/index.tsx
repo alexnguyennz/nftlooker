@@ -1,4 +1,4 @@
-// @ts-nocheck
+// // @ts-nocheck
 import React, { useEffect, useState } from 'react';
 
 // Router
@@ -13,7 +13,7 @@ import {
 import { changeChainTab, chainTabState } from '../../state/tab/tabSlice';
 
 // Data
-import { useQueries } from 'react-query';
+import { useQueries, UseQueryResult, UseQueryOptions } from 'react-query';
 import axios from 'axios';
 import chains from '../../data'; // placeholder
 
@@ -80,6 +80,17 @@ export default function UserNFTs() {
     };
   }, []);
 
+  interface ChainProps {
+    name: string;
+    loaded: boolean;
+    count: number;
+    order: number;
+  }
+
+  interface Chain {
+    [key: string]: ChainProps;
+  }
+
   const queries = useQueries(
     Object.keys(chains).map((chain) => {
       return {
@@ -99,20 +110,19 @@ export default function UserNFTs() {
       dispatch(viewIsNotLoading());
 
       // check for any NFTs
-
-      interface IChain {
-        count: number;
-        loaded: boolean;
-        name: string;
-        order: number;
-        // data
+      interface ChainProps {
+        name?: string;
+        loaded?: boolean;
+        count?: number;
+        order?: number;
       }
 
       setNoNfts(
         Object.values(queries).every((collection) => {
           //console.log('Test', collection.data);
           // collection.data = {eth: {}}
-          const chain: IChain = Object.values(collection.data)[0];
+          const chain: ChainProps = Object.values(collection.data)[0];
+          //const chain = Object.values(collection.data)[0];
           return chain.count === 0;
         })
       );
@@ -146,6 +156,7 @@ export default function UserNFTs() {
             data,
             loaded: true,
             count: nftCount,
+            test: 'type',
           },
         };
       })

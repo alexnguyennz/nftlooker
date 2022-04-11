@@ -6,10 +6,6 @@ export default function NFTCollection(props) {
   const collection = props.collection;
   const chain = props.chain;
 
-  //console.log('chain', props.chain);
-
-  //console.log(collection);
-
   return (
     <section className={`space-y-2`}>
       <h3 className="text-left text-lg font-semibold">

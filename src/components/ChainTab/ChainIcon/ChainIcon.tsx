@@ -53,7 +53,11 @@ function Fantom() {
   );
 }
 
-export default function ChainIcon(props) {
+interface Props {
+  chain: string;
+}
+
+export default function ChainIcon(props: Props) {
   switch (props.chain) {
     case 'eth':
       return <Ethereum />;
@@ -66,11 +70,8 @@ export default function ChainIcon(props) {
     case 'fantom':
       return <Fantom />;
     case 'ropsten':
-      return <Ethereum />;
     case 'rinkeby':
-      return <Ethereum />;
     case 'goerli':
-      return <Ethereum />;
     case 'kovan':
       return <Ethereum />;
     case 'mumbai':

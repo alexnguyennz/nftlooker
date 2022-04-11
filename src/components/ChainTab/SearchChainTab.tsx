@@ -1,8 +1,23 @@
 import { Tab, Tooltip, Spinner } from '@chakra-ui/react';
 
-import ChainIcon from '../ChainIcon/ChainIcon';
+import ChainIcon from './ChainIcon/ChainIcon';
 
-export default function SearchChainTab(props) {
+interface ChainProps {
+  name: string;
+  abbr: string;
+  loaded: boolean;
+  count: number;
+  order: number;
+  total: number;
+}
+
+interface Props {
+  chain: ChainProps;
+  idx: number;
+  key: React.Key;
+}
+
+export default function SearchChainTab(props: Props) {
   const chain = props.chain;
 
   const nftCount = chain.total;

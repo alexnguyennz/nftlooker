@@ -1,8 +1,10 @@
+import { UseToastOptions } from '@chakra-ui/react';
+
 export default function toast(
   toast,
-  toastStatus,
-  toastTitle,
-  toastDescription
+  toastStatus: string,
+  toastTitle: string,
+  toastDescription?: string
 ) {
   const toastId = 'toast';
 

@@ -6,6 +6,7 @@ const chains = {
     data: [],
     loaded: false,
     count: 0,
+    total: 0,
   },
   matic: {
     name: 'Polygon',
@@ -14,6 +15,7 @@ const chains = {
     data: [],
     loaded: false,
     count: 0,
+    total: 0,
   },
   binance: {
     name: 'Binance',
@@ -22,6 +24,7 @@ const chains = {
     data: [],
     loaded: false,
     count: 0,
+    total: 0,
   },
   avalanche: {
     name: 'Avalanche',
@@ -30,6 +33,7 @@ const chains = {
     data: [],
     loaded: false,
     count: 0,
+    total: 0,
   },
   fantom: {
     name: 'Fantom',
@@ -38,6 +42,7 @@ const chains = {
     data: [],
     loaded: false,
     count: 0,
+    total: 0, // may be issue
   },
 };
 

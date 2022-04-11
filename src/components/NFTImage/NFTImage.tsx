@@ -101,6 +101,8 @@ export default function NFTImage(props) {
             // poster="poster.webp"
             shadow-intensity="1"
             autoplay
+            width="100%"
+            height="100%"
           ></model-viewer>
           <div className="mt-3 text-right">
             <Button onClick={fullScreen} colorScheme="blue">
