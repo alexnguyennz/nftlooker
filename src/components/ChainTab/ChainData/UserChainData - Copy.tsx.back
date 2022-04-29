@@ -15,6 +15,7 @@ import { Button, Alert, AlertIcon } from '@chakra-ui/react';
 import { ChevronDownIcon, AddIcon, ExternalLinkIcon } from '@chakra-ui/icons';
 
 // Components
+import NFTCollection from '../../NFTCollection/NFTCollection';
 import NFTCard from '../../NFTCard/NFTCard';
 
 interface ChainProps {
@@ -40,12 +41,14 @@ interface Props {
   //onChainTabSet: onChainTabSet
 }
 
-function SearchChainData(props) {
+function UserChainData(props) {
   // State
   const dispatch = useDispatch();
   const settings = useSelector(settingsState);
 
   const chain = props.chain;
+
+  console.log("settings", settings)
 
   const fetchNfts = async ({ pageParam = 0 }) => {
     // reset UI state
@@ -64,16 +67,18 @@ function SearchChainData(props) {
     });
 
     const { data } = await axios(
-      `/api/nfts/search/chain/${chain}/q/${props.q}/filter/${settings.searchFilter}/limit/${settings.searchLimit}/offset/` +
+      `/api/nfts/chain/${chain}/address/${props.wallet}/limit/${settings.walletLimit}/offset/` +
         pageParam
     );
 
     //console.log('response', data);
 
-    const nftCount = Object.values(data).flat().length;
+    const nftCount = Object.values(data.data).flat().length;
 
     // React Query
-    const offset = pageParam + settings.searchLimit; // manually increase each "page" by the limit
+    const offset = pageParam + settings.walletLimit; // manually increase each "page" by the limit
+
+    console.log("data", data.data)
 
     return {
       [chain]: {
@@ -103,19 +108,20 @@ function SearchChainData(props) {
     // } = useInfiniteQuery('nftMetadata', fetchNfts, {
     //} = useInfiniteQuery(['search', props.q, props.chain], fetchNfts, {
   } = useInfiniteQuery(
-    ['search', props.location, props.q, props.chain],
+    ['userNfts', props.location, props.wallet, props.chain],
     fetchNfts,
     {
       getNextPageParam: (lastPage) => {
-
-        console.log("lastPage", lastPage)
-        if (Object.keys(lastPage[chain].data).length > 0) return lastPage.offset; // only allow up to 100 pages / 500 offsets
+        console.log("lastPage", lastPage[chain].data.cursor)
+        if (Object.keys(lastPage[chain].data.data).length > 0) return lastPage.offset;
+        //return lastPage[chain].data.cursor
       },
     }
   );
 
   useEffect(() => {
     if (data) {
+
       const nftTotals = data.pages.reduce((acc, element) => {
         const nftCount = Object.values(element)[0].count;
 
@@ -136,24 +142,20 @@ function SearchChainData(props) {
     }
   }, [data]);
 
-  if (!isSuccess) {
-    return null;
-  }
+  if (!isSuccess) return null;
 
   return (
     <>
       <div className="grid gap-5">
-        <section className={`space-y-2`}>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 3xl:grid-cols-7 4xl:grid-cols-8 gap-10">
-            {data.pages.map((page) => (
-              <React.Fragment key={page.offset}>
-                {page[chain].data.map((nft, idx) => (
-                  <NFTCard key={idx} nft={nft} chain={chain} />
-                ))}
-              </React.Fragment>
-            ))}
-          </div>
-        </section>
+        {data.pages.map((page) => {
+          return Object.keys(page[chain].data.data).map((collection) => (
+            <NFTCollection
+              key={collection}
+              collection={page[chain].data.data[collection]}
+              chain={chain}
+            />
+          ));
+        })}
       </div>
 
       <div className="text-center mt-5">
@@ -168,12 +170,12 @@ function SearchChainData(props) {
             colorScheme="blue"
             lineHeight="1"
           >
-            Load More +{settings.searchLimit}
+            Load More +{settings.walletLimit}
           </Button>
         ) : (
           <Alert status="error">
             <AlertIcon />
-            Limit reached.
+            No more NFTs.
           </Alert>
         )}
       </div>
@@ -181,4 +183,4 @@ function SearchChainData(props) {
   );
 }
 
-export default React.memo(SearchChainData);
+export default React.memo(UserChainData);

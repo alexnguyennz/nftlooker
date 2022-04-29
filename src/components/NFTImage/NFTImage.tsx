@@ -20,16 +20,17 @@ import toast from '../../components/Toast/Toast';
 import ModelViewer from '@google/model-viewer';
 
 // Image Transformation
+//import generateNftUrl from '../../utils/generateNftUrl';
 import generateNftUrl from '../../utils/generateNftUrl';
 import LoadingSpinner from '../LoadingSpinner/LoadingSpinner';
 
 export default function NFTImage(props) {
-  //const nft = props.nft;
-  //const image = props.image;
 
   const settings = useSelector(settingsState);
 
   const { chain, nft } = props;
+
+  // console.log("props", props)
 
   const [image, setImage] = useState('');
   const [nftContentType, setNftContentType] = useState('');
@@ -39,13 +40,20 @@ export default function NFTImage(props) {
 
   useEffect(() => {
     async function generateUrl() {
-      const { image, contentType } = await generateNftUrl(
+      /* const { image, contentType } = await generateNftUrl(
         nft.metadata.image,
         '1000'
-      );
+      ); */
+      try {
+        const { image, contentType } = generateNftUrl(nft.metadata.image, nft.metadata.content_type, nft.metadata.content_length, '1000');
 
-      setImage(image);
-      setNftContentType(contentType);
+        setImage(image);
+        setNftContentType(contentType);
+
+        
+      } catch (err) {
+        console.log(err);
+      }
     }
 
     generateUrl();
@@ -142,7 +150,8 @@ export default function NFTImage(props) {
           rel="noopener noreferrer nofollow"
         >
           <Image
-            src={image}
+            src={nft.metadata.original_image} // sometimes optimised image doesn't work
+            //src={image}
             fallback={<LoadingSpinner />}
             className="mx-auto w-full"
           />

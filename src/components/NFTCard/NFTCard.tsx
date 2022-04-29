@@ -6,7 +6,7 @@ import { settingsState } from '../../state/settings/settingsSlice';
 
 import { Link } from 'react-router-dom';
 
-import { Button } from '@chakra-ui/react';
+import { Button, tokenToCSSVar } from '@chakra-ui/react';
 import { useColorMode, useColorModeValue } from '@chakra-ui/react';
 import { Image } from '@chakra-ui/react';
 
@@ -48,18 +48,18 @@ function NFTImage(props) {
 
   const { chain, nft } = props;
 
-  //console.log('props', nft);
-
   const [image, setImage] = useState('');
   const [nftContentType, setNftContentType] = useState('');
 
   useEffect(() => {
     async function generateUrl() {
       try {
-        const { image, contentType } = await generateNftUrl(
+        /* const { image, contentType } = await generateNftUrl(
           nft.metadata.image,
           '250'
-        );
+        ); */
+
+        const { image, contentType } = generateNftUrl(nft.metadata.image, nft.metadata.content_type, nft.metadata.content_length, '250', settings.largenfts);
 
         setImage(image);
         setNftContentType(contentType);
@@ -74,7 +74,7 @@ function NFTImage(props) {
   //if (!image) return <LoadingSpinner />;
 
   switch (nftContentType) {
-    case 'image/gif':
+    // case 'image/gif':
     case 'video/mp4':
     case 'video/webm':
       return (
@@ -202,7 +202,8 @@ export default function NFTCard(props: Props) {
 
   return (
     <>
-      <div className="flex flex-col max-w-sm ">
+    {/* <div className="flex flex-col max-w-sm "> */}
+      
         <div
           // className={`mt-auto overflow-hidden rounded-lg shadow-md transition-all hover:-translate-y-2 ${colorModeBg}`}
           className={` mt-auto rounded-b-lg shadow-md transition-all hover:-translate-y-2 ${colorModeBg}`}
@@ -214,9 +215,9 @@ export default function NFTCard(props: Props) {
 
           {/* bg-gray-50 border-t border-gray-100 */}
           <div
-            className={`p-3 mt-auto space-y-2 border-t rounded-b-lg ${colorModeCard}`}
+            className={`p-3 mt-auto border-t rounded-b-lg ${colorModeCard}`}
           >
-            <h3 className="text-center font-semibold">
+            <h3 className="text-center font-bold text-lg">
               <Link
                 to={`/${chain}/collection/${nft.token_address}/nft/${nft.token_id}`}
               >
@@ -224,6 +225,7 @@ export default function NFTCard(props: Props) {
                 {nft.metadata && nft.metadata.name}
               </Link>
             </h3>
+            <h4 className="text-center text-xs"><Link to={`/${chain}/collection/${nft.token_address}`}>{nft.name ? nft.name : `Unnamed Collection`}</Link></h4>
             <div className="flex justify-between items-center">
               <Button size="xs">
                 <Link
@@ -233,7 +235,7 @@ export default function NFTCard(props: Props) {
                 </Link>
               </Button>
               {/* {nft.metadata.original_image && ( */}
-              {nft.metadata.original_image && (
+              {nft.metadata.original_image ? (
                 <Tooltip label="Open original link" openDelay={750} hasArrow>
                   <a
                     // href={nft.metadata.original_image}
@@ -245,11 +247,23 @@ export default function NFTCard(props: Props) {
                     <ExternalLinkIcon boxSize={4} />
                   </a>
                 </Tooltip>
-              )}
+              ) : nft.token_uri ? (
+                <Tooltip label="Open original link" openDelay={750} hasArrow>
+                  <a
+                    // href={nft.metadata.original_image}
+                    href={nft.token_uri}
+                    target="_blank"
+                    rel="noreferrer noopener nofollow"
+                    className="z-0"
+                  >
+                    <ExternalLinkIcon boxSize={4} />
+                  </a>
+                </Tooltip> )
+              : <></> }
             </div>
           </div>
         </div>
-      </div>
+      
     </>
   );
 }

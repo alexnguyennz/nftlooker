@@ -4,7 +4,7 @@ import { QueryKey, UseQueryOptions, UseQueryResult } from 'react-query';
 // Wallet Connection
 declare global {
   interface Window {
-    ethereum: MetaMaskInpageProvider;
+    ethereum?: import('ethers').providers.ExternalProvider & MetaMaskInpageProvider;
   }
 }
 

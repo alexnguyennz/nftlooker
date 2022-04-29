@@ -19,7 +19,7 @@ interface Props {
 
 export default function ChainTab(props: Props) {
   const chain = props.chain;
-
+  
   const nftCount = chain.total;
 
   return (

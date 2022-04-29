@@ -9,46 +9,26 @@ import {
   viewIsLoading,
   viewIsNotLoading,
 } from '../../state/loading/loadingSlice';
-import { testnetsState } from '../../state/testnets/testnetsSlice';
+// import { testnetsState } from '../../state/testnets/testnetsSlice';
 import { changeTab } from '../../state/tab/tabSlice';
 import { changeChainTab, chainTabState } from '../../state/tab/tabSlice';
-import {
-  searchLimitState,
-  searchFilterState,
-} from '../../state/search/searchSlice';
 
 // Data
-import axios from 'axios';
-import { useQueries, useInfiniteQuery, useQuery } from 'react-query';
 import chains from '../../data';
 
 // Components
 import NoNFTs from '../../components/NoNFTs/NoNFTs';
-import SearchChainTab from '../../components/ChainTab/SearchChainTab';
-
+import ChainTab from '../../components/ChainTab/ChainTab';
 import SearchChainData from '../../components/ChainTab/ChainData/SearchChainData';
 
 import {
-  useToast,
   Tabs,
   TabList,
   TabPanels,
-  Tab,
   TabPanel,
-  Menu,
-  MenuButton,
-  MenuList,
-  MenuItem,
-  MenuItemOption,
-  MenuGroup,
-  MenuOptionGroup,
-  MenuDivider,
-  Button,
-  Alert,
-  AlertIcon,
 } from '@chakra-ui/react';
 
-export function SearchNFTs() {
+export default function SearchNFTs() {
   // React Router
   const params = useParams();
   const location = useLocation();
@@ -93,9 +73,10 @@ export function SearchNFTs() {
       // check for any NFTs
       if (Object.values(chainsState).every((chain) => !chain.total)) {
         setNoNfts(true);
-      }
+      } 
     } else {
       dispatch(viewIsLoading());
+      setNoNfts(false);
     }
   }, [chainsState]);
 
@@ -121,7 +102,7 @@ export function SearchNFTs() {
         <TabList>
           <div className="flex items-center">
             {Object.keys(chainsState).map((chain, idx) => (
-              <SearchChainTab chain={chainsState[chain]} idx={idx} key={idx} />
+              <ChainTab chain={chainsState[chain]} idx={idx} key={idx} />
             ))}
           </div>
         </TabList>

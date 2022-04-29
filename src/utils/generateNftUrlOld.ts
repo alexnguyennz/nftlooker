@@ -9,12 +9,21 @@ import {
   DEFAULT_CLOUDINARY_IMG,
 } from './image';
 
-export default function generateNftUrl(image: string, contentType: string, contentLength: string, size: string, showLarge?: boolean) {
+export default async function generateNftUrl(image: string, size: string) {
   // fetch head only to get Content-Type to render NFT appropriately
-  
+  return await axios
+    .head(image)
+    .then((response) => {
+      // get contentType
+      let contentType = response.headers['content-type'];
+      const contentLength = response.headers['content-length'];
+
+      //console.log('contentType', contentType);
+
+      console.log('test', image);
 
       if (contentType === 'image/gif') {
-        
+        console.log('gif', image);
         // Cloudinary
         // https://res.cloudinary.com/gladius/image/fetch/h_250,w_250/f_mp4/d_no-image_lmfa1g.png/https://www.thehighapesclub.com/assets/nft/invite/THCInvite.gif
         // Cloudinary 10MB Limit
@@ -26,11 +35,13 @@ export default function generateNftUrl(image: string, contentType: string, conte
           image = `https://res.cloudinary.com/gladius/image/fetch/h_${size},w_${size}/f_mp4/d_no-image_lmfa1g.png/${image}`;
 
           contentType = 'video/mp4'; // gifs will be outputted as video/mp4
-        } else if (!showLarge) {
+        } else {
           contentType = 'image/png';
+
           image = '/img/no-video.png';
         }
 
+        // ImageKit
         /* setImage(
           imagekit.url({
             src: `${process.env.REACT_APP_IMAGEKIT_API_URL}/${image}`,
@@ -46,6 +57,8 @@ export default function generateNftUrl(image: string, contentType: string, conte
       } else if (contentType === 'video/mp4' || contentType === 'video/webm') {
         // if (contentLength < 10250000) {
 
+        console.log('video', image);
+
         if (Number(contentLength) < 100000000) {
           const stripped = image.replace(/^.*:\/\//i, '');
 
@@ -59,11 +72,14 @@ export default function generateNftUrl(image: string, contentType: string, conte
 
           //setImage(cloudinaryLink);
           image = cloudinaryLink;
-        } else if (!showLarge) {
+        } else {
           contentType = 'image/png';
+
+          //setImage('/img/no-video.png');
           image = '/img/no-video.png';
         }
 
+        // ImageKit
 
         /* setImage(
           imagekit.url({
@@ -81,30 +97,32 @@ export default function generateNftUrl(image: string, contentType: string, conte
         contentType !== 'model/gltf-binary' &&
         contentType !== 'image/svg+xml'
       ) {
-        
-        if (Number(contentLength) < 100000000) {
-          image = imagekit.url({
-            src: `${process.env.REACT_APP_IMAGEKIT_API_URL}/${image}`,
-            transformation: [
-              {
-                height: size,
-                width: size,
-                defaultImage: DEFAULT_IMAGEKIT_IMG,
-              },
-            ],
-          });
-        } else if (!showLarge) {
-          contentType = 'image/png';
-          image = '/img/no-image.png';
-        }
+        // ImageKit
 
-
-
+        image = imagekit.url({
+          src: `${process.env.REACT_APP_IMAGEKIT_API_URL}/${image}`,
+          transformation: [
+            {
+              height: size,
+              width: size,
+              defaultImage: DEFAULT_IMAGEKIT_IMG,
+            },
+          ],
+        });
       }
 
       return {
         image,
         contentType,
       };
-    
+    })
+    .catch((err) => {
+      // console.log(err);
+
+      // if content-type fetch isn't successful, return a fallback
+      return {
+        image,
+        contentType: 'image/png',
+      };
+    });
 }

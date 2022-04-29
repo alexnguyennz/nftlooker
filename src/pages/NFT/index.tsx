@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import { Link, useParams } from 'react-router-dom';
+import { Link as RouterLink, useParams } from 'react-router-dom';
 
 // Redux
 import { useDispatch } from 'react-redux';
@@ -14,6 +14,15 @@ import axios from 'axios';
 import { useQuery } from 'react-query';
 
 // Chakra UI
+import { useColorModeValue, Button, Tooltip, Link, Table,
+  Thead,
+  Tbody,
+  Tfoot,
+  Tr,
+  Th,
+  Td,
+  TableCaption,
+  TableContainer, } from '@chakra-ui/react';
 import { ArrowBackIcon, ExternalLinkIcon } from '@chakra-ui/icons';
 
 // ModelViewer
@@ -26,9 +35,19 @@ import NFTImage from '../../components/NFTImage/NFTImage';
 import truncateAddress from '../../utils/ellipseAddress';
 import { explorer } from '../../utils/chainExplorer';
 
+import ReactMarkdown from 'react-markdown';
+import { stripHtml } from "string-strip-html";
+
+
 export default function NFT() {
   const params = useParams(); // React Router
   const dispatch = useDispatch(); // React Redux
+
+  const colorModeBg = useColorModeValue('bg-white', 'bg-gray-800');
+  const colorModeCard = useColorModeValue(
+    'bg-gray-50 border-gray-100',
+    'bg-gray-700 border-gray-800'
+  );
 
   // React Query
   const { isLoading, error, data, isFetching, isStale } = useQuery(
@@ -51,6 +70,118 @@ export default function NFT() {
   if (isLoading) return null;
 
   return (
+    <>
+      <section className={`grid grid-cols-1 md:grid-cols-2 gap-5 p-5 rounded-lg shadow-md ${colorModeBg}`}>
+        <div className="p-10 flex content-center">
+          <NFTImage nft={data} />
+        </div>
+        <div>
+          <div className="float-right">
+            {data.metadata.original_image ? (
+              <Tooltip label="Open original link" openDelay={750} hasArrow>
+                <Link href={data.metadata.original_image} isExternal>
+                  <ExternalLinkIcon boxSize={4} />
+                </Link>
+              </Tooltip>
+            ) : data.token_uri ? (
+              <Tooltip label="Open original link" openDelay={750} hasArrow>
+                <Link href={data.token_uri} isExternal>
+                  <ExternalLinkIcon boxSize={4} />
+                </Link>
+              </Tooltip> )
+            : <></> }
+          </div>
+          <h3 className="pb-5 text-4xl font-bold">{data.metadata.name}</h3>
+
+          <div className="space-y-5">
+            <div>
+              <p>DESCRIPTION</p>
+              <span className="text-xl">
+                {data.metadata.description && <ReactMarkdown>{stripHtml(data.metadata.description).result}</ReactMarkdown>}
+              </span>
+            </div>
+
+            {data.metadata.attributes && (
+              <div>
+                <p>ATTRIBUTES</p>
+                <div className="text-xl">
+                <TableContainer whiteSpace="normal">
+                  <Table variant="">
+                    {data.metadata.attributes.map((attribute, idx) => {
+                      const values = Object.values(attribute);
+
+                      return (
+                        <Tr>
+                          <Td>{values[0]}</Td>
+                          <Td>{values[1]}</Td>
+                        </Tr>
+                      );
+                    })}
+                    </Table>
+                  </TableContainer>
+                </div>
+              </div>
+            )}
+
+            { data.metadata.external_url && (
+              <div>
+                <p>External URL</p>
+                <span className="text-xl">
+                  <Link href={data.metadata.external_url} isExternal>
+                    {data.metadata.external_url} <ExternalLinkIcon w="4" />
+                  </Link>
+                </span>
+              </div>
+            ) }
+
+            <div>
+              <p>TOKEN ID</p>
+              <span className="text-xl">
+                <Link href={`https://${explorer(params.chain)}/token/${data.token_address}?a=${data.token_id}`} isExternal>
+                  <span className="flex items-center space-x-3">
+                    <span>{truncateAddress(data.token_id)}</span>
+                    <ExternalLinkIcon w="4" />
+                  </span>
+                </Link>
+              </span>
+            </div>
+
+            <div>
+              <p>COLLECTION</p>
+              <span className="text-2xl space-x-3">
+                <Button>
+                <RouterLink
+                  to={`/${params.chain}/collection/${data.token_address}`}
+                >
+                  {data.name}
+                </RouterLink>
+                </Button>
+                <Link href={`https://${explorer(params.chain)}/address/${data.token_address}`} isExternal>
+                  <ExternalLinkIcon w="4" />
+                </Link>
+              </span>
+            </div>
+
+            <div>
+              <p>OWNER</p>
+              <span className="text-2xl space-x-3">
+                <Button><RouterLink to={`/${data.owner_of}`}>View NFTs</RouterLink></Button>
+                <Link href={`https://${explorer(params.chain)}/address/${data.owner_of}`} isExternal>
+                  <ExternalLinkIcon w="4" />
+                </Link>
+              </span>
+            </div>
+          </div>
+        </div>
+        
+      </section>
+    </>
+  );
+}
+
+
+/*
+return (
     <>
       <div className="space-y-10">
         <section className="grid grid-cols 1 md:grid-cols-2 gap-5">
@@ -173,4 +304,4 @@ export default function NFT() {
       </div>
     </>
   );
-}
+*/

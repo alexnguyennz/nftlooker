@@ -61,9 +61,9 @@ export default function ChainIcon(props: Props) {
   switch (props.chain) {
     case 'eth':
       return <Ethereum />;
-    case 'matic':
+    case 'polygon':
       return <Polygon />;
-    case 'binance':
+    case 'bsc':
       return <Binance />;
     case 'avalanche':
       return <Avalanche />;

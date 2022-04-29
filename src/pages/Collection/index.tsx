@@ -2,20 +2,21 @@ import React, { useEffect, useState } from 'react';
 
 import { useParams } from 'react-router-dom';
 
-// Redux
+// State
 import { useDispatch, useSelector } from 'react-redux';
 import {
   viewIsLoading,
   viewIsNotLoading,
   loadingState,
 } from '../../state/loading/loadingSlice';
+import { settingsState } from '../../state/settings/settingsSlice';
 
 // React Query
 import axios from 'axios';
 import { useQueries, useInfiniteQuery } from 'react-query';
 
 // Chakra UI
-import { Button, Alert, AlertIcon } from '@chakra-ui/react';
+import { useColorModeValue, Link, Button, Alert, AlertIcon } from '@chakra-ui/react';
 import { ChevronDownIcon, AddIcon, ExternalLinkIcon } from '@chakra-ui/icons';
 
 // Components
@@ -26,29 +27,10 @@ import NFTImage from '../../components/NFTImage/NFTImage';
 import truncateAddress from '../../utils/ellipseAddress';
 import { explorer, chainName } from '../../utils/chainExplorer';
 
-export function Collection() {
+export default function Collection() {
   const params = useParams(); // React Router
   const dispatch = useDispatch(); // React Redux
   const loading = useSelector(loadingState);
-
-  /* useEffect(() => {
-    test();
-  }, []);
-
-  async function test() {
-    const { data } = await axios.get(
-      `https://deep-index.moralis.io/api/v2/nft/0xbc4ca0eda7647a8ab7c2061c2e118a18a936f13d/owners?offset=1000&limit=500`,
-      {
-        headers: {
-          accept: 'application/json',
-          'X-API-KEY':
-            'xf4Tfp3RHFT92gIv1tjnTs0GR6nzd734ZgKK3MqGFGSWYA4fKdrfhk8dMr9vFlkB',
-        },
-      }
-    );
-
-    console.log('test data', data);
-  } */
 
   // React Query
   const queries = useQueries([
@@ -65,7 +47,7 @@ export function Collection() {
       queryKey: [params.chain, params.contractAddress, 'nfts'],
       queryFn: async () => {
         const { data } = await axios(
-          `/api/collection/nfts/chain/${params.chain}/address/${params.contractAddress}/limit/1/offset/0`
+          `/api/collection/nfts/chain/${params.chain}/address/${params.contractAddress}/limit/1/`
         );
         return data;
       },
@@ -85,13 +67,14 @@ export function Collection() {
     }
   }, [queries]);
 
+  const colorModeBg = useColorModeValue('bg-white', 'bg-gray-800');
+
   return (
-    <>
-      <div className="space-y-10">
-        <section className="grid grid-cols 1 md:grid-cols-2 gap-5">
-          <div className="mx-auto w-full md:w-3/4">
+    <div className="space-y-10">
+      <section className={`grid grid-cols-1 md:grid-cols-2 gap-5 p-5 rounded-lg shadow-md ${colorModeBg}`}>
+        <div className="p-10 flex content-center">
             {!queries[1].isFetching ? (
-              <CollectionThumbnail result={queries[1].data[0]} />
+              <CollectionThumbnail result={queries[1].data.data[0]} />
             ) : (
               <div className="flex items-center justify-center">
                 <img src="/img/loading.svg" />
@@ -107,10 +90,9 @@ export function Collection() {
               </div>
             )}
           </div>
-        </section>
-        <CollectionNfts />
-      </div>
-    </>
+      </section>
+      <CollectionNfts />
+    </div>
   );
 }
 
@@ -139,57 +121,48 @@ export function CollectionMetadata(props) {
 
   return (
     <>
-      <h3 className="pb-2 border-b border-gray-500 text-4xl font-bold ">
-        {data.name}
-      </h3>
+      <h3 className="pb-4 text-4xl font-bold">{data.name}</h3>
 
       <div className="space-y-5">
-        <p>
-          CHAIN
-          <br />
-          <span className="text-2xl">{chainName(params.chain)}</span>
-        </p>
+        <div>
+          <p>CHAIN</p>
+          <span className="text-xl">{chainName(params.chain)}</span>
+        </div>
 
-        <p>
-          CONTRACT
-          <br />
-          <span className="text-2xl">
-            <a
-              href={`https://${explorer(params.chain)}/address/${
-                data.token_address
-              }`}
-              target="_blank"
-              rel="noreferrer noopener nofollow"
-            >
-              {truncateAddress(data.token_address)}
-              {` `}
-              <ExternalLinkIcon />
-            </a>
+        <div>
+          <p>CONTRACT</p>
+          <span className="text-xl">
+            <Link href={`https://${explorer(params.chain)}/address/${data.token_address}`} isExternal>
+              <span className="flex items-center space-x-3">
+                <span>{truncateAddress(data.token_address)}</span>
+                <ExternalLinkIcon w="4" />
+              </span>
+            </Link>
           </span>
-        </p>
+        </div>
 
-        <p>
-          SYMBOL / TICKER
-          <br />
-          <span className="text-2xl">{data.symbol}</span>
-        </p>
+        <div>
+          <p>SYMBOL / TICKER</p>
+          <span className="text-xl">{data.symbol}</span>
+        </div>
       </div>
     </>
   );
 }
 
 export function CollectionNfts() {
+
+  const settings = useSelector(settingsState);
+
   const params = useParams(); // React Router
 
-  const fetchNfts = async ({ pageParam = 0 }) => {
+  const fetchNfts = async ({ pageParam = "" }) => {
     const { data } = await axios(
-      `/api/collection/nfts/chain/${params.chain}/address/${params.contractAddress}/limit/5/offset/` +
+      `/api/collection/nfts/chain/${params.chain}/address/${params.contractAddress}/limit/${settings.walletLimit}/` +
         pageParam
     );
 
-    const offset = pageParam + 5; // manually increase each "page"
-
-    return { data, offset };
+    return data;
   };
 
   const [nfts, setNfts] = useState([]);
@@ -205,11 +178,8 @@ export function CollectionNfts() {
     isSuccess,
     fetchNextPage,
     hasNextPage,
-    // } = useInfiniteQuery('nftMetadata', fetchNfts, {
   } = useInfiniteQuery([params.chain, params.contractAddress], fetchNfts, {
-    getNextPageParam: (lastPage) => {
-      if (lastPage.offset <= 500) return lastPage.offset; // only allow up to 100 pages / 500 offsets
-    },
+    getNextPageParam: (lastPage) => lastPage.cursor,
   });
 
   useEffect(() => {
@@ -217,7 +187,8 @@ export function CollectionNfts() {
     if (data) {
       const page = data.pages.length - 1;
 
-      // console.log('test', data.pages[page].data);
+      //const nfts: any = Object.values(data.pages[page].data)[0]
+      //const parsedNfts = nfts.map((nft) => {
 
       const parsedNfts = data.pages[page].data.map((nft) => {
         const metadata = JSON.parse(nft.metadata);
@@ -255,7 +226,7 @@ export function CollectionNfts() {
         <>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-10">
             {data.pages.map((page) => (
-              <React.Fragment key={page.offset}>
+              <React.Fragment key={page.cursor}>
                 {page.data.map((nft, idx) => (
                   <NFTCard
                     key={nft.token_address + nft.token_id + idx}
@@ -268,7 +239,7 @@ export function CollectionNfts() {
           </div>
 
           <div className="text-center mt-5">
-            {hasNextPage ? (
+            {hasNextPage && (
               <Button
                 type="submit"
                 onClick={() => fetchNextPage()}
@@ -279,13 +250,8 @@ export function CollectionNfts() {
                 colorScheme="blue"
                 rightIcon={<ChevronDownIcon />}
               >
-                More
+                Load More +{settings.walletLimit}
               </Button>
-            ) : (
-              <Alert status="error">
-                <AlertIcon />
-                Limit reached.
-              </Alert>
             )}
           </div>
         </>

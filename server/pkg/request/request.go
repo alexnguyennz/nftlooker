@@ -2,6 +2,7 @@ package request
 
 import (
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -12,6 +13,7 @@ func Request(url string) (string, error) {
 
 	resp, err := http.Get(url)
 	if err != nil {
+		fmt.Println("url", url)
 		return url, errors.New("Get() response error")
 	}
 
@@ -28,9 +30,8 @@ func Request(url string) (string, error) {
 	return data, nil
 }
 
-
 func APIRequest(url string) (string, error) {
-	req, err := http.NewRequest("GET", os.Getenv("MORALIS_API_URL") + url, nil)
+	req, err := http.NewRequest("GET", os.Getenv("MORALIS_API_URL")+url, nil)
 	if err != nil {
 		log.Fatal(err)
 	}

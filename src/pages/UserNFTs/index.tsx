@@ -1,5 +1,4 @@
-// // @ts-nocheck
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 // Router
 import { useLocation, useParams } from 'react-router-dom';
@@ -10,66 +9,38 @@ import {
   viewIsLoading,
   viewIsNotLoading,
 } from '../../state/loading/loadingSlice';
+// import { testnetsState } from '../../state/testnets/testnetsSlice';
+import { changeTab } from '../../state/tab/tabSlice';
 import { changeChainTab, chainTabState } from '../../state/tab/tabSlice';
 
 // Data
-import { useQueries, UseQueryResult, UseQueryOptions } from 'react-query';
-import axios from 'axios';
-import chains from '../../data'; // placeholder
+import chains from '../../data';
 
 // Components
 import NoNFTs from '../../components/NoNFTs/NoNFTs';
-import ChainTab from '../../components/ChainTab/ChainTab';
-import ChainData from '../../components/ChainTab/ChainData/ChainData';
+import ChainTab from '../../components/ChainTab/UserChainTab';
+import UserChainData from '../../components/ChainTab/ChainData/UserChainData';
 
-// Chakra UI
 import {
-  useToast,
   Tabs,
   TabList,
   TabPanels,
   TabPanel,
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
-  PopoverHeader,
-  PopoverBody,
-  PopoverArrow,
-  PopoverCloseButton,
 } from '@chakra-ui/react';
-import { EmailIcon } from '@chakra-ui/icons';
-
-import { FaTwitter, FaFacebook } from 'react-icons/fa';
-
-import {
-  EmailShareButton,
-  FacebookShareButton,
-  TwitterShareButton,
-} from 'react-share';
-
-import toast from '../../components/Toast/Toast';
 
 export default function UserNFTs() {
-  // Router
+  // React Router
   const params = useParams();
   const location = useLocation();
 
   // State
   const dispatch = useDispatch();
   const chainTab = useSelector(chainTabState);
-  let chainTabSet = false;
+  const [chainTabSet, setChainTabSet] = useState(false);
+
+  const [chainsState, setChainsState] = useState(chains);
 
   const [noNfts, setNoNfts] = useState(false);
-
-  const toastInstance = useToast();
-
-  const [, setToggle] = useState(true);
-  useEffect(() => {
-    const id = setInterval(() => {
-      setToggle((toggle) => !toggle);
-    }, 3000);
-    return () => clearInterval(id);
-  }, []);
 
   useEffect(() => {
     document.title = `NFT Looker. ${params.walletAddress}`;
@@ -80,155 +51,33 @@ export default function UserNFTs() {
     };
   }, []);
 
-  interface ChainProps {
-    name: string;
-    loaded: boolean;
-    count: number;
-    order: number;
-  }
-
-  interface Chain {
-    [key: string]: ChainProps;
-  }
-
-  const queries = useQueries(
-    Object.keys(chains).map((chain) => {
-      return {
-        queryKey: [location, params.walletAddress, chain], // location
-        queryFn: ({ signal }) => fetchNfts(chain, signal),
-        placeholderData: {
-          [chain]: chains[chain],
-        },
-      };
-    })
-  );
+  useEffect(() => {
+    //console.log('current chainTab', chainTab);
+  }, [chainTab]);
 
   useEffect(() => {
-    if (queries.some((query) => query.isFetching)) {
-      dispatch(viewIsLoading());
-    } else {
+    //console.log('chains state', chainsState);
+
+    if (Object.values(chainsState).every((chain) => chain.loaded)) {
       dispatch(viewIsNotLoading());
 
       // check for any NFTs
-      interface ChainProps {
-        name?: string;
-        loaded?: boolean;
-        count?: number;
-        order?: number;
-      }
-
-      setNoNfts(
-        Object.values(queries).every((collection) => {
-          //console.log('Test', collection.data);
-          // collection.data = {eth: {}}
-          const chain: ChainProps = Object.values(collection.data)[0];
-          //const chain = Object.values(collection.data)[0];
-          return chain.count === 0;
-        })
-      );
+      if (Object.values(chainsState).every((chain) => !chain.total)) {
+        setNoNfts(true);
+      } 
+    } else {
+      dispatch(viewIsLoading());
+      setNoNfts(false);
     }
-  }, [queries]);
+  }, [chainsState]);
 
-  async function fetchNfts(chain: string, signal: AbortSignal) {
-    // reset UI
-    dispatch(changeChainTab(-1));
-    setNoNfts(false);
+  function handleChainState(data) {
+    setChainsState((prevState) => ({ ...prevState, [data.abbr]: data }));
 
-    return await axios(
-      `/api/nfts/chain/${chain}/address/${params.walletAddress}`,
-      {
-        signal,
-      }
-    )
-      .then(({ data }) => {
-        const nftCount = Object.values(data).flat().length;
-
-        // set the chain tab to one that has NFTs and only set it once i.e. the first loaded tab
-        if (nftCount > 0 && !chainTabSet) {
-          dispatch(changeChainTab(chains[chain].order));
-          chainTabSet = true;
-        }
-
-        return {
-          [chain]: {
-            name: chains[chain]['name'],
-            order: chains[chain]['order'],
-            data,
-            loaded: true,
-            count: nftCount,
-            test: 'type',
-          },
-        };
-      })
-      .catch((err) => {
-        if (err.message == 'canceled') {
-          toast(toastInstance, 'error', 'Cancelled.');
-        } else if (err.message == 'Request failed with status code 500') {
-          toast(
-            toastInstance,
-            'error',
-            'Error - likely invalid address or search.'
-          );
-        } else {
-          toast(toastInstance, 'error', 'Server error', `${err.message}`);
-        }
-
-        return {
-          [chain]: {
-            name: chains[chain]['name'],
-            order: chains[chain]['order'],
-            abbr: chains[chain]['abbr'],
-            data: {},
-            loaded: true,
-            count: 0,
-          },
-        };
-      });
-  }
-
-  function ShareMenu() {
-    return (
-      <Popover>
-        <PopoverTrigger>
-          <button>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-            >
-              <path d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z" />
-            </svg>
-          </button>
-        </PopoverTrigger>
-        <PopoverContent>
-          <PopoverArrow />
-          <PopoverCloseButton />
-          <PopoverHeader>Share</PopoverHeader>
-          <PopoverBody className="flex items-center mx-auto space-x-5">
-            <EmailShareButton
-              url=""
-              subject="View NFTs"
-              body={`View NFTs at https://nftlooker.app${location.pathname}`}
-            >
-              <EmailIcon />
-            </EmailShareButton>
-            <TwitterShareButton
-              url={`nftlooker.app${location.pathname}`}
-              title={`View NFTs at`}
-            >
-              <FaTwitter />
-            </TwitterShareButton>
-            <FacebookShareButton
-              url={`nftlooker.app${location.pathname}`}
-              quote={`View NFTs at`}
-            >
-              <FaFacebook />
-            </FacebookShareButton>
-          </PopoverBody>
-        </PopoverContent>
-      </Popover>
-    );
+    if (data.total > 0 && !chainTabSet) {
+      dispatch(changeChainTab(data.order));
+      setChainTabSet(true);
+    }
   }
 
   return (
@@ -243,22 +92,30 @@ export default function UserNFTs() {
       >
         <TabList>
           <div className="flex items-center">
-            {queries.map((query, idx) => (
-              <ChainTab chain={query.data} idx={idx} key={idx} />
+            {Object.keys(chainsState).map((chain, idx) => (
+              <ChainTab chain={chainsState[chain]} idx={idx} key={idx} />
             ))}
           </div>
         </TabList>
 
         <TabPanels>
-          {queries.map((query) => (
-            <TabPanel key={Object.keys(query.data)[0]} paddingX="0">
-              <ChainData chain={query.data} />
+          {Object.keys(chainsState).map((chain) => (
+            <TabPanel key={chain} paddingX="0">
+              <UserChainData
+                chain={chain}
+                wallet={params.walletAddress}
+                chainTabSet={chainTabSet}
+                onChainTabSet={(bool) => setChainTabSet(bool)}
+                chains={chainsState}
+                onChains={(data) => handleChainState(data)}
+                location={location}
+              />
             </TabPanel>
           ))}
         </TabPanels>
       </Tabs>
 
-      {noNfts && <NoNFTs noNfts={noNfts} />}
+      <NoNFTs noNfts={noNfts} />
     </>
   );
 }

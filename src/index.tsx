@@ -24,12 +24,14 @@ const queryClient = new QueryClient({
   },
 });
 
+// ServiceWorker.register();
+
 // PAGES
 import Layout from './pages/Layout';
 import UserNFTs from './pages/UserNFTs';
-import { Collection } from './pages/Collection';
+import Collection from './pages/Collection';
 import NFT from './pages/NFT';
-import { SearchNFTs } from './pages/SearchNFTs';
+import SearchNFTs from './pages/SearchNFTs';
 
 ReactDOM.render(
   <React.StrictMode>

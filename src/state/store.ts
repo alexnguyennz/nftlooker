@@ -21,30 +21,40 @@ const rootReducers = combineReducers({
 // Convert object to string for localStorage
 function saveToLocalStorage(state) {
   try {
-    const serialisedState = JSON.stringify(state);
-    localStorage.setItem('state', serialisedState);
-  } catch (error) {
-    console.log(error);
+
+    const settings = {
+      "settings": state
+    }
+    localStorage.setItem('settings', JSON.stringify(settings));
+  } catch (err) {
+    console.log(err);
   }
 }
 
 // load string from localStorage into an object
 function loadFromLocalStorage() {
   try {
-    const serialisedState = localStorage.getItem('state');
+    const serialisedState = localStorage.getItem('settings');
     if (serialisedState === null) return undefined;
     return JSON.parse(serialisedState);
-  } catch (error) {
-    console.log(error);
+  } catch (err) {
+    console.log(err);
     return undefined;
   }
 }
 
+
+
 // create store with rootReducers and load localStorage values to overwrite default state
 //const store = createStore(rootReducers, loadFromLocalStorage());
-const store = createStore(rootReducers);
+// const settingsStore = createStore(settingsReducer);
+const store = createStore(rootReducers, loadFromLocalStorage());
 
 // Listen for store changes to save them to localStorage
-store.subscribe(() => saveToLocalStorage(store.getState()));
+// store.subscribe(() => saveToLocalStorage(settingsStore.getState()));
+
+// loadFromLocalStorage();
+//store.subscribe(() => saveToLocalStorage(settingsStore.getState()));
+
 
 export default store;

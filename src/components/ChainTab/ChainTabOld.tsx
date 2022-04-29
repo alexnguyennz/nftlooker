@@ -4,40 +4,44 @@ import ChainIcon from './ChainIcon/ChainIcon';
 
 interface ChainProps {
   name: string;
-  abbr: string;
   loaded: boolean;
   count: number;
   order: number;
-  total: number;
+}
+
+interface Chain {
+  [key: string]: ChainProps;
 }
 
 interface Props {
-  chain: ChainProps;
+  chain: Chain;
   idx: number;
   key: React.Key;
 }
 
 export default function ChainTab(props: Props) {
-  const chain = props.chain;
+  const data = Object.values(props.chain)[0];
 
-  const nftCount = chain.total;
+  const chain = Object.keys(props.chain)[0];
+
+  const noNftsFound = !data.count;
 
   return (
     <Tooltip
-      label={!nftCount && 'No NFTs found.'}
+      label={noNftsFound && 'No NFTs found.'}
       aria-label="NFT count tooltip"
       openDelay={750}
       shouldWrapChildren
     >
       <Tab
-        isDisabled={!nftCount}
+        isDisabled={noNftsFound}
         value={props.idx}
-        className={`space-x-1 ${!nftCount && `css-1ltezim`}`}
+        className={`space-x-1 ${noNftsFound && `css-1ltezim`}`}
       >
-        <ChainIcon chain={chain.abbr} />
-        <span className="tab-name">{chain.name}</span>
-        <span className="tab-count">{nftCount > 0 && `(${nftCount})`}</span>
-        {!chain.loaded && (
+        <ChainIcon chain={chain} />
+        <span className="tab-name">{data.name}</span>{' '}
+        <span className="tab-count">{data.count > 0 && `(${data.count})`}</span>
+        {!data.loaded && (
           <span className="mt-2">
             <Spinner size="sm" />
           </span>

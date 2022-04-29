@@ -52,7 +52,12 @@ export default function WalletModal() {
           connectMetaMask();
         }
 
-        window.ethereum.on('accountsChanged', async (accounts) => {
+        interface Accounts {
+          [key: number]: string
+        }
+
+        window.ethereum.on('accountsChanged', async (accounts: Accounts[]) => {
+
           if (accounts.length > 0) {
             connectMetaMask();
           } else {

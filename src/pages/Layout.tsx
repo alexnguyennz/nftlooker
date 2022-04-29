@@ -17,14 +17,8 @@ import {
   loadingState,
 } from '../state/loading/loadingSlice';
 import { toggleTestnets, testnetsState } from '../state/testnets/testnetsSlice';
-import {
-  changeLimit,
-  changeFilter,
-  searchLimitState,
-  searchFilterState,
-} from '../state/search/searchSlice';
 import { changeTab, tabState } from '../state/tab/tabSlice';
-import { settingsState, toggleAutoplay } from '../state/settings/settingsSlice';
+import { settingsState, toggleAutoplay, toggleLargeNfts, changeWalletLimit, changeSearchLimit, changeSearchFilter } from '../state/settings/settingsSlice';
 
 import WalletModal from '../components/WalletModal/WalletModal';
 
@@ -66,6 +60,7 @@ import {
   AccordionIcon,
   IconButton,
   Spinner,
+  Tooltip
 } from '@chakra-ui/react';
 import {
   Search2Icon,
@@ -150,7 +145,7 @@ export default function Layout() {
     };
   }, []);
 
-  // useEffect(() => {}, [ethereum]);
+  
 
   async function getRandomWallet() {
     dispatch(viewIsLoading());
@@ -159,7 +154,6 @@ export default function Layout() {
       signal: fetchController.signal,
     })
       .then((response) => {
-        console.log('Go Random Response', response);
         setAddress(response.data);
         navigate(`/${response.data}`);
       })
@@ -178,6 +172,20 @@ export default function Layout() {
     dispatch(toggleTestnets());
     navigate(location.pathname);
   }
+
+  function cancel() {
+    dispatch(viewIsNotLoading());
+    navigate('/');
+  }
+
+  function resetSettings() {
+    localStorage.removeItem("settings");
+    
+    dispatch(toggleAutoplay(false));
+    dispatch(toggleLargeNfts(false))
+  }
+
+  // console.log("localStorage", localStorage.getItem("settings"));
 
   return (
     <div
@@ -249,7 +257,7 @@ export default function Layout() {
 
               <MenuItem>
                 <FormControl className="flex justify-between">
-                  <FormLabel htmlFor="autoplay-mode" mb="0">
+                  <FormLabel htmlFor="autoplay" mb="0">
                     Autoplay videos
                   </FormLabel>
                   <Switch
@@ -261,6 +269,27 @@ export default function Layout() {
                   />
                 </FormControl>
               </MenuItem>
+
+              <MenuItem>
+                <FormControl className="flex justify-between">
+                  <FormLabel htmlFor="large" mb="0">
+                    <Tooltip hasArrow openDelay={500} label="Load NFTs over 10MB. Keep in mind when on Internet connections with data allowances.">
+                    Load large NFTs
+                    </Tooltip>
+                  </FormLabel>
+                  <Switch
+                    id="large"
+                    isChecked={settings.largenfts}
+                    onChange={() =>
+                      dispatch(toggleLargeNfts(!settings.largenfts))
+                    }
+                  />
+                </FormControl>
+              </MenuItem>
+
+              
+              <div className="text-right pr-3"><Button size="xs" onClick={resetSettings}>Reset</Button></div>
+              
 
               {/*
               <MenuItem>
@@ -315,7 +344,7 @@ export default function Layout() {
                 .
               </p>
 
-              <Accordion>
+              <Accordion allowToggle>
                 <AccordionItem>
                   <h2>
                     <AccordionButton>
@@ -329,6 +358,7 @@ export default function Layout() {
                     <ul className="list-disc pl-5">
                       <li>images</li>
                       <li>videos</li>
+                      <li>audio</li>
                       <li>3D models</li>
                     </ul>
                   </AccordionPanel>
@@ -353,6 +383,7 @@ export default function Layout() {
                   </AccordionPanel>
                 </AccordionItem>
 
+                {/*
                 <AccordionItem>
                   <h2>
                     <AccordionButton>
@@ -373,7 +404,7 @@ export default function Layout() {
                       <li>Fuji (Avalanche)</li>
                     </ul>
                   </AccordionPanel>
-                </AccordionItem>
+              </AccordionItem>*/}
               </Accordion>
 
               <p className="pt-5">
@@ -409,7 +440,7 @@ export default function Layout() {
         </h1>
 
         <h2 className="text-xl font-semibold">
-          {tab == 0 ? `View NFTs for any wallet.` : `Search for any NFT.`}
+          {tab == 0 ? `View NFTs for any wallet or collection.` : `Search for any NFT.`}
         </h2>
 
         {/* Type
@@ -444,7 +475,7 @@ export default function Layout() {
                   isRequired
                 />
 
-                <div className="space-x-5">
+                <div>
                   {!loading && (
                     <>
                       <Button
@@ -464,6 +495,7 @@ export default function Layout() {
                         loadingText="Loading"
                         spinnerPlacement="end"
                         colorScheme="blue"
+                        marginLeft="1.25rem"
                       >
                         Random
                         <svg
@@ -488,11 +520,43 @@ export default function Layout() {
                       colorScheme="red"
                       backgroundColor="red.400"
                       rightIcon={<Spinner w={4} h={4} />}
-                      onClick={() => navigate('/')}
+                      onClick={cancel}
                     >
                       Cancel
                     </Button>
                   )}
+                  
+                  <Menu closeOnSelect={false} isLazy={true}>
+                    <MenuButton
+                      marginLeft="1.25rem"
+                      as={IconButton}
+                      aria-label="Options"
+                      icon={<SettingsIcon />}
+                      padding="18px"
+                      paddingY="24px"
+                    />
+                    <MenuList minWidth="120px" padding="0.75em">
+                      <MenuOptionGroup
+                        title="Limit"
+                        className="text-left"
+                        marginLeft="0"
+                        marginTop="0"
+                      >
+                        <Select
+                          defaultValue={settings.walletLimit}
+                          onChange={(e) =>
+                            dispatch(changeWalletLimit(Number(e.currentTarget.value)))
+                          }
+                        >
+                          <option value="5">5</option>
+                          <option value="10">10</option>
+                          <option value="25">25</option>
+                          <option value="50">50</option>
+                          <option value="100">100</option>
+                        </Select>
+                      </MenuOptionGroup>
+                    </MenuList>
+                  </Menu>
                 </div>
               </form>
             </TabPanel>
@@ -519,8 +583,7 @@ export default function Layout() {
 function KeywordInput() {
   // Redux
   const loading = useSelector(loadingState);
-  const searchLimit = useSelector(searchLimitState);
-  const searchFilter = useSelector(searchFilterState);
+  const settings = useSelector(settingsState);
   const dispatch = useDispatch();
 
   // React Router
@@ -546,9 +609,6 @@ function KeywordInput() {
 
   //const handleCreateItem = (item: { value: any }) => {
   const handleCreateItem = (item: { label: string; value: string }) => {
-    // label and value strings
-    console.log('item', item);
-    // don't allow empty items
     if (item.value) {
       setPickerItems((curr) => [...curr, item]);
       setSelectedItems((curr) => [...curr, item]);
@@ -557,7 +617,6 @@ function KeywordInput() {
 
   // removal of items
   const handleSelectedItemsChange = (selectedItems: Item[]) => {
-    console.log('handleSelectedItems', selectedItems); // = [{...}]
     if (selectedItems) {
       setSelectedItems(selectedItems);
     }
@@ -604,11 +663,11 @@ function KeywordInput() {
     }
   }
 
-  /* changes =  
-activeIndex: 1
-selectedItems: (2) [{…}, {…}]
-type: "__function_remove_selected_item__"
-  */
+
+  function cancel() {
+    dispatch(viewIsNotLoading());
+    navigate('/');
+  }
 
   return (
     <>
@@ -663,7 +722,7 @@ type: "__function_remove_selected_item__"
             colorScheme="red"
             backgroundColor="red.400"
             rightIcon={<Spinner w={4} h={4} />}
-            onClick={() => navigate('/')}
+            onClick={cancel}
           >
             Cancel
           </Button>
@@ -685,14 +744,16 @@ type: "__function_remove_selected_item__"
               marginTop="0"
             >
               <Select
-                defaultValue={searchLimit}
+                defaultValue={settings.searchLimit}
                 onChange={(e) =>
-                  dispatch(changeLimit(Number(e.currentTarget.value)))
+                  dispatch(changeSearchLimit(Number(e.currentTarget.value)))
                 }
               >
                 <option value="5">5</option>
                 <option value="10">10</option>
                 <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
               </Select>
             </MenuOptionGroup>
             <MenuOptionGroup
@@ -701,8 +762,8 @@ type: "__function_remove_selected_item__"
               marginLeft="0"
             >
               <Select
-                defaultValue={searchFilter}
-                onChange={(e) => dispatch(changeFilter(e.currentTarget.value))}
+                defaultValue={settings.searchFilter}
+                onChange={(e) => dispatch(changeSearchFilter(e.currentTarget.value))}
               >
                 <option value="global">All</option>
                 <option value="name">Name</option>

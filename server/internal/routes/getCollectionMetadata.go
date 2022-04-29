@@ -8,7 +8,6 @@ import (
 	"github.com/gorilla/mux"
 )
 
-
 func GetCollectionMetadata(w http.ResponseWriter, r *http.Request) {
 
 	// PARAMS
@@ -23,5 +22,5 @@ func GetCollectionMetadata(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
-	fmt.Fprintf(w, "%v", response)
+	w.Write([]byte(response))
 }

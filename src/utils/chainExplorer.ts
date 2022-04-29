@@ -3,10 +3,10 @@ export function explorer(chain) {
     case 'eth':
     case '1':
       return 'etherscan.io';
-    case 'matic':
+    case 'polygon':
     case '137':
       return 'polygonscan.com';
-    case 'binance':
+    case 'bsc':
     case '56':
       return 'bscscan.com';
     case 'avalanche':
@@ -24,9 +24,9 @@ export function chainName(chain) {
   switch (chain) {
     case 'eth':
       return 'Ethereum';
-    case 'matic':
+    case 'polygon':
       return 'Polygon';
-    case 'binance':
+    case 'bsc':
       return 'Binance';
     case 'avalanche':
       return 'Avalanche';
