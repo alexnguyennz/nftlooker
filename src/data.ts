@@ -6,22 +6,25 @@ const chains = {
     data: [],
     loaded: false,
     count: 0,
+    total: 0,
   },
-  matic: {
+  polygon: {
     name: 'Polygon',
-    abbr: 'matic',
+    abbr: 'polygon',
     order: 1,
     data: [],
     loaded: false,
     count: 0,
+    total: 0,
   },
-  binance: {
+  bsc: {
     name: 'Binance',
-    abbr: 'binance',
+    abbr: 'bsc',
     order: 2,
     data: [],
     loaded: false,
     count: 0,
+    total: 0,
   },
   avalanche: {
     name: 'Avalanche',
@@ -30,6 +33,7 @@ const chains = {
     data: [],
     loaded: false,
     count: 0,
+    total: 0,
   },
   fantom: {
     name: 'Fantom',
@@ -38,6 +42,7 @@ const chains = {
     data: [],
     loaded: false,
     count: 0,
+    total: 0, // may be issue
   },
 };
 

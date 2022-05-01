@@ -6,6 +6,7 @@ Supported file formats:
 
 - images
 - videos
+- audio
 - 3D models
 
 Supported mainnet chains:
@@ -16,21 +17,17 @@ Supported mainnet chains:
 - Avalanche
 - Fantom
 
-Supported testnet chains:
-
 Tools:
 
-- React - frontend
+- Moralis - NFT data
+- React / TypeScript - frontend
 - Fastify - web framework
+- Go and gorilla/mux - backend and REST API (previously Node.js/Express/Fastify)
 - Redux - state management
 - React Query - API data management
-- Moralis API - NFT data
-- Infura - Ethereum API provider
-- Cloudinary API - media transformations
-- ImageKit API - media transformations
+- Cloudinary and ImageKit API - media transformations
 - TailwindCSS - CSS framework
 - Chakra UI - React components
-- pm2 - Node.js process manager
 - Heroku - PaaS / hosting
 
 NFTs will not appear or display correctly for a number of reasons including:
@@ -39,5 +36,3 @@ NFTs will not appear or display correctly for a number of reasons including:
 - unusual metadata formats and not using common property names e.g. name, image, description
 - broken metadata and/or media (image, video) links
 - dead or broken sites e.g. expired SSL certificates
-
-Initially built for the Road to Web 3 ETHGlobal hackathon.

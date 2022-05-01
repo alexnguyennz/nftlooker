@@ -18,8 +18,8 @@ import chains from '../../data';
 
 // Components
 import NoNFTs from '../../components/NoNFTs/NoNFTs';
-import ChainTab from '../../components/ChainTab/UserChainTab';
-import UserChainData from '../../components/ChainTab/ChainData/UserChainData';
+import ChainTab from '../../components/ChainTab/ChainTab';
+import SearchChainData from '../../components/ChainTab/ChainData/SearchChainData';
 
 import {
   Tabs,
@@ -28,7 +28,7 @@ import {
   TabPanel,
 } from '@chakra-ui/react';
 
-export default function UserNFTs() {
+export default function SearchNFTs() {
   // React Router
   const params = useParams();
   const location = useLocation();
@@ -43,7 +43,16 @@ export default function UserNFTs() {
   const [noNfts, setNoNfts] = useState(false);
 
   useEffect(() => {
-    document.title = `NFT Looker. ${params.walletAddress}`;
+    dispatch(changeTab(1)); // manually set to Search tab on search routes
+
+    // need this
+
+    // reset UI
+    //setChainsState(chains);
+    //dispatch(changeChainTab(-1));
+    //setNoNfts(false);
+
+    document.title = `NFT Looker. Search for ${params.q}`;
 
     return () => {
       dispatch(viewIsNotLoading());
@@ -101,9 +110,9 @@ export default function UserNFTs() {
         <TabPanels>
           {Object.keys(chainsState).map((chain) => (
             <TabPanel key={chain} paddingX="0">
-              <UserChainData
+              <SearchChainData
                 chain={chain}
-                wallet={params.walletAddress}
+                q={params.q}
                 chainTabSet={chainTabSet}
                 onChainTabSet={(bool) => setChainTabSet(bool)}
                 chains={chainsState}

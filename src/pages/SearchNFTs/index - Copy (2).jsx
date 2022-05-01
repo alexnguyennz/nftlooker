@@ -9,26 +9,46 @@ import {
   viewIsLoading,
   viewIsNotLoading,
 } from '../../state/loading/loadingSlice';
-// import { testnetsState } from '../../state/testnets/testnetsSlice';
+import { testnetsState } from '../../state/testnets/testnetsSlice';
 import { changeTab } from '../../state/tab/tabSlice';
 import { changeChainTab, chainTabState } from '../../state/tab/tabSlice';
+import {
+  searchLimitState,
+  searchFilterState,
+} from '../../state/search/searchSlice';
 
 // Data
+import axios from 'axios';
+import { useQueries, useInfiniteQuery, useQuery } from 'react-query';
 import chains from '../../data';
 
 // Components
 import NoNFTs from '../../components/NoNFTs/NoNFTs';
-import ChainTab from '../../components/ChainTab/UserChainTab';
-import UserChainData from '../../components/ChainTab/ChainData/UserChainData';
+import SearchChainTab from '../../components/ChainTab/SearchChainTab';
+
+import SearchChainData from '../../components/ChainTab/ChainData/SearchChainData';
 
 import {
+  useToast,
   Tabs,
   TabList,
   TabPanels,
+  Tab,
   TabPanel,
+  Menu,
+  MenuButton,
+  MenuList,
+  MenuItem,
+  MenuItemOption,
+  MenuGroup,
+  MenuOptionGroup,
+  MenuDivider,
+  Button,
+  Alert,
+  AlertIcon,
 } from '@chakra-ui/react';
 
-export default function UserNFTs() {
+export function SearchNFTs() {
   // React Router
   const params = useParams();
   const location = useLocation();
@@ -43,7 +63,16 @@ export default function UserNFTs() {
   const [noNfts, setNoNfts] = useState(false);
 
   useEffect(() => {
-    document.title = `NFT Looker. ${params.walletAddress}`;
+    dispatch(changeTab(1)); // manually set to Search tab on search routes
+
+    // need this
+
+    // reset UI
+    //setChainsState(chains);
+    //dispatch(changeChainTab(-1));
+    //setNoNfts(false);
+
+    document.title = `NFT Looker. Search for ${params.q}`;
 
     return () => {
       dispatch(viewIsNotLoading());
@@ -64,10 +93,9 @@ export default function UserNFTs() {
       // check for any NFTs
       if (Object.values(chainsState).every((chain) => !chain.total)) {
         setNoNfts(true);
-      } 
+      }
     } else {
       dispatch(viewIsLoading());
-      setNoNfts(false);
     }
   }, [chainsState]);
 
@@ -89,21 +117,22 @@ export default function UserNFTs() {
         variant="solid-rounded"
         colorScheme="gray"
         isLazy={false}
+        lazyBehavior={false}
       >
         <TabList>
           <div className="flex items-center">
             {Object.keys(chainsState).map((chain, idx) => (
-              <ChainTab chain={chainsState[chain]} idx={idx} key={idx} />
+              <SearchChainTab chain={chainsState[chain]} idx={idx} key={idx} />
             ))}
           </div>
         </TabList>
 
         <TabPanels>
-          {Object.keys(chainsState).map((chain) => (
-            <TabPanel key={chain} paddingX="0">
-              <UserChainData
+          {Object.keys(chainsState).map((chain, idx) => (
+            <TabPanel key={chain} value={idx} paddingX="0">
+              <SearchChainData
                 chain={chain}
-                wallet={params.walletAddress}
+                q={params.q}
                 chainTabSet={chainTabSet}
                 onChainTabSet={(bool) => setChainTabSet(bool)}
                 chains={chainsState}
