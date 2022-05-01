@@ -5,6 +5,8 @@ interface Props {
 export default function Footer(props: Props) {
   const colorModeBg = props.colorMode;
 
+  return null;
+
   return (
     <footer className=" text-center">
       <div className="text-center space-x-5">

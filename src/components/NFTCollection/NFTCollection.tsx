@@ -8,12 +8,9 @@ export default function NFTCollection(props) {
 
   return (
     <>
-     
-     
-        {collection.map((nft, idx) => (
-          <NFTCard key={idx} nft={nft} chain={chain} />
-        ))}
-
+      {collection.map((nft, idx) => (
+        <NFTCard key={idx} nft={nft} chain={chain} />
+      ))}
     </>
   );
 }

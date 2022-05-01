@@ -6,8 +6,8 @@ import { settingsState } from '../../state/settings/settingsSlice';
 
 import { Link } from 'react-router-dom';
 
-import { Button, tokenToCSSVar } from '@chakra-ui/react';
-import { useColorMode, useColorModeValue } from '@chakra-ui/react';
+import { Button } from '@chakra-ui/react';
+import { useColorModeValue } from '@chakra-ui/react';
 import { Image } from '@chakra-ui/react';
 
 import { Tooltip } from '@chakra-ui/react';
@@ -59,7 +59,13 @@ function NFTImage(props) {
           '250'
         ); */
 
-        const { image, contentType } = generateNftUrl(nft.metadata.image, nft.metadata.content_type, nft.metadata.content_length, '250', settings.largenfts);
+        const { image, contentType } = generateNftUrl(
+          nft.metadata.image,
+          nft.metadata.content_type,
+          nft.metadata.content_length,
+          '250',
+          settings.largenfts
+        );
 
         setImage(image);
         setNftContentType(contentType);
@@ -202,68 +208,71 @@ export default function NFTCard(props: Props) {
 
   return (
     <>
-    {/* <div className="flex flex-col max-w-sm "> */}
-      
-        <div
-          // className={`mt-auto overflow-hidden rounded-lg shadow-md transition-all hover:-translate-y-2 ${colorModeBg}`}
-          className={` mt-auto rounded-b-lg shadow-md transition-all hover:-translate-y-2 ${colorModeBg}`}
-        >
-          {nft.metadata && (
-            // <NFTImage collection={collection} nft={nft} chain={chain} />
-            <NFTImage nft={nft} chain={chain} />
-          )}
+      {/* <div className="flex flex-col max-w-sm "> */}
 
-          {/* bg-gray-50 border-t border-gray-100 */}
-          <div
-            className={`p-3 mt-auto border-t rounded-b-lg ${colorModeCard}`}
-          >
-            <h3 className="text-center font-bold text-lg">
+      <div
+        // className={`mt-auto overflow-hidden rounded-lg shadow-md transition-all hover:-translate-y-2 ${colorModeBg}`}
+        className={` mt-auto rounded-b-lg shadow-md transition-all hover:-translate-y-2 ${colorModeBg}`}
+      >
+        {nft.metadata && (
+          // <NFTImage collection={collection} nft={nft} chain={chain} />
+          <NFTImage nft={nft} chain={chain} />
+        )}
+
+        {/* bg-gray-50 border-t border-gray-100 */}
+        <div className={`p-3 mt-auto border-t rounded-b-lg ${colorModeCard}`}>
+          <h3 className="text-center font-bold text-lg">
+            <Link
+              to={`/${chain}/collection/${nft.token_address}/nft/${nft.token_id}`}
+            >
+              {/* {nft.metadata && nft.metadata.name} */}
+              {nft.metadata.name && nft.metadata.name}
+            </Link>
+          </h3>
+          <h4 className="text-center text-xs">
+            <Link to={`/${chain}/collection/${nft.token_address}`}>
+              {nft.name && nft.name}
+            </Link>
+          </h4>
+          <div className="flex justify-between items-center">
+            <Button size="xs">
               <Link
                 to={`/${chain}/collection/${nft.token_address}/nft/${nft.token_id}`}
               >
-                {/* {nft.metadata && nft.metadata.name} */}
-                {nft.metadata && nft.metadata.name}
+                View
               </Link>
-            </h3>
-            <h4 className="text-center text-xs"><Link to={`/${chain}/collection/${nft.token_address}`}>{nft.name ? nft.name : `Unnamed Collection`}</Link></h4>
-            <div className="flex justify-between items-center">
-              <Button size="xs">
-                <Link
-                  to={`/${chain}/collection/${nft.token_address}/nft/${nft.token_id}`}
+            </Button>
+            {/* {nft.metadata.original_image && ( */}
+            {nft.metadata.original_image ? (
+              <Tooltip label="Open original link" openDelay={750} hasArrow>
+                <a
+                  // href={nft.metadata.original_image}
+                  href={nft.metadata.original_image}
+                  target="_blank"
+                  rel="noreferrer noopener nofollow"
+                  className="z-0"
                 >
-                  View
-                </Link>
-              </Button>
-              {/* {nft.metadata.original_image && ( */}
-              {nft.metadata.original_image ? (
-                <Tooltip label="Open original link" openDelay={750} hasArrow>
-                  <a
-                    // href={nft.metadata.original_image}
-                    href={nft.metadata.original_image}
-                    target="_blank"
-                    rel="noreferrer noopener nofollow"
-                    className="z-0"
-                  >
-                    <ExternalLinkIcon boxSize={4} />
-                  </a>
-                </Tooltip>
-              ) : nft.token_uri ? (
-                <Tooltip label="Open original link" openDelay={750} hasArrow>
-                  <a
-                    // href={nft.metadata.original_image}
-                    href={nft.token_uri}
-                    target="_blank"
-                    rel="noreferrer noopener nofollow"
-                    className="z-0"
-                  >
-                    <ExternalLinkIcon boxSize={4} />
-                  </a>
-                </Tooltip> )
-              : <></> }
-            </div>
+                  <ExternalLinkIcon boxSize={4} />
+                </a>
+              </Tooltip>
+            ) : nft.token_uri ? (
+              <Tooltip label="Open original link" openDelay={750} hasArrow>
+                <a
+                  // href={nft.metadata.original_image}
+                  href={nft.token_uri}
+                  target="_blank"
+                  rel="noreferrer noopener nofollow"
+                  className="z-0"
+                >
+                  <ExternalLinkIcon boxSize={4} />
+                </a>
+              </Tooltip>
+            ) : (
+              <></>
+            )}
           </div>
         </div>
-      
+      </div>
     </>
   );
 }

@@ -53,11 +53,10 @@ export default function WalletModal() {
         }
 
         interface Accounts {
-          [key: number]: string
+          [key: number]: string;
         }
 
         window.ethereum.on('accountsChanged', async (accounts: Accounts[]) => {
-
           if (accounts.length > 0) {
             connectMetaMask();
           } else {
@@ -147,7 +146,7 @@ export default function WalletModal() {
     }
   }
 
-  async function connectSequence() {
+  /*async function connectSequence() {
     const wallet = new sequence.Wallet('polygon');
 
     const connectDetails = await wallet.connect({
@@ -159,7 +158,7 @@ export default function WalletModal() {
 
     console.log('connectDetails', connectDetails);
     dispatch(setWallet({ address: walletAddress, chain: chainId }));
-  }
+  }*/
 
   if (!wallet.address) {
     return (
@@ -177,7 +176,7 @@ export default function WalletModal() {
           <ModalOverlay /> {/* force scrollbar */}
           <ModalContent className="mx-5">
             <ModalBody padding="0">
-              <div className="modal-wallets grid sm:grid-cols-3">
+              <div className="modal-wallets grid sm:grid-cols-2">
                 <div
                   className={`p-5 text-center cursor-pointer transition ${colorMode}`}
                   onClick={window.ethereum && connectMetaMask}
@@ -205,23 +204,24 @@ export default function WalletModal() {
                     </p>
                   )}
                 </div>
-                {
-                  <div
-                    className={`p-5 text-center cursor-pointer transition ${colorMode}`}
-                    onClick={connectWalletConnect}
-                  >
-                    <img
-                      src="/icons/walletconnect.svg"
-                      width="64"
-                      height="64"
-                      className="mx-auto"
-                    />
-                    <h3 className="text-center font-bold text-xl">
-                      WalletConnect
-                    </h3>
-                    <p>Scan with WalletConnect</p>
-                  </div>
-                }
+
+                <div
+                  className={`p-5 text-center cursor-pointer transition ${colorMode}`}
+                  onClick={connectWalletConnect}
+                >
+                  <img
+                    src="/icons/walletconnect.svg"
+                    width="64"
+                    height="64"
+                    className="mx-auto"
+                  />
+                  <h3 className="text-center font-bold text-xl">
+                    WalletConnect
+                  </h3>
+                  <p>Scan with WalletConnect</p>
+                </div>
+
+                {/* 
                 <div
                   className={`p-5 text-center cursor-pointer transition ${colorMode}`}
                   onClick={connectSequence}
@@ -234,7 +234,7 @@ export default function WalletModal() {
                   />
                   <h3 className="text-center font-bold text-xl">Sequence</h3>
                   <p>Connect to your Sequence Wallet</p>
-                </div>
+                  </div>*/}
               </div>
             </ModalBody>
           </ModalContent>

@@ -16,9 +16,16 @@ import {
   viewIsNotLoading,
   loadingState,
 } from '../state/loading/loadingSlice';
-import { toggleTestnets, testnetsState } from '../state/testnets/testnetsSlice';
+// import { toggleTestnets } from '../state/testnets/testnetsSlice';
 import { changeTab, tabState } from '../state/tab/tabSlice';
-import { settingsState, toggleAutoplay, toggleLargeNfts, changeWalletLimit, changeSearchLimit, changeSearchFilter } from '../state/settings/settingsSlice';
+import {
+  settingsState,
+  toggleAutoplay,
+  toggleLargeNfts,
+  changeWalletLimit,
+  changeSearchLimit,
+  changeSearchFilter,
+} from '../state/settings/settingsSlice';
 
 import WalletModal from '../components/WalletModal/WalletModal';
 
@@ -60,7 +67,7 @@ import {
   AccordionIcon,
   IconButton,
   Spinner,
-  Tooltip
+  Tooltip,
 } from '@chakra-ui/react';
 import {
   Search2Icon,
@@ -73,27 +80,11 @@ import { CUIAutoComplete } from 'chakra-ui-autocomplete';
 
 import axios from 'axios';
 
-// testing address
-//const WALLET_ADDRESS = '0x2aea6d8220b61950f30674606faaa01c23465299';
-
-// declare that window obj already exists
-declare let window: any;
-
 export default function Layout() {
   const [address, setAddress] = useState('');
 
-  const [search, setSearch] = useState(['']);
-
   // Modal
   const { isOpen, onOpen, onClose } = useDisclosure();
-
-  // initialise Ethers
-  /* if (typeof window.ethereum !== 'undefined') {
-    console.log('ethereum exists');
-  } */
-  const { ethereum } = window;
-
-  let provider;
 
   const navigate = useNavigate();
   const params = useParams();
@@ -111,7 +102,7 @@ export default function Layout() {
   const { colorMode, toggleColorMode } = useColorMode();
   const colorModeBg = useColorModeValue('white', '#1f2937');
   const colorModeBody = useColorModeValue('bg-rose-50', 'bg-gray-900'); // chakra gray-800 #1A202C
-  const colorModeBodyHex = useColorModeValue('#fff1f2', '#111827');
+  // const colorModeBodyHex = useColorModeValue('#fff1f2', '#111827');
   const colorModeView = useColorModeValue('pink', 'gray');
 
   // bg-rose-50 background-color: rgb(255 241 242); #fff1f2
@@ -135,8 +126,6 @@ export default function Layout() {
     //console.log('params', params.walletAddress);
     if (params.walletAddress) {
       setAddress(params.walletAddress);
-    } else if (params.q) {
-      setSearch([params.q]);
     }
 
     return () => {
@@ -145,9 +134,7 @@ export default function Layout() {
     };
   }, []);
 
-  
-
-  async function getRandomWallet() {
+  function getRandomWallet() {
     dispatch(viewIsLoading());
 
     axios(`/api/randomwallet`, {
@@ -168,10 +155,10 @@ export default function Layout() {
     }
   }
 
-  function handleTestnetsToggle() {
+  /* function handleTestnetsToggle() {
     dispatch(toggleTestnets());
     navigate(location.pathname);
-  }
+  } */
 
   function cancel() {
     dispatch(viewIsNotLoading());
@@ -179,10 +166,10 @@ export default function Layout() {
   }
 
   function resetSettings() {
-    localStorage.removeItem("settings");
-    
+    localStorage.removeItem('settings');
+
     dispatch(toggleAutoplay(false));
-    dispatch(toggleLargeNfts(false))
+    dispatch(toggleLargeNfts(false));
   }
 
   // console.log("localStorage", localStorage.getItem("settings"));
@@ -273,8 +260,12 @@ export default function Layout() {
               <MenuItem>
                 <FormControl className="flex justify-between">
                   <FormLabel htmlFor="large" mb="0">
-                    <Tooltip hasArrow openDelay={500} label="Load NFTs over 10MB. Keep in mind when on Internet connections with data allowances.">
-                    Load large NFTs
+                    <Tooltip
+                      hasArrow
+                      openDelay={500}
+                      label="Load NFTs over 10MB. Keep in mind when on Internet connections with data allowances."
+                    >
+                      Load large NFTs
                     </Tooltip>
                   </FormLabel>
                   <Switch
@@ -287,9 +278,11 @@ export default function Layout() {
                 </FormControl>
               </MenuItem>
 
-              
-              <div className="text-right pr-3"><Button size="xs" onClick={resetSettings}>Reset</Button></div>
-              
+              <div className="text-right pr-3">
+                <Button size="xs" onClick={resetSettings}>
+                  Reset
+                </Button>
+              </div>
 
               {/*
               <MenuItem>
@@ -440,7 +433,9 @@ export default function Layout() {
         </h1>
 
         <h2 className="text-xl font-semibold">
-          {tab == 0 ? `View NFTs for any wallet or collection.` : `Search for any NFT.`}
+          {tab == 0
+            ? `View NFTs for any wallet or collection.`
+            : `Search for any NFT.`}
         </h2>
 
         {/* Type
@@ -525,7 +520,7 @@ export default function Layout() {
                       Cancel
                     </Button>
                   )}
-                  
+
                   <Menu closeOnSelect={false} isLazy={true}>
                     <MenuButton
                       marginLeft="1.25rem"
@@ -545,7 +540,9 @@ export default function Layout() {
                         <Select
                           defaultValue={settings.walletLimit}
                           onChange={(e) =>
-                            dispatch(changeWalletLimit(Number(e.currentTarget.value)))
+                            dispatch(
+                              changeWalletLimit(Number(e.currentTarget.value))
+                            )
                           }
                         >
                           <option value="5">5</option>
@@ -663,7 +660,6 @@ function KeywordInput() {
     }
   }
 
-
   function cancel() {
     dispatch(viewIsNotLoading());
     navigate('/');
@@ -757,13 +753,15 @@ function KeywordInput() {
               </Select>
             </MenuOptionGroup>
             <MenuOptionGroup
-              title="Filter"
+              title="Search Filter"
               className="text-left"
               marginLeft="0"
             >
               <Select
                 defaultValue={settings.searchFilter}
-                onChange={(e) => dispatch(changeSearchFilter(e.currentTarget.value))}
+                onChange={(e) =>
+                  dispatch(changeSearchFilter(e.currentTarget.value))
+                }
               >
                 <option value="global">All</option>
                 <option value="name">Name</option>

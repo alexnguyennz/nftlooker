@@ -51,7 +51,7 @@ function UserChainData(props) {
 
   const chain = props.chain;
 
-  const fetchNfts = async ({ pageParam = "" }) => {
+  const fetchNfts = async ({ pageParam = '' }) => {
     // reset UI state
     // only reset chain states when it's a fresh query, not more NFTs loaded to each tab
     /* if (pageParam === "") {
@@ -73,12 +73,13 @@ function UserChainData(props) {
       `/api/nfts/chain/${chain}/address/${props.wallet}/limit/${settings.walletLimit}/` + pageParam
     ); */
 
-    // new test 
+    // new test
     const { data } = await axios(
-      `/api/resolve/chain/${chain}/address/${props.wallet}/limit/${settings.walletLimit}/` + pageParam
+      `/api/resolve/chain/${chain}/address/${props.wallet}/limit/${settings.walletLimit}/` +
+        pageParam
     );
-    
-    console.log("Request:", `/api/resolve/chain/${chain}/address/${props.wallet}/limit/${settings.walletLimit}/` + pageParam)
+
+    // console.log("Request:", `/api/resolve/chain/${chain}/address/${props.wallet}/limit/${settings.walletLimit}/` + pageParam)
 
     const nftCount = Object.values(data.data).flat().length;
 
@@ -91,30 +92,24 @@ function UserChainData(props) {
         loaded: true,
         count: nftCount,
         total: nftCount,
-      }
+      },
     };
   };
 
-  const {
-    data,
-    error,
-    isFetchingNextPage,
-    fetchNextPage,
-    hasNextPage,
-  } = useInfiniteQuery(
-    ['userNfts', props.location, props.wallet, props.chain],
-    fetchNfts,
-    {
-      retry: 1,
-      getNextPageParam: (lastPage) => lastPage[chain].data.cursor // only return valid cursor if not empty, otherwise return undefined to make this the last page,
-    }
-  );
+  const { data, error, isFetchingNextPage, fetchNextPage, hasNextPage } =
+    useInfiniteQuery(
+      ['userNfts', props.location, props.wallet, props.chain],
+      fetchNfts,
+      {
+        retry: 1,
+        getNextPageParam: (lastPage) => lastPage[chain].data.cursor, // only return valid cursor if not empty, otherwise return undefined to make this the last page,
+      }
+    );
 
   useEffect(() => {
     if (data) {
-
       const nftTotals = data.pages.reduce((acc, element) => {
-        const nftCount = Object.values(element)[0]["count"];
+        const nftCount = Object.values(element)[0]['count'];
 
         return acc + nftCount;
       }, 0);
@@ -140,22 +135,18 @@ function UserChainData(props) {
         abbr: chain,
         order: chains[chain]['order'],
         data: {
-          data
+          data,
         },
         loaded: true,
         count: 0,
         total: 0,
-      }
+      };
 
       props.onChains(noData);
 
-      toast(
-        toastInstance,
-        'error',
-        'Invalid address.',
-      );
+      toast(toastInstance, 'error', 'Invalid address.');
     }
-  }, [error])
+  }, [error]);
 
   if (!data) return null;
 
@@ -163,18 +154,15 @@ function UserChainData(props) {
     <>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 3xl:grid-cols-7 4xl:grid-cols-8 gap-10">
         {data.pages.map((page) => {
-          return Object.keys(page[chain].data.data).map((collection) => (
+          return Object.keys(page[chain].data.data).map((collection, idx) => (
             <>
-            
-            
-            <NFTCollection
-              key={collection}
-              collection={page[chain].data.data[collection]}
-              type={page[chain].data}
-              chain={chain}
-            />
+              <NFTCollection
+                key={page[chain].data.data[collection] + idx}
+                collection={page[chain].data.data[collection]}
+                type={page[chain].data}
+                chain={chain}
+              />
             </>
-
           ));
         })}
       </div>

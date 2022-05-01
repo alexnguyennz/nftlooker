@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
 )
 
 func ApiHandler(r *mux.Router) {
@@ -45,18 +46,17 @@ func main() {
 
 	// LOAD ENV VARIABLES
 	// Development
-	//err := godotenv.Load()
-	//if err != nil {
-	//	log.Fatal("Error loading .env file")
-	//}
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
 
 	api := r.PathPrefix("/api").Subrouter()
 	ApiHandler(api)
 
 	// Development
-	//log.Fatal(http.ListenAndServe("localhost:"+os.Getenv("GO_PORT"), r))
+	log.Fatal(http.ListenAndServe("localhost:"+os.Getenv("GO_PORT"), r))
 
 	// Production
-	//
-	log.Fatal(http.ListenAndServe(":" + os.Getenv("PORT"), r))
+	//log.Fatal(http.ListenAndServe(":" + os.Getenv("PORT"), r))
 }
