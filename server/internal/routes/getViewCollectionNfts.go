@@ -64,6 +64,7 @@ func GetViewCollectionNfts(w http.ResponseWriter, r *http.Request) {
 
 	var wg sync.WaitGroup
 
+	// Loop through each NFT's results
 	for i, nft := range data.Result {
 
 		wg.Add(1)

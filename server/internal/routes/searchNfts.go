@@ -34,8 +34,13 @@ func SearchNfts(w http.ResponseWriter, r *http.Request) {
 		Frozen              int    `json:"frozen"`
 	}
 
-	type Data struct {
-		Result []Result `json:"result"`
+	type Response struct {
+		Total     int                 `json:"total"`
+		Page      int                 `json:"page"`
+		Page_Size string                 `json:"page_size"` // change to int once they fix bug
+		Cursor    string              `json:"cursor,omitempty"`
+		Result    []Result            `json:"result"`
+		Data      map[string][]Result `json:"data"`
 	}
 
 	// PARAMS
@@ -44,14 +49,18 @@ func SearchNfts(w http.ResponseWriter, r *http.Request) {
 	q := url.QueryEscape(vars["q"])
 	filter := vars["filter"]
 	limit := vars["limit"]
-	offset := vars["offset"]
+	cursor := vars["cursor"]
 
-	response, err := request.APIRequest(`/nft/search?chain=` + chain + `&q=` + q + `&filter=` + filter + `&limit=` + limit + `&offset=` + offset)
+	if cursor != "" {
+		cursor = "&cursor=" + cursor
+	}
+
+	response, err := request.APIRequest(`/nft/search?chain=` + chain + `&q=` + q + `&filter=` + filter + `&limit=` + limit + cursor)
 	if err != nil {
 		fmt.Println("Error - ", err)
 	}
 
-	var data Data
+	var data Response
 
 	err = json.Unmarshal([]byte(response), &data)
 	if err != nil {
@@ -108,7 +117,21 @@ func SearchNfts(w http.ResponseWriter, r *http.Request) {
 	wg.Wait() // Block execution until all goroutines are done
 
 	// Format into JSON
-	jsonByte, _ := json.Marshal(data.Result)
+	// data.Data = data.Result
+	//jsonByte, _ := json.Marshal(data)
+
+	// Group NFTs by collection address
+	grouped := make(map[string][]Result)
+	for i, collection := range data.Result {
+
+		// if metadata is empty, don't add to final result
+		if data.Result[i].Metadata != "" {
+			grouped[collection.Token_Address] = append(grouped[collection.Token_Address], collection)
+		}
+	}
+
+	data.Data = grouped // add grouped collections to Data field
+	jsonByte, _ := json.Marshal(data)
 
 	// Send HTTP Response
 	w.WriteHeader(http.StatusOK)

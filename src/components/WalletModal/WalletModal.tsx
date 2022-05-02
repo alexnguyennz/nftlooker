@@ -141,7 +141,6 @@ export default function WalletModal() {
     });
 
     if (!connector.connected) {
-      // create new session
       connector.createSession();
     }
   }

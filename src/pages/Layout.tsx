@@ -22,8 +22,7 @@ import {
   settingsState,
   toggleAutoplay,
   toggleLargeNfts,
-  changeWalletLimit,
-  changeSearchLimit,
+  changeLimit,
   changeSearchFilter,
 } from '../state/settings/settingsSlice';
 
@@ -521,39 +520,7 @@ export default function Layout() {
                     </Button>
                   )}
 
-                  <Menu closeOnSelect={false} isLazy={true}>
-                    <MenuButton
-                      marginLeft="1.25rem"
-                      as={IconButton}
-                      aria-label="Options"
-                      icon={<SettingsIcon />}
-                      padding="18px"
-                      paddingY="24px"
-                    />
-                    <MenuList minWidth="120px" padding="0.75em">
-                      <MenuOptionGroup
-                        title="Limit"
-                        className="text-left"
-                        marginLeft="0"
-                        marginTop="0"
-                      >
-                        <Select
-                          defaultValue={settings.walletLimit}
-                          onChange={(e) =>
-                            dispatch(
-                              changeWalletLimit(Number(e.currentTarget.value))
-                            )
-                          }
-                        >
-                          <option value="5">5</option>
-                          <option value="10">10</option>
-                          <option value="25">25</option>
-                          <option value="50">50</option>
-                          <option value="100">100</option>
-                        </Select>
-                      </MenuOptionGroup>
-                    </MenuList>
-                  </Menu>
+                  <Settings />
                 </div>
               </form>
             </TabPanel>
@@ -580,7 +547,6 @@ export default function Layout() {
 function KeywordInput() {
   // Redux
   const loading = useSelector(loadingState);
-  const settings = useSelector(settingsState);
   const dispatch = useDispatch();
 
   // React Router
@@ -723,55 +689,65 @@ function KeywordInput() {
             Cancel
           </Button>
         )}
-        <Menu closeOnSelect={false} isLazy={true}>
-          <MenuButton
-            marginLeft="1.25rem"
-            as={IconButton}
-            aria-label="Options"
-            icon={<SettingsIcon />}
-            padding="18px"
-            paddingY="24px"
-          />
-          <MenuList minWidth="120px" padding="0.75em">
-            <MenuOptionGroup
-              title="Limit"
-              className="text-left"
-              marginLeft="0"
-              marginTop="0"
-            >
-              <Select
-                defaultValue={settings.searchLimit}
-                onChange={(e) =>
-                  dispatch(changeSearchLimit(Number(e.currentTarget.value)))
-                }
-              >
-                <option value="5">5</option>
-                <option value="10">10</option>
-                <option value="25">25</option>
-                <option value="50">50</option>
-                <option value="100">100</option>
-              </Select>
-            </MenuOptionGroup>
-            <MenuOptionGroup
-              title="Search Filter"
-              className="text-left"
-              marginLeft="0"
-            >
-              <Select
-                defaultValue={settings.searchFilter}
-                onChange={(e) =>
-                  dispatch(changeSearchFilter(e.currentTarget.value))
-                }
-              >
-                <option value="global">All</option>
-                <option value="name">Name</option>
-                <option value="description">Description</option>
-                <option value="attributes">Attributes</option>
-              </Select>
-            </MenuOptionGroup>
-          </MenuList>
-        </Menu>
+        <Settings />
       </div>
     </>
+  );
+}
+
+function Settings() {
+  // Redux
+  const settings = useSelector(settingsState);
+  const dispatch = useDispatch();
+
+  return (
+    <Menu closeOnSelect={false} isLazy={true}>
+      <MenuButton
+        marginLeft="1.25rem"
+        as={IconButton}
+        aria-label="Options"
+        icon={<SettingsIcon />}
+        padding="18px"
+        paddingY="24px"
+      />
+      <MenuList minWidth="120px" padding="0.75em">
+        <MenuOptionGroup
+          title="Results Limit"
+          className="text-left"
+          marginLeft="0"
+          marginTop="0"
+        >
+          <Select
+            defaultValue={settings.limit}
+            onChange={(e) =>
+              dispatch(changeLimit(Number(e.currentTarget.value)))
+            }
+          >
+            <option value="5">5</option>
+            <option value="10">10</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+          </Select>
+        </MenuOptionGroup>
+        <MenuOptionGroup
+          title="Search Filter"
+          className="text-left"
+          marginLeft="0"
+        >
+          <Select
+            defaultValue={settings.searchFilter}
+            onChange={(e) =>
+              dispatch(changeSearchFilter(e.currentTarget.value))
+            }
+          >
+            <option value="global">All</option>
+            <option value="name">Name</option>
+            <option value="description">Description</option>
+            <option value="attributes">Attributes</option>
+          </Select>
+        </MenuOptionGroup>
+      </MenuList>
+    </Menu>
   );
 }

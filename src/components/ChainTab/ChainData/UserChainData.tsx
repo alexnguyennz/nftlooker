@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 
 // State
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { changeChainTab, chainTabState } from '../../../state/tab/tabSlice';
 import { settingsState } from '../../../state/settings/settingsSlice';
 
@@ -11,15 +11,13 @@ import axios from 'axios';
 import chains from '../../../data'; // placeholder data
 
 // Chakra UI
-import { useToast, Button, Alert, AlertIcon } from '@chakra-ui/react';
-import { ChevronDownIcon, AddIcon, ExternalLinkIcon } from '@chakra-ui/icons';
+import { useToast, Button } from '@chakra-ui/react';
 
 // Components
 import NFTCollection from '../../NFTCollection/NFTCollection';
-import NFTCard from '../../NFTCard/NFTCard';
 import toast from '../../../components/Toast/Toast';
 
-interface ChainProps {
+/* interface ChainProps {
   name: string;
   abbr: string;
   loaded: boolean;
@@ -41,7 +39,7 @@ interface Props {
   wallet: string;
   //onChains: Function;
   //onChainTabSet: onChainTabSet
-}
+} */
 
 function UserChainData(props) {
   // State
@@ -75,7 +73,7 @@ function UserChainData(props) {
 
     // new test
     const { data } = await axios(
-      `/api/resolve/chain/${chain}/address/${props.wallet}/limit/${settings.walletLimit}/` +
+      `/api/resolve/chain/${chain}/address/${props.wallet}/limit/${settings.limit}/` +
         pageParam
     );
 
@@ -179,7 +177,7 @@ function UserChainData(props) {
             colorScheme="blue"
             lineHeight="1"
           >
-            Load More +{settings.walletLimit}
+            Load More +{settings.limit}
           </Button>
         )}
       </div>
@@ -188,12 +186,3 @@ function UserChainData(props) {
 }
 
 export default React.memo(UserChainData);
-
-/*
- : (
-          <Alert status="error">
-            <AlertIcon />
-            No more NFTs.
-          </Alert>
-        )
-        */

@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 
 // State
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { changeChainTab, chainTabState } from '../../../state/tab/tabSlice';
 import { settingsState } from '../../../state/settings/settingsSlice';
 
@@ -11,13 +11,13 @@ import axios from 'axios';
 import chains from '../../../data'; // placeholder data
 
 // Chakra UI
-import { Button, Alert, AlertIcon } from '@chakra-ui/react';
-import { ChevronDownIcon, AddIcon, ExternalLinkIcon } from '@chakra-ui/icons';
+import { useToast, Button } from '@chakra-ui/react';
 
 // Components
-import NFTCard from '../../NFTCard/NFTCard';
+import NFTCollection from '../../NFTCollection/NFTCollection';
+import toast from '../../../components/Toast/Toast';
 
-interface ChainProps {
+/* interface ChainProps {
   name: string;
   abbr: string;
   loaded: boolean;
@@ -36,24 +36,27 @@ interface Props {
   chains: Chains;
   q: string;
   location: Location;
+  wallet: string;
   //onChains: Function;
   //onChainTabSet: onChainTabSet
-}
+} */
 
-function SearchChainData(props) {
+function UserChainData(props) {
   // State
-  const dispatch = useDispatch();
   const settings = useSelector(settingsState);
+
+  const toastInstance = useToast();
 
   const chain = props.chain;
 
-  const fetchNfts = async ({ pageParam = 0 }) => {
+  const fetchNfts = async ({ pageParam = '' }) => {
     // reset UI state
     // only reset chain states when it's a fresh query, not more NFTs loaded to each tab
-    if (pageParam == 0) {
+    /* if (pageParam === "") {
+      console.log("no start param ")
       dispatch(changeChainTab(-1));
       props.onChainTabSet(false);
-    }
+    } */
 
     props.onChains({
       name: chains[chain]['name'],
@@ -63,17 +66,20 @@ function SearchChainData(props) {
       count: 0,
     });
 
+    // old
+    /* const { data } = await axios(
+      `/api/nfts/chain/${chain}/address/${props.wallet}/limit/${settings.walletLimit}/` + pageParam
+    ); */
+
+    // new test
     const { data } = await axios(
-      `/api/nfts/search/chain/${chain}/q/${props.q}/filter/${settings.searchFilter}/limit/${settings.searchLimit}/offset/` +
+      `/api/nfts/search/chain/${chain}/q/${props.q}/filter/${settings.searchFilter}/limit/${settings.limit}/` +
         pageParam
     );
 
-    //console.log('response', data);
+    // console.log("Request:", `/api/resolve/chain/${chain}/address/${props.wallet}/limit/${settings.walletLimit}/` + pageParam)
 
-    const nftCount = Object.values(data).flat().length;
-
-    // React Query
-    const offset = pageParam + settings.searchLimit; // manually increase each "page" by the limit
+    const nftCount = Object.values(data.data).flat().length;
 
     return {
       [chain]: {
@@ -85,39 +91,23 @@ function SearchChainData(props) {
         count: nftCount,
         total: nftCount,
       },
-      offset,
     };
   };
 
-  // infinite queries
-  const {
-    data,
-    error,
-    isLoading,
-    isError,
-    isSuccess,
-    isFetching,
-    isFetchingNextPage,
-    fetchNextPage,
-    hasNextPage,
-    // } = useInfiniteQuery('nftMetadata', fetchNfts, {
-    //} = useInfiniteQuery(['search', props.q, props.chain], fetchNfts, {
-  } = useInfiniteQuery(
-    ['search', props.location, props.q, props.chain],
-    fetchNfts,
-    {
-      getNextPageParam: (lastPage) => {
-
-        console.log("lastPage", lastPage)
-        if (Object.keys(lastPage[chain].data).length > 0) return lastPage.offset; // only allow up to 100 pages / 500 offsets
-      },
-    }
-  );
+  const { data, error, isFetchingNextPage, fetchNextPage, hasNextPage } =
+    useInfiniteQuery(
+      ['userNfts', props.location, props.wallet, props.chain],
+      fetchNfts,
+      {
+        retry: 1,
+        getNextPageParam: (lastPage) => lastPage[chain].data.cursor, // only return valid cursor if not empty, otherwise return undefined to make this the last page,
+      }
+    );
 
   useEffect(() => {
     if (data) {
       const nftTotals = data.pages.reduce((acc, element) => {
-        const nftCount = Object.values(element)[0].count;
+        const nftCount = Object.values(element)[0]['count'];
 
         return acc + nftCount;
       }, 0);
@@ -136,28 +126,47 @@ function SearchChainData(props) {
     }
   }, [data]);
 
-  if (!isSuccess) {
-    return null;
-  }
+  useEffect(() => {
+    if (error) {
+      const noData = {
+        name: chains[chain]['name'],
+        abbr: chain,
+        order: chains[chain]['order'],
+        data: {
+          data,
+        },
+        loaded: true,
+        count: 0,
+        total: 0,
+      };
+
+      props.onChains(noData);
+
+      toast(toastInstance, 'error', 'Invalid address.');
+    }
+  }, [error]);
+
+  if (!data) return null;
 
   return (
     <>
-      <div className="grid gap-5">
-        <section className={`space-y-2`}>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 3xl:grid-cols-7 4xl:grid-cols-8 gap-10">
-            {data.pages.map((page) => (
-              <React.Fragment key={page.offset}>
-                {page[chain].data.map((nft, idx) => (
-                  <NFTCard key={idx} nft={nft} chain={chain} />
-                ))}
-              </React.Fragment>
-            ))}
-          </div>
-        </section>
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 3xl:grid-cols-7 4xl:grid-cols-8 gap-10">
+        {data.pages.map((page) => {
+          return Object.keys(page[chain].data.data).map((collection, idx) => (
+            <>
+              <NFTCollection
+                key={page[chain].data.data[collection] + idx}
+                collection={page[chain].data.data[collection]}
+                type={page[chain].data}
+                chain={chain}
+              />
+            </>
+          ));
+        })}
       </div>
 
       <div className="text-center mt-5">
-        {hasNextPage ? (
+        {hasNextPage && (
           <Button
             type="submit"
             onClick={() => fetchNextPage()}
@@ -168,17 +177,12 @@ function SearchChainData(props) {
             colorScheme="blue"
             lineHeight="1"
           >
-            Load More +{settings.searchLimit}
+            Load More +{settings.limit}
           </Button>
-        ) : (
-          <Alert status="error">
-            <AlertIcon />
-            Limit reached.
-          </Alert>
         )}
       </div>
     </>
   );
 }
 
-export default React.memo(SearchChainData);
+export default React.memo(UserChainData);

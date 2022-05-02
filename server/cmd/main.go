@@ -24,7 +24,10 @@ func ApiHandler(r *mux.Router) {
 	r.HandleFunc("/nfts/collection/chain/{chain}/address/{address}/limit/{limit}/", routes.GetViewCollectionNfts)
 
 	// Search NFTs
-	r.HandleFunc("/nfts/search/chain/{chain}/q/{q}/filter/{filter}/limit/{limit}/offset/{offset}", routes.SearchNfts)
+	r.HandleFunc("/nfts/search/chain/{chain}/q/{q}/filter/{filter}/limit/{limit}/{cursor}", routes.SearchNfts)
+	r.HandleFunc("/nfts/search/chain/{chain}/q/{q}/filter/{filter}/limit/{limit}/", routes.SearchNfts)
+
+	//r.HandleFunc("/nfts/search/chain/{chain}/q/{q}/filter/{filter}/limit/{limit}/offset/{offset}", routes.SearchNfts)
 
 	// Get NFT Metadata
 	r.HandleFunc("/nft/chain/{chain}/address/{address}/id/{tokenId}", routes.GetNft)
