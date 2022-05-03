@@ -29,7 +29,7 @@ func GetViewCollectionNfts(w http.ResponseWriter, r *http.Request) {
 
 	type Response struct {
 		Type      string              `json:"type"`
-		Total     string              `json:"total"`
+		Total     int              `json:"total"`
 		Page      int                 `json:"page"`
 		Page_Size int                 `json:"page_size"`
 		Cursor    string              `json:"cursor,omitempty"`

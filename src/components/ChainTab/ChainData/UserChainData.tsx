@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 
 // State
 import { useSelector } from 'react-redux';
-import { changeChainTab, chainTabState } from '../../../state/tab/tabSlice';
+// import { changeChainTab, chainTabState } from '../../../state/tab/tabSlice';
 import { settingsState } from '../../../state/settings/settingsSlice';
 
 // Data
@@ -152,15 +152,13 @@ function UserChainData(props) {
     <>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 3xl:grid-cols-7 4xl:grid-cols-8 gap-10">
         {data.pages.map((page) => {
-          return Object.keys(page[chain].data.data).map((collection, idx) => (
-            <>
-              <NFTCollection
-                key={page[chain].data.data[collection] + idx}
-                collection={page[chain].data.data[collection]}
-                type={page[chain].data}
-                chain={chain}
-              />
-            </>
+          return Object.keys(page[chain].data.data).map((collection) => (
+            <NFTCollection
+              key={page[chain].data.data[collection]}
+              collection={page[chain].data.data[collection]}
+              type={page[chain].data}
+              chain={chain}
+            />
           ));
         })}
       </div>

@@ -712,7 +712,7 @@ function Settings() {
       />
       <MenuList minWidth="120px" padding="0.75em">
         <MenuOptionGroup
-          title="Results Limit"
+          title="Limit"
           className="text-left"
           marginLeft="0"
           marginTop="0"

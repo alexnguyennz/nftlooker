@@ -37,7 +37,7 @@ func SearchNfts(w http.ResponseWriter, r *http.Request) {
 	type Response struct {
 		Total     int                 `json:"total"`
 		Page      int                 `json:"page"`
-		Page_Size string                 `json:"page_size"` // change to int once they fix bug
+		Page_Size string              `json:"page_size"` // change to int once they fix bug
 		Cursor    string              `json:"cursor,omitempty"`
 		Result    []Result            `json:"result"`
 		Data      map[string][]Result `json:"data"`
