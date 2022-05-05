@@ -16,7 +16,13 @@ import axios from 'axios';
 import { useQueries, useInfiniteQuery } from 'react-query';
 
 // Chakra UI
-import { useColorModeValue, Link, Button, Alert, AlertIcon } from '@chakra-ui/react';
+import {
+  useColorModeValue,
+  Link,
+  Button,
+  Alert,
+  AlertIcon,
+} from '@chakra-ui/react';
 import { ChevronDownIcon, AddIcon, ExternalLinkIcon } from '@chakra-ui/icons';
 
 // Components
@@ -71,25 +77,27 @@ export default function Collection() {
 
   return (
     <div className="space-y-10">
-      <section className={`grid grid-cols-1 md:grid-cols-2 gap-5 p-5 rounded-lg shadow-md ${colorModeBg}`}>
+      <section
+        className={`grid grid-cols-1 md:grid-cols-2 gap-5 p-5 rounded-lg shadow-md ${colorModeBg}`}
+      >
         <div className="p-10 flex content-center">
-            {!queries[1].isFetching ? (
-              <CollectionThumbnail result={queries[1].data.data[0]} />
-            ) : (
-              <div className="flex items-center justify-center">
-                <img src="/img/loading.svg" />
-              </div>
-            )}
-          </div>
-          <div className="space-y-2">
-            {!queries[0].isFetching ? (
-              <CollectionMetadata result={queries[0]} />
-            ) : (
-              <div className="flex items-center justify-center">
-                <img src="/img/loading.svg" />
-              </div>
-            )}
-          </div>
+          {!queries[1].isFetching ? (
+            <CollectionThumbnail result={queries[1].data.data[0]} />
+          ) : (
+            <div className="flex items-center justify-center">
+              <img src="/img/loading.svg" />
+            </div>
+          )}
+        </div>
+        <div className="space-y-2">
+          {!queries[0].isFetching ? (
+            <CollectionMetadata result={queries[0]} />
+          ) : (
+            <div className="flex items-center justify-center">
+              <img src="/img/loading.svg" />
+            </div>
+          )}
+        </div>
       </section>
       <CollectionNfts />
     </div>
@@ -132,7 +140,12 @@ export function CollectionMetadata(props) {
         <div>
           <p>CONTRACT</p>
           <span className="text-xl">
-            <Link href={`https://${explorer(params.chain)}/address/${data.token_address}`} isExternal>
+            <Link
+              href={`https://${explorer(params.chain)}/address/${
+                data.token_address
+              }`}
+              isExternal
+            >
               <span className="flex items-center space-x-3">
                 <span>{truncateAddress(data.token_address)}</span>
                 <ExternalLinkIcon w="4" />
@@ -151,14 +164,13 @@ export function CollectionMetadata(props) {
 }
 
 export function CollectionNfts() {
-
   const settings = useSelector(settingsState);
 
   const params = useParams(); // React Router
 
-  const fetchNfts = async ({ pageParam = "" }) => {
+  const fetchNfts = async ({ pageParam = '' }) => {
     const { data } = await axios(
-      `/api/collection/nfts/chain/${params.chain}/address/${params.contractAddress}/limit/${settings.walletLimit}/` +
+      `/api/collection/nfts/chain/${params.chain}/address/${params.contractAddress}/limit/${settings.limit}/` +
         pageParam
     );
 
@@ -250,7 +262,7 @@ export function CollectionNfts() {
                 colorScheme="blue"
                 rightIcon={<ChevronDownIcon />}
               >
-                Load More +{settings.walletLimit}
+                Load More +{settings.limit}
               </Button>
             )}
           </div>

@@ -167,6 +167,8 @@ export default function Layout() {
   function resetSettings() {
     localStorage.removeItem('settings');
 
+    if (colorMode !== 'light') toggleColorMode();
+
     dispatch(toggleAutoplay(false));
     dispatch(toggleLargeNfts(false));
   }
@@ -311,9 +313,9 @@ export default function Layout() {
           <ModalContent className="mx-5">
             <ModalBody>
               <p className="pt-3 pb-5">
-                NFT Looker is a simple way to view NFTs - by entering a wallet
-                address or searching using keywords. You can view an individual
-                NFT or collection for more info.
+                NFT Looker is a tool to view NFTs by wallet or collection
+                address, and search NFTs using keywords. You can view an
+                individual NFT or collection for more info.
               </p>
 
               <p className="pb-5">
@@ -359,7 +361,7 @@ export default function Layout() {
                   <h2>
                     <AccordionButton>
                       <Box flex="1" textAlign="left">
-                        Supported mainnets
+                        Supported chains
                       </Box>
                       <AccordionIcon />
                     </AccordionButton>
@@ -404,17 +406,14 @@ export default function Layout() {
                 reasons including:
               </p>
               <ul className="list-disc pl-5">
-                <li>slow or down IPFS gateways</li>
+                <li>IPFS gateway issues</li>
                 <li>
-                  unusual metadata formats and not using common property names
-                  e.g. name, image, description
+                  unsupported metadata or not using common properties e.g. name,
+                  image, description
                 </li>
                 <li>broken metadata and/or media (image, video) links</li>
                 <li>dead or insecure sites</li>
-                <li>
-                  general unreliability and poor performance when accessing IPFS
-                  data
-                </li>
+                <li>general unreliability when accessing IPFS data</li>
               </ul>
             </ModalBody>
             <ModalFooter>

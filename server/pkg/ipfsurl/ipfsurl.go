@@ -83,6 +83,7 @@ func ChangeIpfsUrl(nftUrl string) string {
 		}
 
 		u.Scheme = "https"
+		// u.Host = "nftlookertest.infura-ipfs.io"
 		u.Host = "ipfs.io"
 
 	}
