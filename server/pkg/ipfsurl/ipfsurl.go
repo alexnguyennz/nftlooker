@@ -14,7 +14,9 @@ func ParseMetadata(response []byte) string {
 
 	err := json.Unmarshal(response, &metadata)
 	if err != nil {
-		fmt.Println("Couldn't unmarshal", err)
+		test, _ := json.Marshal(response)
+		fmt.Println("test", string(test))
+		fmt.Println("Couldn't unmarshal (ParseMetadata)", err)
 	}
 
 	// changeIpfsUrl
@@ -42,7 +44,7 @@ func ParseMetadata(response []byte) string {
 			resp, err := client.Head(metadata["image"].(string))
 			if err != nil {
 				// if getting Content-Type takes too long, return a default type and length
-				fmt.Println("Request for NFT contentType timed out:", err)
+				fmt.Println("contentType HEAD error:", err)
 
 				metadata["content_length"] = "0"
 				metadata["content_type"] = "image/png"

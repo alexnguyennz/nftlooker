@@ -154,7 +154,7 @@ function UserChainData(props) {
         {data.pages.map((page) => {
           return Object.keys(page[chain].data.data).map((collection) => (
             <NFTCollection
-              key={page[chain].data.data[collection]}
+              key={collection}
               collection={page[chain].data.data[collection]}
               type={page[chain].data}
               chain={chain}

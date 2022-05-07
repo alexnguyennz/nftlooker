@@ -7,7 +7,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
   viewIsLoading,
   viewIsNotLoading,
-  loadingState,
 } from '../../state/loading/loadingSlice';
 import { settingsState } from '../../state/settings/settingsSlice';
 
@@ -23,7 +22,7 @@ import {
   Alert,
   AlertIcon,
 } from '@chakra-ui/react';
-import { ChevronDownIcon, AddIcon, ExternalLinkIcon } from '@chakra-ui/icons';
+import { ExternalLinkIcon } from '@chakra-ui/icons';
 
 // Components
 import NFTCard from '../../components/NFTCard/NFTCard';
@@ -36,7 +35,6 @@ import { explorer, chainName } from '../../utils/chainExplorer';
 export default function Collection() {
   const params = useParams(); // React Router
   const dispatch = useDispatch(); // React Redux
-  const loading = useSelector(loadingState);
 
   // React Query
   const queries = useQueries([
@@ -59,11 +57,6 @@ export default function Collection() {
       },
     },
   ]);
-
-  // console.log('Original Response', queries[1]);
-
-  //console.log('results', results[2].data[0]);
-  const loaded = queries.every((query) => query.isSuccess);
 
   useEffect(() => {
     if (queries.some((query) => query.isFetching)) {
@@ -182,10 +175,8 @@ export function CollectionNfts() {
   // infinite queries
   const {
     data,
-    error,
     isLoading,
     isError,
-    isFetching,
     isFetchingNextPage,
     isSuccess,
     fetchNextPage,
@@ -260,7 +251,7 @@ export function CollectionNfts() {
                 loadingText="Loading"
                 spinnerPlacement="end"
                 colorScheme="blue"
-                rightIcon={<ChevronDownIcon />}
+                lineHeight="1"
               >
                 Load More +{settings.limit}
               </Button>

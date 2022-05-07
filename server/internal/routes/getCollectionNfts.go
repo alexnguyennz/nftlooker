@@ -73,7 +73,10 @@ func GetCollectionNfts(w http.ResponseWriter, r *http.Request) {
 			// Decrease WaitGroup when goroutine has finished
 			defer wg.Done()
 
+			
+
 			if nft.Metadata != "" {
+				
 				data.Result[i].Metadata = ipfsurl.ParseMetadata([]byte(nft.Metadata))
 			} else {
 				// token_uri must exist and be fetchable
@@ -84,7 +87,8 @@ func GetCollectionNfts(w http.ResponseWriter, r *http.Request) {
 							fmt.Println("Error fetching NFT Token URI", err)
 							return
 						}
-
+						// invalid character s issue happens here
+						fmt.Println("metadata ", nft.Metadata)
 						data.Result[i].Metadata = ipfsurl.ParseMetadata([]byte(response))
 
 					} else {
