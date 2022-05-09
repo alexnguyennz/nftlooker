@@ -84,7 +84,9 @@ func GetCollectionNfts(w http.ResponseWriter, r *http.Request) {
 					if !strings.HasPrefix(nft.Token_Uri, "data:application/json") {
 						response, err := request.Request(nft.Token_Uri)
 						if err != nil {
-							fmt.Println("Error fetching NFT Token URI", err)
+							fmt.Println("Error fetching token_uri", err)
+
+							data.Result[i].Metadata = "{}"
 							return
 						}
 						// invalid character s issue happens here
@@ -103,7 +105,6 @@ func GetCollectionNfts(w http.ResponseWriter, r *http.Request) {
 
 				} else {
 					fmt.Println("No metadata.")
-					return
 				}
 			}
 

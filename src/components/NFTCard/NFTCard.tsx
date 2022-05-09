@@ -226,7 +226,7 @@ export default function NFTCard(props: Props) {
               to={`/${chain}/collection/${nft.token_address}/nft/${nft.token_id}`}
             >
               {/* {nft.metadata && nft.metadata.name} */}
-              {nft.metadata.name && nft.metadata.name}
+              {nft.metadata.name ? nft.metadata.name : 'No Name Found'}
             </Link>
           </h3>
           <h4 className="text-center text-xs">

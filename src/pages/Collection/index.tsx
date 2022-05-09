@@ -12,7 +12,7 @@ import { settingsState } from '../../state/settings/settingsSlice';
 
 // React Query
 import axios from 'axios';
-import { useQueries, useInfiniteQuery } from 'react-query';
+import { useQuery, useInfiniteQuery } from 'react-query';
 
 // Chakra UI
 import {
@@ -32,39 +32,40 @@ import NFTImage from '../../components/NFTImage/NFTImage';
 import truncateAddress from '../../utils/ellipseAddress';
 import { explorer, chainName } from '../../utils/chainExplorer';
 
+import LoadingSpinner from '../../components/LoadingSpinner/LoadingSpinner';
+
 export default function Collection() {
   const params = useParams(); // React Router
   const dispatch = useDispatch(); // React Redux
 
   // React Query
-  const queries = useQueries([
-    {
-      queryKey: [params.chain, params.contractAddress, 'metadata'],
-      queryFn: async () => {
-        const { data } = await axios(
-          `/api/collection/metadata/chain/${params.chain}/address/${params.contractAddress}`
-        );
-        return data;
-      },
-    },
-    {
-      queryKey: [params.chain, params.contractAddress, 'nfts'],
-      queryFn: async () => {
-        const { data } = await axios(
-          `/api/collection/nfts/chain/${params.chain}/address/${params.contractAddress}/limit/1/`
-        );
-        return data;
-      },
-    },
-  ]);
+  const metadata = useQuery(
+    [params.chain, params.contractAddress, 'metadata'],
+    async () => {
+      const { data } = await axios(
+        `/api/collection/metadata/chain/${params.chain}/address/${params.contractAddress}`
+      );
+      return data;
+    }
+  );
+
+  const thumbnail = useQuery(
+    [params.chain, params.contractAddress, 'nfts'],
+    async () => {
+      const { data } = await axios(
+        `/api/collection/nfts/chain/${params.chain}/address/${params.contractAddress}/limit/1/`
+      );
+      return data;
+    }
+  );
 
   useEffect(() => {
-    if (queries.some((query) => query.isFetching)) {
+    if (metadata.isFetching && thumbnail.isFetching) {
       dispatch(viewIsLoading());
     } else {
       dispatch(viewIsNotLoading());
     }
-  }, [queries]);
+  }, [metadata.isFetching, thumbnail.isFetching]);
 
   const colorModeBg = useColorModeValue('bg-white', 'bg-gray-800');
 
@@ -73,26 +74,22 @@ export default function Collection() {
       <section
         className={`grid grid-cols-1 md:grid-cols-2 gap-5 p-5 rounded-lg shadow-md ${colorModeBg}`}
       >
-        <div className="p-10 flex content-center">
-          {!queries[1].isFetching ? (
-            <CollectionThumbnail result={queries[1].data.data[0]} />
+        <div className="p-10">
+          {!thumbnail.isFetching ? (
+            <CollectionThumbnail result={thumbnail.data.data[0]} />
           ) : (
-            <div className="flex items-center justify-center">
-              <img src="/img/loading.svg" />
-            </div>
+            <LoadingSpinner />
           )}
         </div>
         <div className="space-y-2">
-          {!queries[0].isFetching ? (
-            <CollectionMetadata result={queries[0]} />
+          {!metadata.isFetching ? (
+            <CollectionMetadata result={metadata} />
           ) : (
-            <div className="flex items-center justify-center">
-              <img src="/img/loading.svg" />
-            </div>
+            <LoadingSpinner />
           )}
         </div>
       </section>
-      <CollectionNfts />
+      {<CollectionNfts />}
     </div>
   );
 }

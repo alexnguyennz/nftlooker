@@ -34,9 +34,7 @@ func ParseMetadata(response []byte) string {
 
 			metadata["original_image"] = metadata["image"] // set original image to use as backup
 
-			// Get Content-Type
-			// resp, _ := http.Head(metadata["image"].(string))
-
+			// Get contentType
 			client := &http.Client{
 				Timeout: 1 * time.Second,
 			}

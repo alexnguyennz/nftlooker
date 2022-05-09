@@ -7,11 +7,16 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 )
 
 func Request(url string) (string, error) {
 
-	resp, err := http.Get(url)
+	client := &http.Client{
+		Timeout: 5 * time.Second,
+	}
+
+	resp, err := client.Get(url)
 	if err != nil {
 		fmt.Println("url", url)
 		return url, errors.New("Get() response error")
